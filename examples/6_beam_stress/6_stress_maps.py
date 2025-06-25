@@ -58,6 +58,10 @@ choose_cutoff = 2    # 0 step, 2 round
 
 # Flag applies twist rotations in SONATA before output and then sets the output
 # twist to all be zero degrees.
+# If True on this example, results will not be consistent because SONATA
+# always takes inputs of internal forces without the rotation to zero twist,
+# but the stress maps will take the rotation to zero twist if this is set to
+# True.
 flag_output_zero_twist = False
 
 
@@ -131,7 +135,8 @@ job.blade_plot_sections(attribute=attribute_str,
 
 map_folder = 'box-beam-maps'
 
-job.blade_exp_stress_strain_map(output_folder=map_folder)
+job.blade_exp_stress_strain_map(output_folder=map_folder,
+                                flag_output_zero_twist=flag_output_zero_twist)
 
 map_fname = os.path.join(map_folder, 'blade_station0000_stress_strain_map.npz')
 

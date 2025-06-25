@@ -241,6 +241,8 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
                     anbax_beam_viscoelastic[n_sec, k, :, :] = trsf_sixbysix(
                         anbax_beam_viscoelastic[n_sec, k, :, :], rot_mat)
 
+        job.true_twist = np.copy(job.twist[:, 1])
+        
         print('Setting twist to zero now that 6x6 are rotated.')
         job.twist[:, 1] = np.zeros_like(job.twist[:, 1])
 

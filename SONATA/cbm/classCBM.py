@@ -877,7 +877,8 @@ class CBM(object):
         return viscoelastic_6x6
 
 
-    def cbm_exp_stress_strain_map(self, station_ind, station_pos, **kwargs):
+    def cbm_exp_stress_strain_map(self, station_ind, station_pos, twist,
+                                  **kwargs):
         """
         Calculation and save of the map from the 6x6 applied forces to the
         internal stress and strain at each element
@@ -892,6 +893,11 @@ class CBM(object):
             when the outputs are used.
         output_folder : str, optional
             Folder to output mapping files to.
+        twist : float
+            Twist angle in radians that the matrices are rotated through for
+            output and thus the stress map should be rotated through the same
+            angle so that `local` forces from GEBT correspond to this stress
+            map set.
         **kwargs : TYPE
             Ignored.
 
@@ -968,13 +974,24 @@ class CBM(object):
         external_to_internal_ind = [2, 0, 1]
         for i in range(6):
             
-            F = [0.0, 0.0, 0.0]
-            M = [0.0, 0.0, 0.0]
+            F = np.array([0.0, 0.0, 0.0])
+            M = np.array([0.0, 0.0, 0.0])
             
             if i < 3:
                 F[external_to_internal_ind[i]] = 1.0
             else:
                 M[external_to_internal_ind[i - 3]] = 1.0
+                
+            # rotate these forces around any applied twist that would be
+            # applied to the GEBT simulation that way these are still
+            # in the local coordinates of the GEBT simulation
+            alpha = -twist
+            R = np.array([[1, 0, 0],
+                          [0,  np.cos(alpha), -np.sin(alpha)],
+                          [0,  np.sin(alpha),  np.cos(alpha)]])
+            
+            F = R @ F
+            M = R @ M
             
             # This ends up being potentially excessively slow since
             # it does a new calculation for each stress and strain field (4),
