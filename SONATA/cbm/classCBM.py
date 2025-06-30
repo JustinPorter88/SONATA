@@ -978,21 +978,24 @@ class CBM(object):
             M = np.array([0.0, 0.0, 0.0])
             
             if i < 3:
-                F[external_to_internal_ind[i]] = 1.0
+                F[i] = 1.0
             else:
-                M[external_to_internal_ind[i - 3]] = 1.0
+                M[i - 3] = 1.0
                 
             # rotate these forces around any applied twist that would be
             # applied to the GEBT simulation that way these are still
             # in the local coordinates of the GEBT simulation
-            alpha = -twist
             R = np.array([[1, 0, 0],
-                          [0,  np.cos(alpha), -np.sin(alpha)],
-                          [0,  np.sin(alpha),  np.cos(alpha)]])
+                          [0,  np.cos(twist), -np.sin(twist)],
+                          [0,  np.sin(twist),  np.cos(twist)]])
             
             F = R @ F
             M = R @ M
             
+            # rearrange to internal indices
+            F[external_to_internal_ind] = np.copy(F)
+            M[external_to_internal_ind] = np.copy(M)
+
             # This ends up being potentially excessively slow since
             # it does a new calculation for each stress and strain field (4),
             # but only need the material coordinate strain field.

@@ -1120,8 +1120,34 @@ def test_stress_map_zero_twist():
     ###########
     # Test checks - Is the zero twist getting appropriately applied.
     
-    baseline_forces_moments = np.array([10.0, 5.0, 5., 5.0, 5.0, 5.0])
-    twist0_forces_moments = np.array([10.0, 5.0, 5., 5.0, 5.0, 5.0])
+    baseline_forces_moments = np.array([2.0, 13.0, 5.0, 3.0, 23.0, 8.0])
+    
+    
+    twist = job_0twist.true_twist[0]
+    
+    # This sign is opposite of that in classCBM.py because this is the rotation
+    # from the forces aligned with the chord to the forces aligned with global
+    # 0 degrees. 
+    # In classCBM it rotates from the global to the chord aligned forces.
+    rot_mat = np.array([[1.0, 0.0, 0.0],
+                        [0.0, np.cos(twist), np.sin(twist)],
+                        [0.0, -np.sin(twist), np.cos(twist)]])
+    
+    twist0_forces_moments = np.zeros_like(baseline_forces_moments)
+    twist0_forces_moments[:3] = rot_mat @ baseline_forces_moments[:3]
+    twist0_forces_moments[3:] = rot_mat @ baseline_forces_moments[3:]
+        
+    # # Manually constructed from BeamDyn w/ and w/o rotation
+    # Converted from BeamDyn as [Fz, Fy, -Fx]
+    # twist of 10 degrees.
+    # baseline_forces_moments = np.array([3.000E+01, 5.676E+01, -9.153E+01,
+    #                                     ])
+    # 
+    # twist0_forces_moments = np.array([3.000E+01, 4.000E+01, -1.000E+02,
+    #                                   ])
+    #
+    # These numbers were used to manually check that the signs on the rotation
+    # matrix are correct.
     
     print('These forces are not yet the correct ones to test with. '
           + 'Need to have them in different rotated coordinate sytems')
@@ -1139,8 +1165,6 @@ def test_stress_map_zero_twist():
     
     stress_twist0 = np.einsum('ijk,j->ik', map_flag['fc_to_stress_m'],
                               twist0_forces_moments)
-    
-    breakpoint()
     
     assert np.abs(strain_baseline - strain_twist0).max() < 1e-20, \
         'Strains are inconsistent between normal and zero twist outputs.'
