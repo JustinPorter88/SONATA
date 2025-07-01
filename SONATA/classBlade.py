@@ -12,7 +12,7 @@ import yaml
 # from jsonschema import validate
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
                          gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, PchipInterpolator
 
 # First party modules
 from SONATA.cbm.classCBM import CBM
@@ -156,8 +156,12 @@ class Blade(Component):
         "add_function_to_menu",
         "yml",
         "loft",
-        "cutoff_style"
+        "cutoff_style",
+        "true_twist",
     )
+    
+    # real twist value that is set if twist is set to zero for outputing
+    # matrices at zero twist
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -177,6 +181,7 @@ class Blade(Component):
             
             self.read_yaml(yml.get('components').get('blade'), airfoils, **kwargs)
 
+        self.true_twist = None
             
 #    def __repr__(self):
 #        """__repr__ is the built-in function used to compute the "official" 
@@ -606,7 +611,8 @@ class Blade(Component):
 
         return None
 
-    def blade_exp_stress_strain_map(self, **kwargs):
+    def blade_exp_stress_strain_map(self, flag_output_zero_twist=False,
+                                    **kwargs):
         """
         Creates outputs for stress and strain recovery maps.
 
@@ -614,6 +620,10 @@ class Blade(Component):
         ----------
         output_folder : str, optional
             Folder to output mapping files to.
+        flag_output_zero_twist : bool, optional
+            Flag indicating that the 6x6 stiffness matrices will be output
+            at zero twist and thus the local forces used in these mappings
+            will also be rotated to that zero twist.
         **kwargs : TYPE
             Passed to section. Options/defaults include
             `output_folder='stress-map'`
@@ -647,7 +657,23 @@ class Blade(Component):
             cs.config.anbax_cfg = ac
 
             print("STATUS:\t Running Stress and Strain Maps at %s" % (x))
-            cs.cbm_exp_stress_strain_map(ind, x, **kwargs)
+            
+            curr_twist = 0
+            if self.true_twist is not None:
+                curr_twist = self.true_twist[ind]
+
+                print("STATUS:\t Output twist at section is %s" % (curr_twist))
+                
+            elif flag_output_zero_twist:
+                twist_interp = PchipInterpolator(self.twist[:, 0],
+                                                 self.twist[:, 1])
+
+                # this should just be the same as evaluating at `x`.
+                curr_twist = twist_interp(self.beam_properties[ind][0])
+
+                print("STATUS:\t Output twist at section is %s" % (curr_twist))
+
+            cs.cbm_exp_stress_strain_map(ind, x, curr_twist, **kwargs)
         pass
 
 

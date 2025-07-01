@@ -3,6 +3,9 @@ import numpy as np
 from SONATA.classBlade import Blade
 from SONATA.utl.beam_struct_eval import beam_struct_eval, strain_energy_eval
 
+# Used to supress all plots
+import matplotlib
+import matplotlib.pyplot as plt
 
 import pytest
 
@@ -936,6 +939,240 @@ def test_output_maps():
     assert np.allclose(strain, elem_strain, atol=1e-7), \
         'Strains are different on loaded recovery.'
     
+def twist_stress_map_helper(flag_output_zero_twist):
+    
+    
+    original_backend = matplotlib.get_backend()
+    matplotlib.use('Agg')
+    
+    # Path to yaml file
+    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
+    job_str = 'rotated_beam.yaml'
+    job_name = 'Box-Beam'
+    filename_str = run_dir + job_str
+    
+    # ===== Define flags ===== #
+    flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
+    flag_ref_axes_wt        = True # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
+    
+    # --- plotting flags ---
+    # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
+    mesh_resolution = 400
+    # For plots within blade_plot_sections
+    attribute_str           = 'MatID'  # default: 'MatID' (theta_3 - fiber orientation angle)
+                                                # others:  'theta_3' - fiber orientation angle
+                                                #          'stress.sigma11' (use sigma_ij to address specific component)
+                                                #          'stressM.sigma11'
+                                                #          'strain.epsilon11' (use epsilon_ij to address specific component)
+                                                #          'strainM.epsilon11'
+    
+    # 2D cross sectional plots (blade_plot_sections)
+    flag_plotTheta11        = False      # plane orientation angle
+    flag_recovery           = False     # Set to True to Plot stresses/strains
+    flag_plotDisplacement   = True     # Needs recovery flag to be activated - shows displacements from loadings in cross sectional plots
+    
+    # 3D plots (blade_post_3dtopo)
+    flag_wf                 = True      # plot wire-frame
+    flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
+    flag_topo               = True      # plot mesh topology
+    c2_axis                 = False
+    flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
+    flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
+    flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
+    
+    # create flag dictionary
+    flags_dict = {"flag_wt_ontology": flag_wt_ontology,
+                  "flag_ref_axes_wt": flag_ref_axes_wt,
+                  "attribute_str": attribute_str,
+                  "flag_plotDisplacement": flag_plotDisplacement,
+                  "flag_plotTheta11": flag_plotTheta11,
+                  "flag_wf": flag_wf,
+                  "flag_lft": flag_lft,
+                  "flag_topo": flag_topo,
+                  "mesh_resolution": mesh_resolution,
+                  "flag_recovery": flag_recovery,
+                  "c2_axis": c2_axis}
+    
+    
+    # ===== User defined radial stations ===== #
+    # Define the radial stations for cross sectional analysis
+    # (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
+    radial_stations =  [0.5]
+    # radial_stations = [.7]
+    # ===== Execute SONATA Blade Component Object ===== #
+    # name          - job name of current task
+    # filename      - string combining the defined folder directory and the job name
+    # flags         - communicates flag dictionary (defined above)
+    # stations      - input of radial stations for cross sectional analysis
+    # stations_sine - input of radial stations for refinement 
+    #           (only and automatically applied when lofing flag flag_lft = True)
+    job = Blade(name=job_name, filename=filename_str, flags=flags_dict,
+                stations=radial_stations)
+    
+    # ===== Build & mesh segments ===== #
+    job.blade_gen_section(topo_flag=True, mesh_flag=True)
+    
+    # ===== Recovery Analysis + BeamDyn Outputs ===== #
+    
+    # Define flags
+    flag_csv_export = False # export csv files with structural data
+    # Update flags dictionary
+    flags_dict['flag_csv_export'] = flag_csv_export
+    flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
+    flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
+    flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
+    flags_dict['flag_output_zero_twist'] = flag_output_zero_twist
+    
+    Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
+    
+    # Set damping for BeamDyn input file
+    
+    delta = np.array([0.03, 0.03, 0.06787])
+    zeta = 1. / np.sqrt(1.+(2.*np.pi / delta)**2.)
+    omega = np.array([0.508286, 0.694685, 4.084712])*2*np.pi
+    mu1 = 2*zeta[0]/omega[0]
+    mu2 = 2*zeta[1]/omega[1]
+    mu3 = 2*zeta[2]/omega[2]
+    mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
+    beam_struct_eval(flags_dict, Loads_dict, radial_stations, job,
+                     run_dir, job_str, mu)
+    
+    
+    plt.close('all')
+    matplotlib.use(original_backend)
+    
+    return job
+
+def test_stress_map_zero_twist():
+    """
+    Test that the stress maps are correctly rotated to stay with the GEBT
+    local coordinates when the zero twist output flag is used.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    job_baseline = twist_stress_map_helper(False)
+    
+    job_0twist = twist_stress_map_helper(True)
+    
+    ###########
+    # Create all output map options
+    
+    # Baseline stress map case
+    output_baseline = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+                                 'stress-map')
+    job_baseline.blade_exp_stress_strain_map(output_folder=output_baseline)
+    
+    # Stress map case using the flag on export only and not in job creation
+    output_flag = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+                                 'stress-map-flag')
+    job_baseline.blade_exp_stress_strain_map(output_folder=output_flag,
+                                             flag_output_zero_twist=True)
+    
+    # Stress maps that are at zero twist because of evaluation of properties
+    output_0twist = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+                                 'stress-map-flag')
+    job_0twist.blade_exp_stress_strain_map(output_folder=output_0twist)
+    
+    
+    ###########
+    # load all of the stress/strain maps
+    
+    # Baseline
+    map_fname = os.path.join(output_baseline, 
+                         'blade_station{:04d}_stress_strain_map.npz'.format(0))
+    map_baseline = np.load(map_fname)
+    
+    # Flag export to zero twist
+    map_fname = os.path.join(output_flag, 
+                         'blade_station{:04d}_stress_strain_map.npz'.format(0))
+    map_flag = np.load(map_fname)
+    
+    # Job previously set to zero twist
+    map_fname = os.path.join(output_0twist, 
+                         'blade_station{:04d}_stress_strain_map.npz'.format(0))
+    map_0twist = np.load(map_fname)
+    
+    ###########
+    # Test checks - basic sanity checks on everything that should be identical
+    
+    node_err = np.abs(map_0twist['node_coords'] - map_flag['node_coords']).max()
+    
+    assert node_err < 1e-12, 'Nodes have moved, meshes cannot be compared.'
+    
+    assert np.abs(map_0twist['cells'] - map_flag['cells']).max() == 0, \
+        'Cell definitions have changed, meshes cannot be compared.'
+    
+    # values are on the order of 1e-10, so checking against a tighter tolerance
+    # here.
+    assert np.abs(map_0twist['fc_to_strain_m']
+                  - map_flag['fc_to_strain_m']).max() < 1e-20, \
+        'Strain maps are inconsistent between zero twist output options.'
+    
+    # Stresses are on the order of 1 to 10.
+    assert np.abs(map_0twist['fc_to_stress_m']
+                  - map_flag['fc_to_stress_m']).max() < 1e-9, \
+        'Stress maps are inconsistent between zero twist output options.'
+
+    ###########
+    # Test checks - Is the zero twist getting appropriately applied.
+    
+    baseline_forces_moments = np.array([2.0, 13.0, 5.0, 3.0, 23.0, 8.0])
+    
+    
+    twist = job_0twist.true_twist[0]
+    
+    # This sign is opposite of that in classCBM.py because this is the rotation
+    # from the forces aligned with the chord to the forces aligned with global
+    # 0 degrees. 
+    # In classCBM it rotates from the global to the chord aligned forces.
+    rot_mat = np.array([[1.0, 0.0, 0.0],
+                        [0.0, np.cos(twist), np.sin(twist)],
+                        [0.0, -np.sin(twist), np.cos(twist)]])
+    
+    twist0_forces_moments = np.zeros_like(baseline_forces_moments)
+    twist0_forces_moments[:3] = rot_mat @ baseline_forces_moments[:3]
+    twist0_forces_moments[3:] = rot_mat @ baseline_forces_moments[3:]
+        
+    # # Manually constructed from BeamDyn w/ and w/o rotation
+    # Converted from BeamDyn as [Fz, Fy, -Fx]
+    # twist of 10 degrees.
+    # baseline_forces_moments = np.array([3.000E+01, 5.676E+01, -9.153E+01,
+    #                                     ])
+    # 
+    # twist0_forces_moments = np.array([3.000E+01, 4.000E+01, -1.000E+02,
+    #                                   ])
+    #
+    # These numbers were used to manually check that the signs on the rotation
+    # matrix are correct.
+    
+    print('These forces are not yet the correct ones to test with. '
+          + 'Need to have them in different rotated coordinate sytems')
+    
+    
+    strain_baseline = np.einsum('ijk,j->ik', map_baseline['fc_to_strain_m'],
+                                baseline_forces_moments)
+    
+    stress_baseline = np.einsum('ijk,j->ik', map_baseline['fc_to_stress_m'],
+                                baseline_forces_moments)
+    
+    
+    strain_twist0 = np.einsum('ijk,j->ik', map_flag['fc_to_strain_m'],
+                              twist0_forces_moments)
+    
+    stress_twist0 = np.einsum('ijk,j->ik', map_flag['fc_to_stress_m'],
+                              twist0_forces_moments)
+    
+    assert np.abs(strain_baseline - strain_twist0).max() < 1e-20, \
+        'Strains are inconsistent between normal and zero twist outputs.'
+    
+    # Stresses are on the order of 1 to 10.
+    assert np.abs(stress_baseline - stress_twist0).max() < 1e-9, \
+        'Stresses are inconsistent between normal and zero twist outputs.'
+
 
 if __name__ == "__main__":
     pytest.main(["-s", "test_stress_recov.py"])
