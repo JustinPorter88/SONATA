@@ -187,7 +187,7 @@ for dof in dof_masks.keys():
 
     plt.title(dof + ' Abs*Sign(Angle)')
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # # Plot Phase Angles
     # for i in range(N_modes):
@@ -241,7 +241,7 @@ for key in output_data.keys():
 
     plt.title(key)
     plt.legend()
-    plt.show()
+    # plt.show()
 
 ###############################################################################
 ######## Add Displacement Info to Outputs                              ########
@@ -309,9 +309,12 @@ with open(output_fname, 'w') as file:
 ######## Stress and Strain Energy Recovery                             ########
 ###############################################################################
 
-map_fname = os.path.join(map_folder, 'blade_station0000_stress_strain_map.npz')
+map_data = [None] * len(output_data['FzL'])
 
-map_data = np.load(map_fname)
+for i in range(len(output_data['FzL'])):
+    map_fname = os.path.join(map_folder, 'blade_station{:04d}_stress_strain_map.npz'.format(i))
+
+    map_data[i] = np.load(map_fname)
 
 # quadrature locations
 quad_pos = np.array(output_data['Quads_Z'])
@@ -323,10 +326,14 @@ quad_length_weights[-1]   = 0.5*(quad_pos[-1] - quad_pos[-2])
 quad_length_weights[1:-1] = 0.5*(quad_pos[2:] - quad_pos[0:-2])
 
 energy_dict = {}
+for station_ind, map_curr in enumerate(map_data):
+    for mat_ind, mat_name in enumerate(map_curr['material_names']):
+        energy_dict[mat_name] = np.zeros((6, N_modes))
 
-# omit the None material and the gelcoat
-for material in map_data['material_names'][1:-1]:
-    energy_dict[str(material)] = np.full((6, N_modes), 0.)
+
+# # omit the None material and the gelcoat
+# for material in map_data['material_names'][1:-1]:
+#     energy_dict[str(material)] = np.full((6, N_modes), 0.)
 
 # Loop over modes
 for mode_ind in range(N_modes):
@@ -338,37 +345,38 @@ for mode_ind in range(N_modes):
                               np.array(output_data['MyL'])[:, mode_ind],
                               -np.array(output_data['MxL'])[:, mode_ind]))
 
-    # First index is stress/strain component in order [11, 22, 33, 23, 13, 12]
-    # second index is element number
-    # third index is station number
-    stresses = np.einsum('ijk,jl->ikl', map_data['fc_to_stress_m'],
-                         force_moments)
-    
-    strains = np.einsum('ijk,jl->ikl', map_data['fc_to_strain_m'],
-                         force_moments)
-    
-    # energy densities at each element and each station
-    energy_densities = 0.5*stresses * strains
-    
-    # energy scaled by volume for each element (area and length quadrature
-    # weight)
-    energy = energy_densities * map_data['elem_areas'].reshape(1, -1, 1) \
-                * quad_length_weights.reshape(1,1,-1)
-    
-    # loop over materials and add up energies for each direction
-    for mat_ind, mat_name in enumerate(map_data['material_names']):
+    for station_ind, map_curr in enumerate(map_data):
+        # First index is stress/strain component in order [11, 22, 33, 23, 13, 12]
+        # second index is element number
+        # third index is station number
+        stresses = np.einsum('ijk,j->ik', map_curr['fc_to_stress_m'],
+                            force_moments[:, station_ind])
         
-        elem_mask = map_data['elem_materials'] == mat_ind
+        strains = np.einsum('ijk,j->ik', map_curr['fc_to_strain_m'],
+                            force_moments[:, station_ind])
+        
+        # energy densities at each element and each station
+        energy_densities = 0.5*stresses * strains
+        
+        # energy scaled by volume for each element (area and length quadrature
+        # weight)
+        energy = energy_densities * map_curr['elem_areas'].reshape(1, -1) \
+                    * quad_length_weights[station_ind]
+        
+        # loop over materials and add up energies for each direction
+        for mat_ind, mat_name in enumerate(map_curr['material_names']):
+            
+            elem_mask = map_curr['elem_materials'] == mat_ind
 
-        if elem_mask.sum() > 0:
-            
-            # first index for each material is direction with order
-            # [11, 22, 33, 23, 13, 12]
-            
-            
-            # sum energy over elements and then over stations
-            energy_dict[mat_name][:, mode_ind] \
-                = energy[:, elem_mask, :].sum(axis=1).sum(axis=1)
+            if elem_mask.sum() > 0:
+                
+                # first index for each material is direction with order
+                # [11, 22, 33, 23, 13, 12]
+                
+                
+                # sum energy over elements and then over stations
+                energy_dict[mat_name][:, mode_ind] \
+                    += energy[:, elem_mask].sum(axis=1)
                 
 ###############################################################################
 ######## For a given mode, print energy fractions                      ########
@@ -380,7 +388,7 @@ mode_energy = np.zeros(N_modes)
 
 
 for mode_ind in range(N_modes):
-
+    print('Mode {}:'.format(mode_ind + 1))
     for key in energy_dict.keys():
         
         mode_energy[mode_ind] += energy_dict[key][:, mode_ind].sum()
