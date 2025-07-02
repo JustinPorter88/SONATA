@@ -36,6 +36,7 @@ c2_axis                 = False
 flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
 flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
 flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
+flag_estimate_structural_damping = True # Estimate structural damping from SONATA and BeamDyn 
 
 # Shape of corners
 choose_cutoff = 2    # 0 step, 2 round
@@ -49,13 +50,9 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
               "flag_recovery": flag_recovery, "c2_axis": c2_axis}
 
 
-# ===== User defined radial statiosns ===== #
+# ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-radial_stations = [0.000000000000000e+00, 6.896551724137931e-02, 1.034482758620690e-01, 1.379310344827586e-01, 1.724137931034483e-01, 2.068965517241379e-01, 
-                   2.413793103448276e-01, 2.758620689655172e-01, 3.103448275862069e-01, 3.448275862068966e-01, 3.793103448275862e-01, 4.137931034482759e-01, 4.482758620689655e-01, 
-                   4.827586206896551e-01, 5.172413793103449e-01, 5.517241379310345e-01, 5.862068965517241e-01, 6.206896551724138e-01, 6.551724137931034e-01, 6.896551724137931e-01, 
-                   7.241379310344828e-01, 7.586206896551724e-01, 7.931034482758621e-01, 8.275862068965517e-01, 8.620689655172413e-01, 8.965517241379310e-01, 9.310344827586207e-01, 
-                   9.655172413793103e-01, 1.000000000000000e+00]
+radial_stations = [0.        , 0.02040816, 0.04081633, 0.06122449, 0.08163265, 0.10204082, 0.12244898, 0.14285714, 0.16326531, 0.18367347, 0.20408163, 0.2244898 , 0.24489796, 0.26530612, 0.28571429, 0.30612245, 0.32653061, 0.34693878, 0.36734694, 0.3877551 , 0.40816327, 0.42857143, 0.44897959, 0.46938776, 0.48979592, 0.51020408, 0.53061224, 0.55102041, 0.57142857, 0.59183673, 0.6122449 , 0.63265306, 0.65306122, 0.67346939, 0.69387755, 0.71428571, 0.73469388, 0.75510204, 0.7755102 , 0.79591837, 0.81632653, 0.83673469, 0.85714286, 0.87755102, 0.89795918, 0.91836735, 0.93877551, 0.95918367, 1.]
 
 # ===== Execute SONATA Blade Component Object ===== #
 # name          - job name of current task
@@ -68,7 +65,8 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, cutoff_style
 # ===== Build & mesh segments ===== #
 job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
-job.blade_exp_stress_strain_map()  # export stress-strain map for cross sectional analysis
+if flag_estimate_structural_damping:
+    job.blade_exp_stress_strain_map()  # export stress-strain map for cross sectional analysis
 
 # Define flags
 flag_3d = False
@@ -80,14 +78,17 @@ flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
 Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
 
-# Set damping for BeamDyn input file
-delta = np.array([0.03, 0.03, 0.06787]) # logarithmic decrement, natural log of the ratio of the amplitudes of any two successive peaks. 3% flap and edge, 6% torsion
-zeta = 1. / np.sqrt(1.+(2.*np.pi / delta)**2.) # damping ratio,  dimensionless measure describing how oscillations in a system decay after a disturbance
-omega = np.array([0.508286, 0.694685, 4.084712])*2*np.pi # Frequency (rad/s), flap/edge/torsion
-mu1 = 2*zeta[0]/omega[0]
-mu2 = 2*zeta[1]/omega[1]
-mu3 = 2*zeta[2]/omega[2]
-mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
+if not flag_estimate_structural_damping:
+    # Set damping for BeamDyn input file
+    delta = np.array([0.03, 0.03, 0.06787]) # logarithmic decrement, natural log of the ratio of the amplitudes of any two successive peaks. 3% flap and edge, 6% torsion
+    zeta = 1. / np.sqrt(1.+(2.*np.pi / delta)**2.) # damping ratio,  dimensionless measure describing how oscillations in a system decay after a disturbance
+    omega = np.array([0.508286, 0.694685, 4.084712])*2*np.pi # Frequency (rad/s), flap/edge/torsion
+    mu1 = 2*zeta[0]/omega[0]
+    mu2 = 2*zeta[1]/omega[1]
+    mu3 = 2*zeta[2]/omega[2]
+    mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
+else:
+    mu = np.zeros(6)
 beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str, mu)
 
 # ===== PLOTS ===== #
