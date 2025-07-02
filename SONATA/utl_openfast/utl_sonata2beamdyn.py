@@ -133,7 +133,7 @@ def write_beamdyn_axis(folder, flags_dict, wt_name, ra, twist):
     file.write('True          QuasiStaticInit - Use quasistatic pre-conditioning with centripetal accelerations in initialization (flag) [dynamic solve only]\n')
     file.write(' 0            rhoinf          - Numerical damping parameter for generalized-alpha integrator\n')
     file.write(' 2            quadrature      - Quadrature method: 1=Gaussian; 2=Trapezoidal (switch)\n')
-    file.write('"DEFAULT"     refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n')
+    file.write(' 2            refine          - Refinement factor for trapezoidal quadrature (-). DEFAULT = 1 [used only when quadrature=2]\n')
     file.write('"DEFAULT"     n_fact          - Factorization frequency (-). DEFAULT = 5\n')
     file.write('"DEFAULT"     DTBeam          - Time step size (s).\n')
     file.write('"DEFAULT"     load_retries    - Number of factored load retries before quitting the aimulation\n')

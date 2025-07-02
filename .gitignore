@@ -14,7 +14,6 @@ license
 #*.pdf
 *.jpeg
 *.jpg
-*.dat
 *.xlsx
 *.xls
 *.svg
@@ -30,6 +29,10 @@ license
 *.zip
 *.DS_Store
 *.png
-*.dat
 *.pdf
 *.txt
+*.npz
+*.lin
+*.ech
+*.sum*
+examples/2_IEA22MW/structural_damping/*.yaml

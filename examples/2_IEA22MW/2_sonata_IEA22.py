@@ -68,6 +68,8 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, cutoff_style
 # ===== Build & mesh segments ===== #
 job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
+job.blade_exp_stress_strain_map()  # export stress-strain map for cross sectional analysis
+
 # Define flags
 flag_3d = False
 flag_csv_export = True                         # export csv files with structural data
