@@ -418,15 +418,15 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                                     web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
 
-        if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
-            # id_seg = n_webs*2 + 2
-            tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
-            tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
-            tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'Adhesive'
-            tmp2[i]['segments'][-1]['layup'][0]['thickness'] = 5.e-4
-            tmp2[i]['segments'][-1]['layup'][0]['start'] = 0.0
-            tmp2[i]['segments'][-1]['layup'][0]['end'] = 1.0
-            tmp2[i]['segments'][-1]['layup'][0]['orientation'] = 0.0
+        # if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
+        #     # id_seg = n_webs*2 + 2
+        #     tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
+        #     tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
+        #     tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'Adhesive'
+        #     tmp2[i]['segments'][-1]['layup'][0]['thickness'] = 5.e-4
+        #     tmp2[i]['segments'][-1]['layup'][0]['start'] = 0.0
+        #     tmp2[i]['segments'][-1]['layup'][0]['end'] = 1.0
+        #     tmp2[i]['segments'][-1]['layup'][0]['orientation'] = 0.0
 
 
     # Split webs for determining the
