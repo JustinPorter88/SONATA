@@ -428,3 +428,73 @@ for key in energy_dict.keys():
 # Write out the yaml file of the modal information
 with open(output_fname_energy, 'w') as file:
     yaml.dump(energy_dict, file)
+
+
+# Order is [11, 22, 33, 23, 13, 12]
+loss_factors = {'glass_uniax' : np.array([1.49e-3, 7.16e-3, 7.16e-3,
+                                       6.62e-3, 6.62e-3, 6.62e-3]),
+                'carbon_uniax' : np.array([4.32e-4, 4.614e-3, 4.614e-3,
+                                       4.669e-3, 4.669e-3, 4.669e-3]), # Imperial
+                'glass_biax' : np.array([7.04e-3, 7.04e-3, 7.16e-3,
+                                      6.62e-3, 6.62e-3, 3.01e-3]),
+                'glass_triax' : (np.array([7.04e-3, 7.04e-3, 7.16e-3,
+                                      6.62e-3, 6.62e-3, 3.01e-3]) + np.array([1.49e-3, 7.16e-3, 7.16e-3,
+                                       6.62e-3, 6.62e-3, 6.62e-3]))/2, # average of  UD and BX GFRP
+                'Adhesive' : np.array([1.3e-2]*6),
+                'medium_density_foam' : np.array([1.3e-2]*6), # Same of adhesive
+                'gelcoat' : np.array([1.3e-2]*6), # same of gelcoat
+                }
+
+for key in energy_dict.keys():
+    energy_dict[key] = np.array(energy_dict[key])
+
+###############################################################################
+######## Load 1D + 2D Loss Factors and Damping                         ########
+###############################################################################
+
+loss_factors_vec = np.hstack((loss_factors['glass_uniax'],
+                              loss_factors['carbon_uniax'],
+                              loss_factors['glass_biax'],
+                              loss_factors['glass_triax'],
+                              loss_factors['Adhesive'],
+                              loss_factors['medium_density_foam'],
+                              loss_factors['gelcoat']))
+
+
+energy_fracs_mat = np.hstack((energy_dict['glass_uniax'].T,
+                              energy_dict['carbon_uniax'].T,
+                              energy_dict['glass_biax'].T,
+                              energy_dict['glass_triax'].T,
+                              energy_dict['Adhesive'].T,
+                              energy_dict['medium_density_foam'].T,
+                              energy_dict['gelcoat'].T))
+
+
+
+sonata_zeta = 0.5 * (energy_fracs_mat @ loss_factors_vec)
+
+print("Critical damping ratios (%):")
+print(sonata_zeta*100.)
+
+damp_contributions = np.zeros((N_modes, len(loss_factors)))
+energy_contributions = np.zeros((N_modes, len(loss_factors)))
+for i in range(N_modes):
+    for j, material in enumerate(loss_factors.keys()):
+        energy_contributions[i,j] = sum(energy_dict[material][:, i])
+        damp_contributions[i,j] = sum(energy_dict[material][:, i] * loss_factors[material])
+
+# Save contributions and labels to a text file
+damp_contributions_file = os.path.join(run_dir, 'damp_material_contributions.txt')
+energy_contributions_file = os.path.join(run_dir, 'energy_material_contributions.txt')
+
+np.savetxt(energy_contributions_file, energy_contributions)
+np.savetxt(damp_contributions_file, damp_contributions)
+
+# Save loss factors as a table
+loss_factors_table_file = os.path.join(run_dir, 'loss_factors_table.txt')
+
+with open(loss_factors_table_file, 'w') as file:
+    file.write("Material\tLoss Factors (11, 22, 33, 23, 13, 12)\n")
+    for material, factors in loss_factors.items():
+        factors_str = ', '.join(f'{factor:.6e}' for factor in factors)
+        file.write(f"{material}\t{factors_str}\n")
