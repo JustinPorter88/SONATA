@@ -20,10 +20,11 @@ def test_6x6_iea22mw():
     matplotlib.use('Agg')
     
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-    job_str = 'iea_22_280_rwt.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__file__) )
+    job_str = 'IEA-22-280-RWT.yaml'
     job_name = 'IEA22'
-    filename_str = run_dir + job_str
+    filename_str = os.path.join(run_dir, '..', '..','..', 'examples','2_IEA22MW', job_str)
+
     
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
@@ -118,7 +119,7 @@ def test_6x6_iea22mw():
     matplotlib.use(original_backend)
     
     reference_file = 'ref_iea22mw_bd_blade.dat'
-    test_file = 'IEA_22MW_BeamDyn_Blade.dat'
+    test_file = 'IEA-22-280-RWT_BeamDyn_Blade.dat'
     
     ref_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             reference_file)

@@ -1,4 +1,4 @@
-name: IEA 15MW Offshore Reference Turbine, with taped chord tip design
+name: IEA-15-240-RWT
 assembly:
     turbine_class: I
     turbulence_class: B

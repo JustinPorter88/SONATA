@@ -1,4 +1,4 @@
-name: IEA 22MW Offshore Wind Turbine in Fixed Bottom Configuration
+name: IEA-22-280-RWT
 assembly:
     turbine_class: I
     turbulence_class: B
