@@ -136,7 +136,7 @@ def test_6x6_rotated():
     test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              test_file)
     
-    utils.compare_bd_blade(ref_path, test_path, tolerance=1e-1)
+    utils.compare_bd_blade(ref_path, test_path, tolerance=1e-9)
     
     # Check that the output repots zero twist.
     
