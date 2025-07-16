@@ -346,9 +346,9 @@ for mode_ind in range(N_modes):
                               -np.array(output_data['MxL'])[:, mode_ind]))
 
     for station_ind, map_curr in enumerate(map_data):
+        # After einsum:
         # First index is stress/strain component in order [11, 22, 33, 23, 13, 12]
         # second index is element number
-        # third index is station number
         stresses = np.einsum('ijk,j->ik', map_curr['fc_to_stress_m'],
                             force_moments[:, station_ind])
         
