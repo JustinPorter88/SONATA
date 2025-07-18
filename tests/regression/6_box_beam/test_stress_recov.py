@@ -1149,10 +1149,6 @@ def test_stress_map_zero_twist():
     # These numbers were used to manually check that the signs on the rotation
     # matrix are correct.
     
-    print('These forces are not yet the correct ones to test with. '
-          + 'Need to have them in different rotated coordinate sytems')
-    
-    
     strain_baseline = np.einsum('ijk,j->ik', map_baseline['fc_to_strain_m'],
                                 baseline_forces_moments)
     

@@ -20,10 +20,10 @@ def test_6x6_iea15mw():
     matplotlib.use('Agg')
     
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-    job_str = 'iea_15_240_rwt.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__file__) )
+    job_str = 'IEA-15-240-RWT.yaml'
     job_name = 'IEA15'
-    filename_str = run_dir + job_str
+    filename_str = os.path.join(run_dir, '..', '..','..', 'examples','1_IEA15MW', job_str)
     
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
@@ -216,7 +216,7 @@ def test_6x6_iea15mw():
     matplotlib.use(original_backend)
     
     reference_file = 'ref_iea15mw_bd_blade.dat'
-    test_file = 'IEA_15MW_BeamDyn_Blade.dat'
+    test_file = 'IEA-15-240-RWT_BeamDyn_Blade.dat'
     
     ref_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             reference_file)
@@ -242,10 +242,10 @@ def test_external_mesh_iea15mw():
     matplotlib.use('Agg')
     
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-    job_str = 'iea_15_240_rwt.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__file__) )
+    job_str = 'IEA-15-240-RWT.yaml'
     job_name = 'IEA15'
-    filename_str = run_dir + job_str
+    filename_str = os.path.join(run_dir, '..', '..','..', 'examples','1_IEA15MW', job_str)
     
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
