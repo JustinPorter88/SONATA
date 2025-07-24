@@ -37,6 +37,7 @@ flag_DeamDyn_def_transform = True               # transform from SONATA to BeamD
 flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
 flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
 flag_estimate_structural_damping = True # Estimate structural damping from SONATA and BeamDyn 
+flag_output_zero_twist = False # Output sectional analysis so that BeamDyn sees everything at 0 twist?
 
 # Shape of corners
 choose_cutoff = 2    # 0 step, 2 round
@@ -70,9 +71,6 @@ job = Blade(name=job_name, filename=filename_str, flags=flags_dict, cutoff_style
 # ===== Build & mesh segments ===== #
 job.blade_gen_section(topo_flag=True, mesh_flag = True)
 
-if flag_estimate_structural_damping:
-    job.blade_exp_stress_strain_map()  # export stress-strain map for cross sectional analysis
-
 # Define flags
 flag_3d = False
 flag_csv_export = True                         # export csv files with structural data
@@ -81,6 +79,7 @@ flags_dict['flag_csv_export'] = flag_csv_export
 flags_dict['flag_DeamDyn_def_transform'] = flag_DeamDyn_def_transform
 flags_dict['flag_write_BeamDyn'] = flag_write_BeamDyn
 flags_dict['flag_write_BeamDyn_unit_convert'] = flag_write_BeamDyn_unit_convert
+flags_dict['flag_output_zero_twist'] = flag_output_zero_twist
 Loads_dict = {"Forces":[1.,1.,1.],"Moments":[1.,1.,1.]}
 
 if not flag_estimate_structural_damping:
@@ -94,17 +93,24 @@ if not flag_estimate_structural_damping:
     mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
 else:
     mu = np.zeros(6)
-beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str, mu)
+
+beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir,
+                 job_str, mu)
+
+if flag_estimate_structural_damping:
+    # export stress-strain map for cross sectional analysis
+    job.blade_exp_stress_strain_map(
+        flag_output_zero_twist=flag_output_zero_twist)
 
 # ===== PLOTS ===== #
 # job.blade_plot_attributes()
 # job.blade_plot_beam_props()
 
 # saves figures in folder_str/figures if savepath is provided:
-job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement, savepath=run_dir)
+job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11,
+                    plotDisplacement=flag_plotDisplacement, savepath=run_dir)
 if flag_3d:
-    job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
-
-
-
+    job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'],
+                          flag_lft=flags_dict['flag_lft'],
+                          flag_topo=flags_dict['flag_topo'])
 
