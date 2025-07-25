@@ -420,9 +420,8 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
         if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
             # id_seg = n_webs*2 + 2            
-            assert 'Adhesive' in [materials[mat].name for mat in materials], \
-                'Adhesive material needs to be included for TE fill.' \
-                + ' Name needs to be exactly `Adhesive`.'
+            assert 'ADHESIVE' in [materials[mat].name.upper() for mat in materials], \
+                'Adhesive material needs to be included for TE fill.'
             
             tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
             tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
