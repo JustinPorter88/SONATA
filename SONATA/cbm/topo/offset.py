@@ -151,15 +151,35 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         line = shp.LineString(arrPts)
         offset = line.parallel_offset(dist, side, res, join_style)
 
+       # if isinstance(offset, shp.MultiLineString):
+       #     parts = hasattr(offset, "geoms") and offset or [offset]
+       #     parts = list(offset.geoms)
+       #     for part in parts:
+       #         if part.is_closed:
+       #             x, y = part.xy
+       #             data = np.vstack((x, y))
+       #             data = data.T
+       #         else:
+       #             print("ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!")
+#
+        # FP - TRIAL
+        from shapely.ops import linemerge
+
         if isinstance(offset, shp.MultiLineString):
-            parts = hasattr(offset, "geoms") and offset or [offset]
-            for part in parts:
-                if part.is_closed:
-                    x, y = part.xy
-                    data = np.vstack((x, y))
-                    data = data.T
-                else:
-                    print("ERROR: \t A multilinestring has been created by shp_parallel_offset that is not closed!")
+            # Merge connected parts into a single LineString if possible
+            merged = linemerge(offset)
+
+            if isinstance(merged, shp.LineString):
+                data = np.array(merged.coords)
+
+            elif isinstance(merged, shp.MultiLineString):
+                # Still multiple parts after merge — pick the longest
+                print('[WARNING] offset layers could not be merged - picking longest')
+                longest = max(merged.geoms, key=lambda g: g.length)
+                data = np.array(longest.coords)
+
+            else:
+                raise TypeError(f"Unexpected geometry type after merging: {type(merged)}")
 
         elif isinstance(offset, shp.LineString):
             data = np.array(offset.coords)
