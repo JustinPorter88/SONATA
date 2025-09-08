@@ -1,99 +1,142 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 19 09:38:19 2018
+#------------------------------------------------------------------------------------
+# Import Libraries
+#------------------------------------------------------------------------------------
 
-@author: Tobias Pflumm
-"""
+# Standard library
+from typing import Optional, Union, List, Dict, Any
+
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-# from jsonschema import validate
-from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir, gp_Pln,
-                         gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec,)
 from scipy.interpolate import interp1d, PchipInterpolator
 
-# First party modules
-from SONATA.cbm.classCBM import CBM
-from SONATA.cbm.classCBMConfig import CBMConfig
-from SONATA.cbm.display.display_utils import (display_Ax2,
-                                              display_cbm_SegmentLst,
-                                              display_config,)
+# OpenCASCADE imports
+from OCC.Core.gp import (
+    gp_Ax1, gp_Ax2, gp_Ax3,
+    gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d,
+    gp_Trsf, gp_Vec
+)
 
-from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,
-                                              set_BSplineLst_to_Origin2,)
-from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
-from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,)
-from SONATA.cbm.topo.wire_utils import (equidistant_Points_on_wire,)
+# SONATA core classes
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component
 from SONATA.classMaterial import read_materials
-from SONATA.utl.blade_utl import (array_pln_intersect, check_uniformity,
-                                  interp_airfoil_position, interp_loads,
-                                  make_loft,)
+
+# SONATA anbax module
+from SONATA.anbax.classANBAXConfig import ANBAXConfig
+
+# SONATA cbm module
+from SONATA.cbm.classCBM import CBM
+from SONATA.cbm.classCBMConfig import CBMConfig
+
+# SONATA cbm display utilities
+from SONATA.cbm.display.display_utils import (
+    display_Ax2,
+    display_cbm_SegmentLst,
+    display_config
+)
+
+# SONATA cbm topology utilities
+from SONATA.cbm.topo.BSplineLst_utils import (
+    BSplineLst_from_dct,
+    set_BSplineLst_to_Origin2
+)
+from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
+from SONATA.cbm.topo.utils import Array_to_PntLst, PntLst_to_npArray
+from SONATA.cbm.topo.wire_utils import equidistant_Points_on_wire
+
+# SONATA utilities
+from SONATA.utl.blade_utl import (
+    array_pln_intersect,
+    check_uniformity,
+    interp_airfoil_position,
+    interp_loads,
+    make_loft
+)
 from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
 from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
-from SONATA.anbax.classANBAXConfig import ANBAXConfig
 
 
-
-# from SONATA.airconics_blade_cad.blade_cst import blade_cst
-# import SONATA.airconics_blade_cad.airconics.liftingSurface as liftingSurface
-
+#------------------------------------------------------------------------------------
+# Utility functions
+#------------------------------------------------------------------------------------
 def rotate(xo, yo, xp, yp, angle):
-    ## Rotate a point clockwise by a given angle around a given origin.
-    # angle *= -1.
+    """
+    Rotate a point clockwise by a given angle around a given origin.
+
+    Parameters
+    ----------
+    xo : float
+        X-coordinate of the origin point.
+    yo : float
+        Y-coordinate of the origin point.
+    xp : float
+        X-coordinate of the point to be rotated.
+    yp : float
+        Y-coordinate of the point to be rotated.
+    angle : float
+        Rotation angle in radians (clockwise).
+
+    Returns
+    -------
+    tuple
+        A tuple containing the rotated point coordinates (qx, qy).
+    """
     qx = xo + np.cos(angle) * (xp - xo) - np.sin(angle) * (yp - yo)
     qy = yo + np.sin(angle) * (xp - xo) + np.cos(angle) * (yp - yo)
     return qx, qy
 
+
+#------------------------------------------------------------------------------------
+# Blade class
+#------------------------------------------------------------------------------------
 class Blade(Component):
     """
     SONATA Blade component object.
-    
+
     Attributes
-    ----------                      
+    ----------
     coordinates :  ndarray
         Describes the axis LE coordinates in meters along the span.
         nparray([[grid, x, y, z]]).
-        The grid represents the nondimensional x position along the Blade from 
+        The grid represents the nondimensional x position along the Blade from
         0 to 1
-    
+
     chord : ndarray
-        Describes the blades chord lenght in meters in spanwise direction. 
-        nparray([[grid, chord]]) 
+        Describes the blades chord lenght in meters in spanwise direction.
+        nparray([[grid, chord]])
 
     twist : ndarray
-        Describes the blades twist angles in !radians! in spanwise direction. 
-        nparray([[grid, twist]]) 
+        Describes the blades twist angles in !radians! in spanwise direction.
+        nparray([[grid, twist]])
 
     pitch_axis : ndarray
-        Describes the blades pitch-axis location in 1/chord lengths from the 
-        leading edge. nparray([[grid, pitch_axis]]) 
+        Describes the blades pitch-axis location in 1/chord lengths from the
+        leading edge. nparray([[grid, pitch_axis]])
 
     airfoils : ndarray
-        array of grid location and airfoil instance 
+        array of grid location and airfoil instance
         nparray([[grid, airfoil instance]],dtype = object)
-        
+
     sections : ndarray
-        array of CBM cross-sections 
+        array of CBM cross-sections
         nparray([[grid, CBM instance]],dtype = object)
-        
+
     beam_properties : ndarray
         array of grid location and VABSSectionalProp instance
         nparray([[grid, beam_properties]],dtype = object)
-              
-        
+
+
     Methods
     -------
     blade_matrix : ndarray
         Summons all the blades global properties in one array
         nparray([[grid, x, y, z, chord, twist, pitch_axis,....]])
-    
-    
+
+
     Notes
     --------
     Units: meter (m), Newton (N), kilogramm (kg), degree (deg), Kelvin (K),
@@ -103,23 +146,23 @@ class Blade(Component):
     See Also
     --------
     Component,
-    
+
 
     ToDo
     -----
-    - Include the possibity to rotate the beam_properties non-twisted frame. 
+    - Include the possibity to rotate the beam_properties non-twisted frame.
         Default is the twisted frame
     -
-    
+
 
     Examples
     --------
     Initialize Blade Instance:
-    
+
     >>> job = Blade(name='UH-60A_adv')
-    
+
     >>> job.read_yaml(yml.get('components').get('blade'), airfoils, materials)
-    
+
     >>> job.blade_gen_section()
     >>> job.blade_run_anbax()
     >>> job.blade_plot_sections()
@@ -159,7 +202,7 @@ class Blade(Component):
         "cutoff_style",
         "true_twist",
     )
-    
+
     # real twist value that is set if twist is set to zero for outputing
     # matrices at zero twist
 
@@ -167,7 +210,7 @@ class Blade(Component):
         super().__init__(*args, **kwargs)
         self.beam_properties = None
         self.loft=None
-        
+
         if 'filename' in kwargs:
             filename = kwargs.get('filename')
             with open(filename, 'r') as myfile:
@@ -175,24 +218,24 @@ class Blade(Component):
                 yml = yaml.load(inputs, Loader = yaml.FullLoader)
                 self.yml = yml
 
-            
+
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
             self.materials = read_materials(yml.get('materials'))
-            
+
             self.read_yaml(yml.get('components').get('blade'), airfoils, **kwargs)
 
         self.true_twist = None
-            
+
 #    def __repr__(self):
-#        """__repr__ is the built-in function used to compute the "official" 
+#        """__repr__ is the built-in function used to compute the "official"
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
-    
+
     def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False, c2_axis=False, tmp_chord = [], tmp_pa = [], tmp_tw=[]):
         """
-        reads and determines interpolates function for the reference axis of 
+        reads and determines interpolates function for the reference axis of
         the blade
-        
+
         Parameters
         ----------
         yml_ra : dict
@@ -223,14 +266,14 @@ class Blade(Component):
             tmp_ra['x'] = np.asarray((yml_ra.get('x').get('grid'),yml_ra.get('x').get('values'))).T
             tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
             tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
-        
+
         f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
         f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
         f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1], bounds_error=False, fill_value='extrapolate')
-        
+
         x_blra = np.unique(np.sort(np.hstack((tmp_ra['x'][:,0], tmp_ra['y'][:,0], tmp_ra['z'][:,0]))))
         tmp_ra = np.vstack((x_blra, f_ref_axis_x(x_blra), f_ref_axis_y(x_blra), f_ref_axis_z(x_blra))).T
-        
+
         if c2_axis:
             f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
             chord = f_chord(x_blra)
@@ -255,7 +298,7 @@ class Blade(Component):
 
     def _get_local_Ax2(self, x):
         """
-        
+
 
         Parameters
         ----------
@@ -274,7 +317,7 @@ class Blade(Component):
         p = gp_Pnt()
         vx = gp_Vec()
         v2 = gp_Vec()
-        
+
         #determine local the local cbm coordinate system Ax2
         self.beam_ref_axis_BSplineLst[int(resCoords[0,0])].D2(resCoords[0,1],p,vx,v2)
         vz = gp_Vec(-vx.Z(),0,vx.X()).Normalized()
@@ -284,21 +327,21 @@ class Blade(Component):
 
     def _interpolate_cbm_boundary(self, x, fs=1.1, nPoints=4000):
         """
-        interpolates a cbm boundary BSplineLst from the blade definition at a 
-        certain grid station. Following the procedure: 
+        interpolates a cbm boundary BSplineLst from the blade definition at a
+        certain grid station. Following the procedure:
         Determine all important neighboring airfoil positions
-        discretize all airfoils equidistantly with the same number of Points. 
-        Use these Points to performe a plane_line_intersection with the local 
+        discretize all airfoils equidistantly with the same number of Points.
+        Use these Points to performe a plane_line_intersection with the local
         coordinate system Ax2. Find the correct intersection and extrapolate if
         necessary over the blade boundaries.
-        Transfer the points to the local cbm frame and performe a BSpline 
-        interpolation.        
+        Transfer the points to the local cbm frame and performe a BSpline
+        interpolation.
 
         Parameters
         -------
         x : float
             nondimensional grid location
-        
+
         Returns
         -------
         BoundaryBSplineLst : BSplineLst
@@ -306,9 +349,9 @@ class Blade(Component):
 
         ToDo
         -------
-        - Use equidistant_Points_on_BSplineLst instead of equidistant_Points_on_wire 
+        - Use equidistant_Points_on_BSplineLst instead of equidistant_Points_on_wire
             to capture corners
-            
+
         """
         ax2 = self._get_local_Ax2(x)
 
@@ -372,17 +415,17 @@ class Blade(Component):
     def read_yaml(self, yml, airfoils, stations=None, npts=11, wt_flag=False, **kwargs):
         """
         reads the Beam or Blade dictionary
-        generates the blade matrix and airfoil to represent all given 
-        information at every grid point by interpolating the input data 
+        generates the blade matrix and airfoil to represent all given
+        information at every grid point by interpolating the input data
         and assign them to the class attribute twist, choord, coordinates
-        and airfoil_positions with the first column representing the 
+        and airfoil_positions with the first column representing the
         non-dimensional radial location
 
         Parameters
         ----------
         airfoils : list
             Is the database of airfoils
-        
+
         """
         self.name = self.yml.get('name')
         print('STATUS:\t Reading YAML Dictionary for Beam/Blade: %s' % (self.name))
@@ -391,7 +434,7 @@ class Blade(Component):
         tmp_chord = np.asarray((yml.get('outer_shape_bem').get('chord').get('grid'),yml.get('outer_shape_bem').get('chord').get('values'))).T
         tmp_tw = np.asarray((yml.get('outer_shape_bem').get('twist').get('grid'),yml.get('outer_shape_bem').get('twist').get('values'))).T
         tmp_pa = np.asarray((yml.get('outer_shape_bem').get('pitch_axis').get('grid'),yml.get('outer_shape_bem').get('pitch_axis').get('values'))).T
-        
+
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
         (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_pa = tmp_pa, tmp_tw=tmp_tw)
 
@@ -400,14 +443,14 @@ class Blade(Component):
             (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_pa = tmp_pa, tmp_tw=tmp_tw)
         else:
             (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('outer_shape_bem').get('beam_reference_axis'), flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'))
-        
+
         if c2_axis:
             tmp_pa[:,1]=0.5
         self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
         self.f_pa = interp1d(tmp_pa[:,0], tmp_pa[:,1], bounds_error=False, fill_value='extrapolate')
-        
-        #Read airfoil information 
+
+        #Read airfoil information
         airfoil_position = (yml.get('outer_shape_bem').get('airfoil_position').get('grid'),yml.get('outer_shape_bem').get('airfoil_position').get('labels'))
         tmp = []
         for an in airfoil_position[1]:
@@ -425,7 +468,7 @@ class Blade(Component):
                 cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure_2d_fem').get('sections')])
             else:
                 cs_pos = stations
-            
+
         x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0],
                                          tmp_blra[:,0], tmp_bera[:,0],
                                          tmp_pa[:,0], arr[:,0], cs_pos))))
@@ -443,7 +486,7 @@ class Blade(Component):
         #Generate CBMConfigs
         if kwargs.get('flags',{}).get('flag_wt_ontology'):
             cbmconfigs = converter_WT(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
-            
+
         else:
             lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("internal_structure_2d_fem").get("sections")]
             cbmconfigs = np.asarray(lst)
@@ -473,7 +516,7 @@ class Blade(Component):
         Returns
         -------
         np.ndarray
-            blade matrix of bl_ra, chord, twist, pa, 
+            blade matrix of bl_ra, chord, twist, pa,
 
         """
         return np.column_stack((self.blade_ref_axis, self.chord[:, 1], self.twist[:, 1], self.pitch_axis[:, 1]))
@@ -486,11 +529,11 @@ class Blade(Component):
         Parameters
         ----------
         topo_flag : bool, optional
-            If this flag is true the topology of each cross-section is 
+            If this flag is true the topology of each cross-section is
             generated. The default is True.
         mesh_flag : bool, optional
-            IF this flag is set true, the discretization of each cross-section 
-            is generated if a topology is generated beforehand. 
+            IF this flag is set true, the discretization of each cross-section
+            is generated if a topology is generated beforehand.
             The default is True.
         **kwargs : TYPE
             keyword arguments can be passed down to the cbm_gen_mesh function
@@ -540,21 +583,21 @@ class Blade(Component):
         Returns
         -------
         None.
-        
+
         Notes
         -----
-        
+
         Each blade section gets asigned the same mesh for now.
-        
+
         Still requires reading a yaml file first for materials information.
-        
+
         """
-        
+
         for (x, cs) in self.sections:
             cs.cbm_custom_mesh(nodes, cells, materials,
                                split_quads=split_quads, theta_11=theta_11,
                                theta_3=theta_3)
-        
+
         return None
 
     def blade_run_anbax(self, loads=None, **kwargs):
@@ -585,7 +628,7 @@ class Blade(Component):
             lst.append([x, cs.BeamProperties])
         # self.anba_beam_properties = np.asarray(lst)
         self.beam_properties = np.asarray(lst)
-        return None      
+        return None
 
     def blade_run_viscoelastic(self, **kwargs):
         """
@@ -631,39 +674,39 @@ class Blade(Component):
         Returns
         -------
         None.
-        
+
         Notes
         -----
-        
+
         Saves out npz files for each station to map from sectional internal
         forces and moments to stress and strain in each element.
-        
+
         The maps have keys in the file of `fc_to_strain_m` and
         `fc_to_stress_m`.
         These maps are (6,6,Nelem). For each element index in the third
         position, the 6x6 matrix can multiply the local internal stresses.
         These maps are to the strain and stress respectively in the material
         coordinates.
-        
+
         Stresses and strains are in order [11, 22, 33, 23, 13, 12]
-        
+
         Additional documentation available on `cbm_exp_stress_strain_map`
 
         """
-        
+
         ac = ANBAXConfig()
         for ind,(x, cs) in enumerate(self.sections):
 
             cs.config.anbax_cfg = ac
 
             print("STATUS:\t Running Stress and Strain Maps at %s" % (x))
-            
+
             curr_twist = 0
             if self.true_twist is not None:
                 curr_twist = self.true_twist[ind]
 
                 print("STATUS:\t Output twist at section is %s" % (curr_twist))
-                
+
             elif flag_output_zero_twist:
                 twist_interp = PchipInterpolator(self.twist[:, 0],
                                                  self.twist[:, 1])
@@ -679,15 +722,15 @@ class Blade(Component):
 
     def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='vabs', filename = None):
         """
-        Exports the beam_properties in the 
-        
+        Exports the beam_properties in the
+
         Parameters
         ----------
         cosy : str, optional
-            either 'global' for the global beam coordinate system or 
-            'local' for a coordinate system that is always pointing with 
+            either 'global' for the global beam coordinate system or
+            'local' for a coordinate system that is always pointing with
             the chord-line (in the twisted frame)
-        
+
         style : str, optional
             select the style you want the beam_properties to be exported
             'DYMORE' will return an array of the following form:
@@ -695,23 +738,23 @@ class Blade(Component):
             Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
             Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
             ...
-            
+
         eta_offset : float, optional
-            if the beam eta coordinates from start to end of the beam doesn't 
+            if the beam eta coordinates from start to end of the beam doesn't
             coincide with the global coorinate system of the blade. The unit
             is in nondimensional r coordinates (x/Radius)
-            
+
         solver : str, optional
-            solver : if multiple or other solvers than vabs were applied, use 
+            solver : if multiple or other solvers than vabs were applied, use
             this option
-        
+
         filename : str, optional
-            if the user wants to write the output to a file. 
-            
+            if the user wants to write the output to a file.
+
         Returns
         ----------
         arr : ndarray
-            an array that reprensents the beam properties for the 
+            an array that reprensents the beam properties for the
         """
 
         lst = []
@@ -781,7 +824,7 @@ class Blade(Component):
         Parameters
         ----------
         **kwargs : TYPE
-            keyword arguments can be passed down to the plot such as 
+            keyword arguments can be passed down to the plot such as
             sigma=None, ref=None, x_offset = 0, description = True
 
         Returns
@@ -794,13 +837,13 @@ class Blade(Component):
     def blade_plot_sections(self, **kwargs):
         """
         plots the different sections of the blade
-        """      
+        """
         for (x,cs) in self.sections:
             print('STATUS:\t Plotting section at grid location %s' % x)
             string = 'Blade: '+ str(self.name) + '; Section %.3f: ' % x
             cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
-        return None    
-    
+        return None
+
     def blade_post_3dtopo(self, flag_wf=True, flag_lft=False, flag_topo=False, flag_mesh=False, flag_wopwop=False):
         """
         generates the wireframe and the loft surface of the blade
@@ -809,11 +852,11 @@ class Blade(Component):
         ----------
         loft : OCC.TopoDS_surface
             the 3D surface of the blade
-        
+
         wireframe : list
             list of every airfoil_wire scaled and rotated at every grid point
-            
-            
+
+
         ToDo
         ----------
 
@@ -875,18 +918,18 @@ class Blade(Component):
         self.display.View_Iso()
         self.display.FitAll()
         self.start_display()
-        
+
     def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='anbax', filename = None):
         """
-        Exports the beam_properties in the 
-        
+        Exports the beam_properties in the
+
         Parameters
         ----------
         cosy : str, optional
-            either 'global' for the global beam coordinate system or 
-            'local' for a coordinate system that is always pointing with 
+            either 'global' for the global beam coordinate system or
+            'local' for a coordinate system that is always pointing with
             the chord-line (in the twisted frame)
-        
+
         style : str, optional
             select the style you want the beam_properties to be exported
             'DYMORE' will return an array of the following form:
@@ -894,23 +937,23 @@ class Blade(Component):
             Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
             Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
             ...
-            
+
         eta_offset : float, optional
-            if the beam eta coordinates from start to end of the beam doesn't 
+            if the beam eta coordinates from start to end of the beam doesn't
             coincide with the global coorinate system of the blade. The unit
             is in nondimensional r coordinates (x/Radius)
-            
+
         solver : str, optional
-            solver : if multiple or other solvers than vabs were applied, use 
+            solver : if multiple or other solvers than vabs were applied, use
             this option
-        
+
         filename : str, optional
-            if the user wants to write the output to a file. 
-            
+            if the user wants to write the output to a file.
+
         Returns
         ----------
         arr : ndarray
-            an array that reprensents the beam properties for the 
+            an array that reprensents the beam properties for the
         """
 
         lst = []
@@ -936,9 +979,9 @@ class Blade(Component):
         return arr
 
 
-
-
-# ====== M A I N ==============
+#------------------------------------------------------------------------------------
+# Main function
+#------------------------------------------------------------------------------------
 if __name__ == "__main__":
     plt.close("all")
 
