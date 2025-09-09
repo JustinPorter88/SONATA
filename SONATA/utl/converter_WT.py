@@ -419,7 +419,10 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                                     web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
 
         if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
-            # id_seg = n_webs*2 + 2
+            # id_seg = n_webs*2 + 2            
+            assert 'ADHESIVE' in [materials[mat].name.upper() for mat in materials], \
+                'Adhesive material needs to be included for TE fill.'
+            
             tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
             tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
             tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'Adhesive'
