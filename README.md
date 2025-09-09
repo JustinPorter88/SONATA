@@ -62,6 +62,11 @@ cd SONATA
 pip install -e .
 ```
 
+If you are contributing code to SONATA, you also need to install pre-commit
+```
+pre-commit install
+```
+
 Done! now check your installation trying running an example
 
 ## Usage
