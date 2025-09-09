@@ -52,7 +52,7 @@ try:
 
 except:
     print("dolfin and anbax could not be imported!")
-    pass
+    raise
 
 
 class CBM(object):
@@ -343,7 +343,7 @@ class CBM(object):
         global_minLen = round(self.refL / Resolution, 5)
 
         core_cell_area = 1.0 * global_minLen ** 2
-        bw_cell_area = 0.7 * global_minLen ** 2
+        # bw_cell_area = 0.7 * global_minLen ** 2
         web_consolidate_tol = 0.5 * global_minLen
 
         # ===================MESH SEGMENT
@@ -389,7 +389,7 @@ class CBM(object):
 
         # invert nodes list of all cell to make sure they are counterclockwise for vabs in the right coordinate system!
         for c in self.mesh:
-            if c.orientation == False:
+            if not c.orientation:
                 c.invert_nodes()
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
 
@@ -524,7 +524,7 @@ class CBM(object):
 
             c = Cell([node_list[nind] for nind in cells[ind]])
 
-            if c.orientation == False:
+            if not c.orientation:
                 c.invert_nodes()
 
             c.calc_theta_1()
@@ -578,6 +578,7 @@ class CBM(object):
             print('Error, Anba4 wrapper called, likely ')
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
+            raise
 
 
         #TBD: pass it to anbax and run it!
@@ -599,7 +600,7 @@ class CBM(object):
 
 
         # --- Stress & Strain recovery --- #
-        if  self.config.anbax_cfg.recover_flag == True:
+        if  self.config.anbax_cfg.recover_flag:
             print("STATUS:\t Running ANBAX Stress & Strain Recovery:")
             [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
                 anbax_recovery(anba, len(self.mesh), self.config.anbax_cfg.F.tolist(), self.config.anbax_cfg.M.tolist(), self.config.anbax_cfg.voigt_convention, T)
@@ -639,6 +640,7 @@ class CBM(object):
             print('Error, Anba4 wrapper called, likely ')
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
+            raise
 
 
         # Call ANBAX with baseline properties
@@ -935,6 +937,7 @@ class CBM(object):
             print('Error, Anba4 wrapper called, likely ')
             print('Anba4 _or_ Dolfin are not installed\n\n')
             print('==========================================\n\n')
+            raise
 
 
         # Call ANBAX with baseline properties
@@ -943,8 +946,8 @@ class CBM(object):
 
         # These lines are necessary for what happens in the objects
         # not for this outputs here.
-        tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
-        tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
+        _ = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
+        _ = anba.inertia().getValues(range(6),range(6))    # get mass matrix
 
         # Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
