@@ -8,16 +8,14 @@ Created on Wed Jan 18 12:49:54 2017
 import os
 
 # Third party modules
-import numpy as np
 from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
                                      BRepBuilderAPI_MakeWire,)
-from OCC.Core.Geom2d import Geom2d_BezierCurve, Geom2d_Circle
-from OCC.Core.gp import (gp_Ax2, gp_Ax2d, gp_Circ, gp_Circ2d, gp_Dir,
+from OCC.Core.Geom2d import Geom2d_Circle
+from OCC.Core.gp import (gp_Ax2, gp_Ax2d, gp_Circ, gp_Dir,
                          gp_Dir2d, gp_Pnt, gp_Pnt2d, gp_Vec2d,)
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
-from SONATA.cbm.topo.utils import point2d_list_to_TColgp_Array1OfPnt2d
 
 if __name__ == "__main__":
     os.chdir("../../..")

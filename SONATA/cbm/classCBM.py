@@ -9,11 +9,9 @@ https://numpydoc.readthedocs.io/en/latest/format.html
 # Core Library modules
 import os
 import copy
-import math
 from collections import OrderedDict
 
 # Basic PYTHON Modules:
-import pickle as pkl
 from datetime import datetime
 
 # Third party modules
@@ -47,9 +45,7 @@ from OCC.Core.Geom2dAPI import Geom2dAPI_InterCurveCurve
 from OCC.Core.gp import gp_Pnt2d
 
 try:
-    import dolfin as do
-    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery, ComputeShearCenter, ComputeTensionCenter, ComputeMassCenter
-    import sys
+    from SONATA.anbax.anbax_utl import build_dolfin_mesh, anbax_recovery, ComputeShearCenter, ComputeTensionCenter
     from anba4.anbax import anbax
 
 
@@ -60,75 +56,75 @@ except:
 
 
 class CBM(object):
-    """ 
-    This Class includes the SONATA Dicipline Module for Structural 
-    Composite Beam Modelling (CBM). 
-    Design Variables are passed in form of the configuration Object or a 
-    configuration file.          
+    """
+    This Class includes the SONATA Dicipline Module for Structural
+    Composite Beam Modelling (CBM).
+    Design Variables are passed in form of the configuration Object or a
+    configuration file.
 
     Attributes
     ----------
     config : configuration
         Pointer to the Configuration object.
-        
+
     materials: list
         List of Materials object instances.
-    
+
     SegmentLst: list
         list of Segment object instances
-    
+
     refL : float, default: 1.0
-        reference length to account for different dimensions and sizes in the 
-        cross-section. This length is approximately the circumference of the 
-        outer curve.  
+        reference length to account for different dimensions and sizes in the
+        cross-section. This length is approximately the circumference of the
+        outer curve.
 
     Methods
-    -------     
+    -------
     cbm_stpexport_topo(export_filename=None)
         exports all Layer wires and the Segment0 Boundary Wire as .step
-       
+
     __cbm_generate_SegmentLst(**kwargs)
-        psydo private method of the cbm class to generate the list of 
-        Segments in the instance. 
-        
+        psydo private method of the cbm class to generate the list of
+        Segments in the instance.
+
     cbm_gen_topo(**kwargs)
         generates the topology.
-         
+
     cbm_gen_mesh(**kwargs)
-        generates the dicretization of topology 
-        
+        generates the dicretization of topology
+
     cbm_review_mesh()
-        prints a summary of the mesh properties to the screen 
-        
+        prints a summary of the mesh properties to the screen
+
     cbm_run_vabs()
         runs the solver VABS (Variational Asymptotic Beam Sectional Analysis)
-    
+
     cbm_run_anbax()
         runs the solver anbax from macro morandini
-        
+
     cbm_post_2dmesh(attribute='MatID', title='NOTITLE', **kw)
         displays the mesh with specified attributes with matplotlib
-      
+
     cbm_post_3dtopo()
         displays the topology with the pythonocc 3D viewer
-    
+
     cbm_post_3dmesh()
         displays the 2D mesh with the pythonocc 3D viewer
-        
+
     cbm_set_DymoreMK(x_offset=0)
-        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
-        array of the beamproperties with Massterms(6), Stiffness(21), 
+        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the
+        array of the beamproperties with Massterms(6), Stiffness(21),
         damping(1) and curvilinear coordinate(1)
-    
-    
+
+
     Notes
     ----------
-    1 
-        For computational efficiency it is sometimes not suitable to recalculate 
-        the topology or the crosssection every iteration, maybe design flags 
+    1
+        For computational efficiency it is sometimes not suitable to recalculate
+        the topology or the crosssection every iteration, maybe design flags
         to account for that.
-    2 
-        make it possible to construct an instance by passing the topology 
+    2
+        make it possible to construct an instance by passing the topology
         and/or mesh
 
 
@@ -192,9 +188,9 @@ class CBM(object):
 
     def _cbm_generate_SegmentLst(self, **kwargs):
         """
-        psydo private method of the cbm class to generate the list of 
-        Segments in the instance. 
-        
+        psydo private method of the cbm class to generate the list of
+        Segments in the instance.
+
         """
         self.SegmentLst = []  # List of Segment Objects
 
@@ -210,7 +206,7 @@ class CBM(object):
         sorted(self.SegmentLst, key=getID)
         self.refL = get_BSplineLst_length(self.SegmentLst[0].BSplineLst)
         return None
-    
+
     def find_bspline_ends(self, bspline):
         start_point = gp_Pnt2d()
         end_point = gp_Pnt2d()
@@ -235,7 +231,7 @@ class CBM(object):
                                 intersected = True
                                 intersection_points.append(intersector.Point(k))
         return [intersected, intersection_points]
-    
+
     def display_bsplinelst(self, bsplinelst, color = 'blue'):
         for bspline in bsplinelst:
             u_min, u_max = bspline.FirstParameter(), bspline.LastParameter()
@@ -263,11 +259,11 @@ class CBM(object):
 
     def cbm_gen_topo(self, **kwargs):
         """
-        CBM Method that generates the topology. It starts by generating the 
-        list of Segments. It continous to gen all layers for Segment 0. 
-        Subsequently the webs are defined and afterwards the layers of the 
+        CBM Method that generates the topology. It starts by generating the
+        list of Segments. It continous to gen all layers for Segment 0.
+        Subsequently the webs are defined and afterwards the layers of the
         remaining Segments are build. The Balance Weight is defined at the end
-        of this method.        
+        of this method.
         """
         # Generate SegmentLst from config:
         self.SegmentLst = []
@@ -281,11 +277,11 @@ class CBM(object):
         # Build Webs:
         self.WebLst = []
         if len(self.config.webs) > 0:
-            for k, w in self.config.webs.items(): 
+            for k, w in self.config.webs.items():
                 print('STATUS:\t Building Web %s' %(k+1))
                 self.WebLst.append(Web(k, w['Pos1'], w['Pos2'], w['curvature'], self.SegmentLst))
-            sorted(self.SegmentLst, key=getID)  
-            
+            sorted(self.SegmentLst, key=getID)
+
         #Build remaining Segments:
         if len(self.config.webs) > 0:
             for i, seg in enumerate(self.SegmentLst[1:], start=1):
@@ -299,7 +295,7 @@ class CBM(object):
 
         self.BW = None
         # Balance Weight:
-        if self.config.setup["BalanceWeight"] == True:
+        if self.config.setup["BalanceWeight"]:
             # print('STATUS:\t Building Balance Weight')
             # self.BW = Weight(0, self.config.bw['XPos'], self.config.bw['YPos'], self.config.bw['Diameter'], self.config.bw['Material'])
             p = self.SegmentLst[0].det_weight_Pnt2d(self.config.bw["s"], self.config.bw["t"])
@@ -309,32 +305,33 @@ class CBM(object):
 
     def cbm_gen_mesh(self, **kwargs):
         """
-        CBM Method that generates the dicretization of topology and stores the 
-        cells and nodes in both the <Layer> instances, the <Segment> instances 
+        CBM Method that generates the dicretization of topology and stores the
+        cells and nodes in both the <Layer> instances, the <Segment> instances
         and the attribute self.mesh that is a list of <Cell> instances
 
 
         Parameters:
         ----------
         split_quads : bool, optional
-            This option can be passed as keyword argument and splits the quads 
-            (4 node cells) in mesh into two cells of 3 nodes      
-        
-        
+            This option can be passed as keyword argument and splits the quads
+            (4 node cells) in mesh into two cells of 3 nodes
+
+
         Notes:
-        ----------  
-        More option keyword arguments shall be possible in the future      
-        
+        ----------
+        More option keyword arguments shall be possible in the future
+
         Examples:
-        ----------  
+        ----------
         >>> job.cbm_gen_mesh(splitquads=True)
-        
+
         """
 
         split_quads = False
         if "split_quads" in kwargs:
-            if type(kwargs["split_quads"]) == bool:
+            if isinstance(type(kwargs["split_quads"]), bool):
                 split_quads = kwargs["split_quads"]
+                print("split quads set to {}".format(split_quads))
             else:
                 print("split_quads must provide a boolean value")
 
@@ -366,8 +363,8 @@ class CBM(object):
         # ===================consolidate mesh on web interface
         for web in self.WebLst:
             #print web.ID,  'Left:', SegmentLst[web.ID].ID, 'Right:', SegmentLst[web.ID+1].ID,
-            print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)  
-            (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)            
+            print('STATUS:\t Consolidate Mesh on Web Interface', web.ID)
+            (web.wl_nodes, web.wl_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID].cells, web.BSplineLst)
             (web.wr_nodes, web.wr_cells) = grab_nodes_of_cells_on_BSplineLst(self.SegmentLst[web.ID+1].cells, web.BSplineLst)
 
             if not web.wl_nodes or not web.wl_cells or not web.wr_nodes or not web.wr_cells:  # in case there was no mesh in a segment
@@ -389,89 +386,89 @@ class CBM(object):
         for c in self.mesh:
             tmp.extend(c.split_quads())
         self.mesh = tmp
-        
+
         # invert nodes list of all cell to make sure they are counterclockwise for vabs in the right coordinate system!
         for c in self.mesh:
             if c.orientation == False:
                 c.invert_nodes()
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
-        
+
         # Mesh cleanup
         # 1. Identify all nodes with exact repeated coordinates
         # (tolerance 1e-14)
         # 2. Keep only the lower number node and replace all cells node entries
         # as needed
         # Redo the sort and reassignID call
-        
+
         # Find number of nodes
         n_nodes = 0
-        
+
         for cell_i in self.mesh:
             n_nodes = np.maximum(n_nodes, np.max([n.id for n in cell_i.nodes]))
 
         node_coords = np.full((n_nodes+1, 2), np.nan)
         node_list = (n_nodes+1)* [None]
-        
+
         for ind,cell_i in enumerate(self.mesh):
             for n in cell_i.nodes:
                 node_coords[n.id] = [n.Pnt2d.X(), n.Pnt2d.Y()]
                 node_list[n.id] = n
-        
+
         same_coords = (n_nodes+1)* [[]]
-        
+
         for ind in range(node_coords.shape[0]):
-            
+
             same_coords[ind] = np.where(np.linalg.norm(node_coords
                                        - node_coords[ind], axis=1) < 1e-14)[0]
-        
+
         reduced_sets = [group for group in same_coords if group.shape[0]>1]
-        
+
         node_sets = len(reduced_sets)*[None]
         set_inds = 0
-                
+
         for curr in reduced_sets:
-            
+
             added = False
-            
+
             for i in range(set_inds):
                 if np.intersect1d(curr, node_sets[i]).shape[0] > 0:
                     added=True
                     node_sets[i] = np.unique(np.hstack((node_sets[i], curr)))
-            
+
             if not added:
                 node_sets[set_inds] = curr
                 set_inds += 1
-                
+
         node_sets = node_sets[:set_inds]
         # WARNING: It could be possible that a node is in multiple node sets.
         # Using a large enough tolerance should limit this risk
 
         for cell in self.mesh:
             for i,n in enumerate(cell.nodes):
-                
+
                 for check_set in node_sets:
                     if n.id in check_set:
                         cell.nodes[i] = node_list[check_set[0]]
-        
+
         # remove any cell that has repeated nodes
         remove_inds = []
-        
+
         for ind,cell in enumerate(self.mesh):
             nodes = [n.id for n in cell.nodes]
-            
+
             _,counts = np.unique(nodes, return_counts=True)
             if counts.max() > 1:
                 remove_inds += [ind]
-        
+
         if len(remove_inds) > 0:
             print("Removing Cells with repeated nodes.")
-            
+
             self.mesh = [cell
                          for i, cell in enumerate(self.mesh)
                          if i not in remove_inds]
-        
+
         (self.mesh, nodes) = sort_and_reassignID(self.mesh)
-        
+
         return None
 
     def cbm_custom_mesh(self, nodes, cells, materials, split_quads=True,
@@ -500,58 +497,58 @@ class CBM(object):
         Returns
         -------
         None.
-        
+
         Notes
         -----
-        
+
         Cannot currently set the ply orientation except by ordering the
         cell nodes appropriately for the cell orientation.
 
         """
-        
+
         if theta_3 is None:
             theta_3 = 0
-        
+
         # Generate node list, do not need to explicitly save since each cell
         # saves its own nodes.
         node_list = nodes.shape[0] * [None]
-        
+
         for ind in range(nodes.shape[0]):
-            
+
             node_list[ind] = Node(gp_Pnt2d(nodes[ind, 0], nodes[ind, 1]),
                                   ['Custom Layer', ind, 0])
-            
+
         self.mesh = cells.shape[0] * [None]
-        
+
         for ind in range(cells.shape[0]):
-            
+
             c = Cell([node_list[nind] for nind in cells[ind]])
-            
+
             if c.orientation == False:
                 c.invert_nodes()
-            
+
             c.calc_theta_1()
             c.theta_3 = theta_3
             c.MatID = int(materials[ind])
             c.structured = True
-            
+
             if theta_11 is not None:
                 c.theta_1[0] = theta_11[ind]
-            
+
             self.mesh[ind] = c
-        
+
         if split_quads:
             print("STATUS:\t Splitting Quads into Trias")
             tmp = []
             for c in self.mesh:
                 tmp.extend(c.split_quads())
             self.mesh = tmp
-        
+
         return None
 
     def cbm_run_anbax(self):
-        """interface method to run the solver anbax from marco.morandini 
-        
+        """interface method to run the solver anbax from marco.morandini
+
         Notes
         ----------
         To be defined.
@@ -647,7 +644,7 @@ class CBM(object):
         # Call ANBAX with baseline properties
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations,
                      fiber_orientations, maxE)
-        
+
         tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
         tmp_MM = anba.inertia().getValues(range(6),range(6))    # get mass matrix
 
@@ -665,11 +662,11 @@ class CBM(object):
 
         # Recover the mapping from sectional Forces and Moments to Strain
         # in a non-invasive way from ANBA
-        
+
         # 1. Initialize memory on each element to store the mapping
         # ASSIGN stresses and strains to mesh elements:
         for i,c in enumerate(self.mesh):
-            
+
             c.fm_to_strain = np.zeros((6,6))
 
         # Reordering is necessary from the conventional stress/strain order
@@ -677,29 +674,29 @@ class CBM(object):
         # Both the strains and stresses need reordering so setting it here.
         # All other orders here were tested and verified to give wrong results.
         reorder_stress_strain = np.array([1, 2, 0, 4, 5, 3])
-        
+
         # 2. Call ANBA looping over unit forces/moments
         for i in range(6):
-            
+
             F = [0.0, 0.0, 0.0]
             M = [0.0, 0.0, 0.0]
-            
+
             if i < 3:
                 F[i] = 1.0
             else:
                 M[i - 3] = 1.0
-            
+
             # This ends up being potentially excessively slow since
             # it does a new calculation for each stress and strain field (4),
             # but only need the global coordinate strain field.
             [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
                 anbax_recovery(anba, len(self.mesh), F, M,
                                self.config.anbax_cfg.voigt_convention, T)
-        
-        
+
+
             # 3. Store Strain results in each case / element
             for j,c in enumerate(self.mesh):
-            
+
                 # This creates a Strain class object that clearly identifies
                 # elasticity strain tensor components (epsilon) versus
                 # engineering shear strain components (gamma).
@@ -718,51 +715,51 @@ class CBM(object):
                                              curr_strain.gamma23,
                                              curr_strain.gamma13,
                                              curr_strain.gamma12])
-                
+
                 c.fm_to_strain[:, i] = strain_vec[reorder_stress_strain]
 
         # 4. Create a material dictionary for each time scale.
         #    The will loop over those time scales
         time_scale_list = []
-        
+
         for MatID in self.materials:
-            
+
             if not (self.materials[MatID].viscoelastic == {}):
                 time_scale_list += self.materials[MatID]\
                                     .viscoelastic['time_scales_v'].tolist()
-        
+
         time_scale_list = np.sort(np.unique(time_scale_list)).tolist()
-        
+
         time_scale_mat_dicts = len(time_scale_list) * [None]
-                
+
         for i, tau in enumerate(time_scale_list):
-            
+
             curr_materials = OrderedDict()
-            
+
             for MatID in self.materials:
-                
+
                 mat = self.materials[MatID]
-                
+
                 if hasattr(mat, 'viscoelastic') and not (mat.viscoelastic=={}):
                     found_time_scale = tau in mat.viscoelastic['time_scales_v'].tolist()
                 else:
                     found_time_scale = False
-                
+
                 if not found_time_scale:
                     # Set material as isotropic with no stiffness
                     # nu value is irrelevant since E=0.0
                     curr_dict = {'nu' : 0.0,
                                  'E'  : 0.0}
-                    
+
                     curr_materials[MatID] = IsotropicMaterial(ID=MatID,
                                                                 **curr_dict)
                 else:
                     # find index of time scale
-                    time_scale_ind = np.argmax(tau 
+                    time_scale_ind = np.argmax(tau
                                           == mat.viscoelastic['time_scales_v'])
-                
+
                 if found_time_scale and mat.orth == 0:
-                    
+
                     curr_dict = {'E' : mat.viscoelastic['E_v'][time_scale_ind],
                                  'nu' : mat.nu,
                                  'name' : mat.name + ' time scale : {}'.format(tau)}
@@ -770,7 +767,7 @@ class CBM(object):
                     curr_materials[MatID] = IsotropicMaterial(ID=MatID,
                                                                 **curr_dict)
                 elif found_time_scale and mat.orth == 1:
-                    
+
                     curr_dict = {'E_1' : mat.viscoelastic['E_1_v'][time_scale_ind],
                                  'E_2' : mat.viscoelastic['E_2_v'][time_scale_ind],
                                  'E_3' : mat.viscoelastic['E_3_v'][time_scale_ind],
@@ -789,29 +786,29 @@ class CBM(object):
         # This mapping is just the partial product that maps force/moments
         # back to forces/moments (or time derivatives to be integrated)
         viscoelastic_6x6 = len(time_scale_list) * [None]
-        
+
         for tau_ind, tau in enumerate(time_scale_list):
-            
+
             material_dict = time_scale_mat_dicts[tau_ind]
-            
+
             force_to_forcedot = np.zeros((6,6))
-    
-    
+
+
             for i,c in enumerate(self.mesh):
-    
+
                 cxy = c.center
-                
+
                 ze = np.zeros((6,6))
                 ze[0, -1] = 1.0 # shear stress x=2 -> shear force x
                 ze[1, -2] = 1.0 # shear stress y=3 -> shear force y
                 ze[2, 0] = 1.0 # axial stress -> axial force
-    
+
                 ze[3, 0] = cxy[1] # axial stress -> moment around x
                 ze[4, 0] = -cxy[0] # axial stress -> moment around y
-    
+
                 ze[-1, -2] = cxy[0] # shear zy (13) stress -> moment around z/torsion
                 ze[-1, -1] = -cxy[1] # shear zx (12) stress -> moment around z/torsion
-    
+
                 ze = ze[:, reorder_stress_strain]
 
                 De = material_dict[c.MatID].rotated_constitutive_tensor(
@@ -822,58 +819,58 @@ class CBM(object):
             viscoelastic_6x6[tau_ind] = trsf_sixbysix(force_to_forcedot @ tmp_TS, T)
 
         if test_elastic:
-            
+
             force_to_forcedot = np.zeros((6,6))
-    
+
             ze = np.zeros((6,6))
             ze[0, -1] = 1.0 # shear stress x=2 -> shear force x
             ze[1, -2] = 1.0 # shear stress y=3 -> shear force y
             ze[2, 0] = 1.0 # axial stress -> axial force
-    
+
             for i,c in enumerate(self.mesh):
-    
+
                 cxy = c.center
-    
+
                 ze[3, 0] = cxy[1] # axial stress -> moment around x
                 ze[4, 0] = -cxy[0] # axial stress -> moment around y
-    
+
                 ze[-1, -2] = cxy[0] # shear zy (13) stress -> moment around z/torsion
                 ze[-1, -1] = -cxy[1] # shear zx (12) stress -> moment around z/torsion
-    
+
                 De = self.materials[c.MatID].rotated_constitutive_tensor(
                                                          c.theta_1[0], c.theta_3)
-    
+
                 force_to_forcedot += c.area * (ze @ De @ c.fm_to_strain)
-            
+
             error = np.linalg.norm(force_to_forcedot - np.eye(6))
-            
+
             print('Error in recovering elastic 6x6 with mappings is: {:.3e}'
                   .format(error))
 
         if test_tau0:
-            # Test that all of the viscoelastic matrices add up to the 
+            # Test that all of the viscoelastic matrices add up to the
             # default calculated matrix
-            
+
             sum_6x6 = np.zeros((6,6))
-            
+
             for mat6x6 in viscoelastic_6x6:
                 sum_6x6 += mat6x6
-            
+
             error = np.linalg.norm(self.BeamProperties.TS - sum_6x6)
-            
+
             mag = np.linalg.norm(self.BeamProperties.TS)
-            
+
             print('Adding all time scale 6x6 v. baseline error: '
                   + 'absolute: {:.3e}, relative: {:.3e}'
                   .format(error, error/mag))
-            
+
             print('This error should be small if the (sum of the elastic'
                   + ' modulus and shear modulus at all time scales) equals'
                   + ' the reference elastic and shear moduli.')
 
         self.BeamProperties.TSv = viscoelastic_6x6
         self.BeamProperties.tau = time_scale_list
-        
+
         return viscoelastic_6x6
 
 
@@ -882,7 +879,7 @@ class CBM(object):
         """
         Calculation and save of the map from the 6x6 applied forces to the
         internal stress and strain at each element
-        
+
         Parameters
         ----------
         station_ind : int
@@ -904,21 +901,21 @@ class CBM(object):
         Returns
         -------
         None.
-        
+
         Notes
         -----
         Stress and strain maps are for the SONATA force coordinates to the
         local (material coordinate direction) stress and strain.
-        
+
         Outputs are (6,6,n_elem). First dimension is stress or strain in order
         [11, 22, 33, 23, 13, 12]. Second dimension is the internal forces then
         moments. Third dimension is the elements.
-        
-        Outputs are of the form 
+
+        Outputs are of the form
         'blade_station{station_ind}_stress_strain_map.npz'
-        
+
         Outputs are engineering shear strain (not elasticity tensor components)
-        
+
         The mesh outputs are described by `node_coords` (row `i` has
         coorindates for node `i`), `cells` (each row has node numbers for the
         cell), `theta_11` (first cell rotation parameter), `theta_3` (second
@@ -943,7 +940,7 @@ class CBM(object):
         # Call ANBAX with baseline properties
         anba = anbax(mesh, 1, matLibrary, materials, plane_orientations,
                      fiber_orientations, maxE)
-        
+
         # These lines are necessary for what happens in the objects
         # not for this outputs here.
         tmp_TS = anba.compute().getValues(range(6),range(6))    # get stiffness matrix
@@ -952,46 +949,46 @@ class CBM(object):
         # Define transformation T (from ANBA to SONATA/VABS coordinates)
         B = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
         T = np.dot(np.identity(3), np.linalg.inv(B))
-        
-            
+
+
         fc_to_strain_m = np.zeros((6,6,len(self.mesh)))
         fc_to_stress_m = np.zeros((6,6,len(self.mesh)))
         elem_areas = np.zeros((len(self.mesh)))
         elem_materials = np.zeros((len(self.mesh)))
         elem_cxy = np.zeros((len(self.mesh), 2))
-        
+
         # 1. Initialize memory on each element to store the mapping
         # ASSIGN stresses and strains to mesh elements:
         for i,c in enumerate(self.mesh):
-            
+
             elem_areas[i] = c.area
             elem_materials[i] = c.MatID
             elem_cxy[i, :] = c.center
 
         # 2. Call ANBA looping over unit forces/moments
-        
+
         # Mapping should match `beam_struct_eval`
         external_to_internal_ind = [2, 0, 1]
         for i in range(6):
-            
+
             F = np.array([0.0, 0.0, 0.0])
             M = np.array([0.0, 0.0, 0.0])
-            
+
             if i < 3:
                 F[i] = 1.0
             else:
                 M[i - 3] = 1.0
-                
+
             # rotate these forces around any applied twist that would be
             # applied to the GEBT simulation that way these are still
             # in the local coordinates of the GEBT simulation
             R = np.array([[1, 0, 0],
                           [0,  np.cos(twist), -np.sin(twist)],
                           [0,  np.sin(twist),  np.cos(twist)]])
-            
+
             F = R @ F
             M = R @ M
-            
+
             # rearrange to internal indices
             F[external_to_internal_ind] = np.copy(F)
             M[external_to_internal_ind] = np.copy(M)
@@ -1002,11 +999,11 @@ class CBM(object):
             [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
                 anbax_recovery(anba, len(self.mesh), F, M,
                                self.config.anbax_cfg.voigt_convention, T)
-        
-        
+
+
             # 3. Store Strain results in each case / element
             for j,c in enumerate(self.mesh):
-            
+
                 # This creates a Strain class object that clearly identifies
                 # elasticity strain tensor components (epsilon) versus
                 # engineering shear strain components (gamma).
@@ -1018,8 +1015,8 @@ class CBM(object):
                                       tmp_StrainF_M_tran[j,1,1],
                                       tmp_StrainF_M_tran[j,1,2],
                                       tmp_StrainF_M_tran[j,2,2]])
-                
-                
+
+
                 curr_stress = Stress([tmp_StressF_M_tran[j,0,0],
                                       tmp_StressF_M_tran[j,0,1],
                                       tmp_StressF_M_tran[j,0,2],
@@ -1040,46 +1037,46 @@ class CBM(object):
                                                     curr_stress.sigma23,
                                                     curr_stress.sigma13,
                                                     curr_stress.sigma12])
-                
+
         # Save the material names as strings to be output
         material_names = (np.max([mat for mat in self.materials]) + 1)*['None']
-        
+
         for mat in self.materials:
             material_names[mat] = self.materials[mat].name
-            
+
         ##################
         # format mesh information
 
         n_nodes = len(nodes)
-        
+
         node_coords = np.full((n_nodes, 2), np.nan)
         cells = np.zeros((len(self.mesh), 3), np.int64)
         theta_11 = np.zeros(len(self.mesh))
         theta_3 = np.zeros(len(self.mesh))
-        
+
         for ind,cell_i in enumerate(self.mesh):
             cells[ind] = [n.id-1 for n in cell_i.nodes]
-            
+
             theta_11[ind] = cell_i.theta_11
             theta_3[ind] = cell_i.theta_3
-            
+
             for n in cell_i.nodes:
                 node_coords[n.id-1] = [n.Pnt2d.X(), n.Pnt2d.Y()]
-                
+
         ##################
         # output information
-        
+
         if 'output_folder' in kwargs.keys():
             folder = kwargs['output_folder']
         else:
             folder = 'stress-map'
-        
+
         # Output File with Data
         fname = os.path.join(folder,
              'blade_station{:04d}_stress_strain_map.npz'.format(station_ind))
-        
+
         os.makedirs(folder, exist_ok=True)
-        
+
         np.savez(fname,
                  station_pos=station_pos,
                  station_ind=station_ind,
@@ -1098,40 +1095,40 @@ class CBM(object):
         return
 
     def cbm_exp_BeamDyn_beamprops(self, Theta=0, solver="vabs"):
-        """ 
+        """
         Converts the Beam Properties of CBM to the correct coordinate System of
         BeamDyn and returns the 6x6 Stiffness matrix, the 6x6 MassMatrix.
-        
+
         The geometry of the blade is defined by key-point coordinates and initial
         twist angles (in units of degree) in the blade local coordinate system
         (IEC standard blade system where Zr is along blade axis from root to
-        tip, Xr directs normally toward the suction side, and Yr directs 
+        tip, Xr directs normally toward the suction side, and Yr directs
         normally toward the trailing edge).
         https://openfast.readthedocs.io/en/master/source/user/beamdyn/input_files.html
-        
+
         Parameters
         ----------
         Theta: float, optional
             is the angle of rotation of the coordinate system in "radians"
         solver: str, optional
-        
+
         Returns
         ----------
             tuple of arrays
             (6x6 StiffnessMatrix, 6x6MassMatrix)
-            
-            
+
+
         Notes:
         ----------
-        - Following the station location parameter η, there are two 
+        - Following the station location parameter η, there are two
         6×6 matrices providing the structural and inertial properties for this
-        cross-section. First is the stiffness matrix and then the mass matrix. 
-        We note that these matrices are defined in a local coordinate system 
-        along the blade axis with Zl directing toward the unit tangent vector 
+        cross-section. First is the stiffness matrix and then the mass matrix.
+        We note that these matrices are defined in a local coordinate system
+        along the blade axis with Zl directing toward the unit tangent vector
         of the blade reference axis.
         - Does this create an oblique cross-section!?
-        
-        
+
+
         """
         if solver == "vabs" or solver == "anbax":
             if Theta != 0:
@@ -1156,31 +1153,31 @@ class CBM(object):
 
     def cbm_exp_dymore_beamprops(self, eta, Theta=0, solver="vabs", units={"mass": "kg", "length": "m", "force": "N"}):
         """
-        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the 
-        array of the beamproperties with Massterms(6), Stiffness(21), 
+        Converts the Units of CBM to DYMORE/PYMORE/MARC units and returns the
+        array of the beamproperties with Massterms(6), Stiffness(21),
         damping(1) and curvilinear coordinate(1)
 
         Parameters
         ----------
-        
-        eta : float, 
-            is the beam curvilinear coordinate of the beam from 0 to 1. 
-        
+
+        eta : float,
+            is the beam curvilinear coordinate of the beam from 0 to 1.
+
         Theta: float
             is the angle of rotation of the coordinate system in "radians"
 
         Returns
         ----------
         arr : ndarray
-            [Massterms(6) (m00, mEta2, mEta3, m33, m23, m22) 
+            [Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
             Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
             Viscous Damping(1) mu, Curvilinear coordinate(1) eta]
-            
-            
+
+
         Notes
         ----------
         - Unit Convertion takes sooo much time. Commented out for now!
-        
+
         """
         if solver == "vabs" or solver == "anbax":
             if Theta != 0:
@@ -1202,27 +1199,27 @@ class CBM(object):
     def cbm_post_2dmesh(self, attribute="MatID", title="NOTITLE", **kw):
         """
         CBM Postprocessing method that displays the mesh with matplotlib.
-        
+
         Parameters
         ----------
         attribute : string, optional
-            Uses the string to look for the cell attributes. 
-            The default attribute is MatID. Possible other attributes can be 
-            fiber orientation (theta_3) or strains and stresses. 
+            Uses the string to look for the cell attributes.
+            The default attribute is MatID. Possible other attributes can be
+            fiber orientation (theta_3) or strains and stresses.
             If BeamProperties are already calculated by VABS or something
             similar, elastic-axis, center-of-gravity... are displayed.
         title : string, optional
             Title to be placed over the plot.
         **kw : keyword arguments, optional
-            are passed to the lower "plot_cells" function. Such options are: 
-            VABSProperties=None, title='None', plotTheta11=False, 
+            are passed to the lower "plot_cells" function. Such options are:
+            VABSProperties=None, title='None', plotTheta11=False,
             plotDisplacement=False, savepath
-            
+
         Returns
         ----------
         (fig, ax) : tuple
             figure and axis handler are returned by the method
-        
+
         Examples
         ----------
         >>> job.cbm_post_2dmesh(title='Hello World!', attribute='theta_3', plotTheta11=True)

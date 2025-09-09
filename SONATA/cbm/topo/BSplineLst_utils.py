@@ -4,11 +4,10 @@
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
-from OCC.Core.GCPnts import (GCPnts_AbscissaPoint, 
+from OCC.Core.GCPnts import (GCPnts_AbscissaPoint,
                              GCPnts_QuasiUniformDeflection,)
 from OCC.Core.Geom import Geom_BSplineCurve, Geom_Curve
-from OCC.Core.Geom2d import (Geom2d_BSplineCurve, Geom2d_Curve, Geom2d_Line,
-                             Handle_Geom2d_BSplineCurve_DownCast,)
+from OCC.Core.Geom2d import (Geom2d_BSplineCurve, Geom2d_Curve, Handle_Geom2d_BSplineCurve_DownCast,)
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import (Geom2dAPI_Interpolate,
                                 Geom2dAPI_ProjectPointOnCurve,Geom2dAPI_InterCurveCurve,)
@@ -33,23 +32,23 @@ from SONATA.cbm.topo.utils import (Pnt2dLst_to_npArray,
 
 def ProjectPointOnBSplineLst(BSplineLst, Pnt2d, tolerance_distance=100):
     """
-    Projets a Pnt2d onto a list of BSplines with given tolerance_distance and 
+    Projets a Pnt2d onto a list of BSplines with given tolerance_distance and
     returns the a tuple of information of the closest Point
-    
+
     Parameters
     ----------
     BSplineLst : list
-        consecutive list of Geom2d_BSplineCurves 
-    
+        consecutive list of Geom2d_BSplineCurves
+
     Pnt2d : gp_Pnt2d
         2d Point object of OCC.gp.gp_Pnt2d
-    
+
     Returns
     ----------
-    p2 : list 
+    p2 : list
      list of projection information [gp_Pnt2d, index of BSplineLst, curve parameter u, distance]
-         
-    
+
+
     """
     p2 = []
     for idx, item in enumerate(BSplineLst):
@@ -82,20 +81,20 @@ def findPnt_on_curve(Pnt, Curve):
 
 def isPnt_on_curve(Pnt, Curve, tolerance=1e-6):
     """
-    checks if a point (either gp_Pnt or gp_Pnt2d) is on a curve (subclass of 
-    Geom2d_Curve or Geom_Curve) by projecting the Point orthogonal on to the 
+    checks if a point (either gp_Pnt or gp_Pnt2d) is on a curve (subclass of
+    Geom2d_Curve or Geom_Curve) by projecting the Point orthogonal on to the
     curve and checing ifthe distance is below a tolerance tol.
-    
+
     Parameter
     ---------
     Pnt : OCC.gp_Pnt or OCC.gp_Pnt2d
     Curve : OCC.Geom_Curve or OCC.Geom_Curve Handle
     tolerance : float, optional
         default tolerance 1e-6
-        
+
     Return
     --------
-    Trigger : bool    
+    Trigger : bool
     """
     if isinstance(Pnt, gp_Pnt2d) and issubclass(Curve.__class__, Geom2d_Curve):
         twoD = True
@@ -172,23 +171,23 @@ def get_BSplineLst_length(BSplineLst):
 
 
 def find_BSplineLst_coordinate(BSplineLst, S, start, end):
-    """The function find_BSplineLst_coordinate returns the list index of 
+    """The function find_BSplineLst_coordinate returns the list index of
     the bspline and its parameter where the coordinate is located.
-    
+
     Parameters
     ----------
     S : float
-        Coordinate to be found 
+        Coordinate to be found
     start : float
         start of the interval where the BSplineLst is defined
     end : float
         end of the interval where the BSplineLst is defined
-    
+
     Returns
     ----------
     [i,U]: list
         Return [index of the bspline, parameter U on the bspline]
-        
+
     """
 
     if all(isinstance(s, Geom_BSplineCurve) for s in BSplineLst):
@@ -267,22 +266,22 @@ def get_BSplineLst_D2(BSplineLst, S, start, end, **kwargs):
 def intersect_BSplineLst_with_plane(BSplineLst, plane):
     """
     intersects a 3D-BSplineLst (OCC.Geom_BSplineCurve) with a plane (Handle<Geom_Surface>) and returns the
-    a list of intersection coordinates and the corresponding list of 
+    a list of intersection coordinates and the corresponding list of
     intersection points
-    
+
     Paramters
     ---------
     BSplineLst : list
          list of OCC.Geom_BSplineCurve
     plane : <Geom_Surface>
          Plane or surface - Geom_Surface, Geom_Plane is a subclass of Geom_Surface
-    
+
     Return
     --------
     IntCoords : list
         list of intersection coordinates
         [index of the bspline, parameter U on the bspline]
-    IntPnts : list 
+    IntPnts : list
         list of intersection points (OCC.gp_Pnt)
     """
     # plane = Geom_Plane(gp_Pnt(float(x),0,0), gp_Dir(1,0,0))
@@ -300,9 +299,9 @@ def intersect_BSplineLst_with_plane(BSplineLst, plane):
 
 
 def trim_BSplineLst(BSplineLst, S1, S2, start, end):
-    """ the trim_BSplineLst function trims the BSplineLst that is defined on 
+    """ the trim_BSplineLst function trims the BSplineLst that is defined on
     the interval between start and end to the interval defined by S1 and S2.
-    
+
     Parameters
     ----------
     BSplineLst: list of geom2d_bsplines
@@ -315,15 +314,15 @@ def trim_BSplineLst(BSplineLst, S1, S2, start, end):
         start of the interval where the BSplineLst is defined
     end: float
         end of the interval where the BSplineLst is defined
-            
+
     Returns
     ----------
     trimmed_BSplineLst: list of geom2d_bsplines
         is the modified object.
-            
+
     Example
     ----------
-    a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed 
+    a BSplineLst is defined between 0.0 and 1.0 and shall be trimmed
     to a interval S1=0.3 and S2=0.7
     """
 
@@ -569,12 +568,12 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15,  cutoff_style = 2, clos
 
 def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-1):
     """
-    this procedure reorders the self.BSplineLst to an origin if the layer 
-    is closed. The Origin is detected by searching for an orthogonal 
-    projection of the StartPoint of the self.Boundary_BSplineLst. If no 
-    projection is found it takes the closest neighbor of the discrete 
+    this procedure reorders the self.BSplineLst to an origin if the layer
+    is closed. The Origin is detected by searching for an orthogonal
+    projection of the StartPoint of the self.Boundary_BSplineLst. If no
+    projection is found it takes the closest neighbor of the discrete
     offlinepts (Offset Line Points).
-            
+
     """
     # Determine Origin as point
     if BSplineLst[0].StartPoint().IsEqual(BSplineLst[-1].EndPoint(), 1e-5):

@@ -18,15 +18,15 @@ from SONATA.utl.blade_utl import check_uniformity
 
 class interpBSplineLst(object):
     """
-    
-    
+
+
     """
 
     def __init__(self, BSplineLst, xgrid, xvalues):
         """
         Parameters
         --------
-        BSplineLst : 
+        BSplineLst :
         xgrid : array
         xvalues : array
         """
@@ -40,18 +40,18 @@ class interpBSplineLst(object):
         """
         interpolates the BSplineLst at a certain radial station by intersecting
         with a plane.
-        
+
         Parameters
         --------
         grid : float
             nondimensional x coordinate in the blade ref. frame
-        
+
         Retruns
         --------
         res, resCoords : (array,array)
-            tuple of arrays. res contains the coordinates, while resCoords 
+            tuple of arrays. res contains the coordinates, while resCoords
             contains the BSpline List parameter coordinates i and u.
-            
+
         """
 
         if not isinstance(grid, np.ndarray):

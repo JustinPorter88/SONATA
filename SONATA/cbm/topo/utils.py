@@ -8,14 +8,10 @@ import math
 
 # Third party modules
 import numpy as np
-from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                     BRepBuilderAPI_MakeWire,
-                                     BRepBuilderAPI_Transform,)
 # Python OCC Libraries
-from OCC.Core.gp import gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d
-from OCC.Core.TColgp import (TColgp_Array1OfPnt, TColgp_Array1OfPnt2d,
+from OCC.Core.gp import gp_Pnt, gp_Pnt2d
+from OCC.Core.TColgp import (TColgp_Array1OfPnt2d,
                              TColgp_HArray1OfPnt, TColgp_HArray1OfPnt2d,)
-from OCC.Core.TopoDS import topods
 from scipy.spatial import cKDTree
 
 # Own Modules:
@@ -38,7 +34,7 @@ def isclose(a, b, rel_tol=2e-09, abs_tol=2e-09):
     rel_tol: is the relative tolerance -- it is the amount of error allowed, relative to the larger absolute value of a or b. For
     example, to set a tolerance of 5%, pass tol=0.05. The default tolerance is 1e-9, which assures that the two values are the same
     within about 9 decimal digits. rel_tol must be greater than 0.0
-    
+
     abs_tol: is a minimum absolute tolerance level -- useful for comparisons near zero.
     The name, isclose, is selected for consistency with the existing isnan and isinf .
     """
@@ -47,9 +43,9 @@ def isclose(a, b, rel_tol=2e-09, abs_tol=2e-09):
 
 def fuse_rows(a, tol=1e-5, keep_closed=True):
     """
-    fuses rows if the coordiante points are closer than tol but keeps the set 
-    of coordinates closed if keep_closed is selected 
-    
+    fuses rows if the coordiante points are closer than tol but keeps the set
+    of coordinates closed if keep_closed is selected
+
     Parameters
     --------
     a : ndarray
@@ -58,12 +54,12 @@ def fuse_rows(a, tol=1e-5, keep_closed=True):
          tolerance distance
     keep_closed : bool
         to keep the set of coordinates closed after the fuse
-        
+
     Returns
     -------
-    d : ndarray 
+    d : ndarray
         returns the fused array
-    
+
     """
     tree = cKDTree(a)
     # print(a)
@@ -214,23 +210,23 @@ def getID(custom):
 
 def lin_pln_intersect(n0, p, p1, p2):
     """
-    calculates the intersection point of the a line and plane. 
+    calculates the intersection point of the a line and plane.
     The plane is defined by its normalized normal vector n0 and a plane point p.
-    the line is defined from p1 to p2. The function not only returns the 
+    the line is defined from p1 to p2. The function not only returns the
     intersection point but also the line coordinate lambda
-    
+
     Parameters
     ---------
     n0 : array
     p : array
     p1 : array
     p2 : array
-    
+
     Returns
     --------
     Pnt : array
-    lamb : float 
-    
+    lamb : float
+
     """
     n0 = np.asarray(n0)
     p = np.asarray(p)

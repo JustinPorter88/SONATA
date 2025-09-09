@@ -10,7 +10,6 @@ Created on Wed Jan 04 13:52:57 2017
 # Third party modules
 from OCC.Core.Geom2d import Geom2d_BezierCurve
 from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.Core.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
 from OCC.Core.Geom2dConvert import geom2dconvert
 # First party modules
 from SONATA.cbm.topo.BSplineLst_utils import (get_BSplineLst_D2,

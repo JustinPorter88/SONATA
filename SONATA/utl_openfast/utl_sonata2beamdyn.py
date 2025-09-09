@@ -13,13 +13,13 @@ Functions:
     write_beamdyn_prop  - writes '*_BeamDyn_Blade.dat' file
 
 Inputs:
-    wt_name         - name of currently investigated concept; i.e. wind turbine 
+    wt_name         - name of currently investigated concept; i.e. wind turbine
     byml            - yml.get('components').get('blade')
     radial_stations - radial stations along the blade span for inertia and stiffness characteristics
     beam_stiff      - matrix containing beam stiffness values
     beam_inertia    - matrix containing beam inertia values
 
-Outputs: 
+Outputs:
     - None -
 
 """
@@ -38,11 +38,11 @@ if __name__ == '__main__':
 def convert_structdef_SONATA_to_beamdyn(cs_pos, SONATA_beam_prop):
     """
     Convert structural characteristics from SONATA definition to BeamDyn definition
-    
+
     Inputs:
         cs_pos              - array of radial stations along the span
         SONATA_beam_prop    - data struct containing the direct results from VABS in SONATA/VABS definition; equiv to job.beam_properties
-    
+
     Outputs:
         BeamDyn_beam_prop   - converted data struct in BeamDyn definition
     """
@@ -69,7 +69,7 @@ def convert_structdef_SONATA_to_beamdyn(cs_pos, SONATA_beam_prop):
     for i in range(len(SONATA_beam_prop)):
         if SONATA_beam_prop[i, 1] is not None:
             BeamDyn_beam_prop['beam_section_mass'][i] = SONATA_beam_prop[i, 1].m00  # mass per unit span (absolute - no transform needed)
-            
+
             # use init for the following in order to transform afterwards
             beam_mass_center_init[i] = np.array(SONATA_beam_prop[i, 1].Xm[:])  # Center of gravity (mass center)
             beam_neutral_axes_init[i] = np.array(SONATA_beam_prop[i, 1].Xt[:])  # Neutral axes (tension center)
@@ -85,7 +85,7 @@ def convert_structdef_SONATA_to_beamdyn(cs_pos, SONATA_beam_prop):
 
     # --------------------------------------- #
     #  rotate VABS results from SONATA/VABS def to BeamDyn def coordinate system
-    
+
     # B = np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]])  # transformation matrix
     B = np.array([[0, 0, 1], [0, -1, 0], [1, 0, 0]])  # NEW transformation matrix
     T = np.dot(np.identity(3), np.linalg.inv(B))
@@ -194,14 +194,14 @@ def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations,
     n_pts = len(radial_stations)
 
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
-    file = open(os.path.join(folder , wt_name + '_' + format_name 
+    file = open(os.path.join(folder , wt_name + '_' + format_name
                              + '_Blade.dat'), 'w')
-    
+
     if not (format_name == 'BeamDyn'):
         file.write(' ------- NOT A BeamDyn Input File. Format is: {:}'
                    .format(format_name) + ' --------------------------\n')
-        
-    
+
+
     file.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
     file.write(' Test Format 1\n')
     file.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
@@ -210,7 +210,7 @@ def write_beamdyn_prop(folder, flags_dict, wt_name, radial_stations,
     file.write('  ---------------------- DAMPING COEFFICIENT------------------------------------\n')
     file.write('   mu1        mu2        mu3        mu4        mu5        mu6\n')
     file.write('   (-)        (-)        (-)        (-)        (-)        (-)\n')
-    file.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (mu[0], mu[1], mu[2], mu[3], mu[4], mu[5])) 
+    file.write('\t %.5e \t %.5e \t %.5e \t %.5e \t %.5e \t %.5e\n' % (mu[0], mu[1], mu[2], mu[3], mu[4], mu[5]))
     file.write(' ---------------------- DISTRIBUTED PROPERTIES---------------------------------\n')
 
     if flags_dict['flag_write_BeamDyn_unit_convert'] == 'mm_to_m':  # convert units from mm (yaml input) to m
@@ -248,14 +248,14 @@ def write_beamdyn_viscoelastic(folder, flags_dict, wt_name, radial_stations,
 
     output_name = os.path.join(folder , wt_name + '_' + format_name
                                + '_Blade_Viscoelastic.dat')
-    
+
     # file = open(folder + '00_analysis/analysis/' + wt_name + '_BeamDyn_Blade.dat', 'w')
     file = open(output_name, 'w')
-    
+
     if not (format_name == 'BeamDyn'):
         file.write(' ------- NOT A BeamDyn Input File. Format is: {:}'
                    .format(format_name) + ' --------------------------\n')
-        
+
     file.write(' ------- BEAMDYN V1.00.* INDIVIDUAL BLADE INPUT FILE --------------------------\n')
     file.write(' Test Format 1\n')
     file.write(' ---------------------- BLADE PARAMETERS --------------------------------------\n')
@@ -274,9 +274,9 @@ def write_beamdyn_viscoelastic(folder, flags_dict, wt_name, radial_stations,
         file.write('\t %.6f \n' % (radial_stations[i]))
         # loop over time scales
         for k in range(len(time_scales)):
-            
+
             curr_stiff = beam_viscoelastic[i, k, :, :]
-        
+
             # write stiffness matrices
             for j in range(6):
                 file.write('\t %.16e \t %.16e \t %.16e \t %.16e \t %.16e \t %.16e\n' % (
@@ -288,7 +288,7 @@ def write_beamdyn_viscoelastic(folder, flags_dict, wt_name, radial_stations,
     file.close()
 
     print('STATUS:\t Finished writing BeamDyn_Blade_Viscoelastic file.')
-    
+
     return None
 
 
@@ -329,7 +329,6 @@ if __name__ == '__main__':
     from SONATA.classAirfoil import Airfoil
     #from SONATA.classBlade import Blade
 
-    from SONATA.classAirfoil import Airfoil
     from SONATA.classMaterial import read_materials
 
     # provide primary path; used for providing yaml input file as well as output directory
@@ -352,5 +351,3 @@ if __name__ == '__main__':
 
     write_beamdyn_axis(folder, wt_name, yml.get('components').get('blade'))
     write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inertia)
-
-

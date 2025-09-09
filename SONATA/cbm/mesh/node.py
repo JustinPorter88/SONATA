@@ -36,7 +36,7 @@ class Node(object):
     @property
     def coordinates(self):
         return [self.Pnt2d.X(), self.Pnt2d.Y()]  # [x,y]
-    
+
     def __repr__(self):
         return str("Node: %s @ [%.3f,%.3f]" % (self.id, self.coordinates[0], self.coordinates[1]))
 
@@ -45,15 +45,15 @@ class Node(object):
         return self.id == other.id  # faster, but be careful not to assign the id's otherwise in the code
 
     def __hash__(self):
-        """if you define __eq__, the default __hash__ (namely, hashing the address 
-        of the object in memory) goes away. This is important because hashing 
+        """if you define __eq__, the default __hash__ (namely, hashing the address
+        of the object in memory) goes away. This is important because hashing
         needs to be consistent with equality: equal objects need to hash the same."""
         return id(self)  # faster, but be careful not to assign the id's otherwise in the code
 
     def __lt__(self, other):
-        """with the definition of__lt__ magic methon an the decorator 
-        @total_ordering it is possible to define a sorting methodology for the 
-        instaces within a list eg.: sorted(b_nodes) rather than 
+        """with the definition of__lt__ magic methon an the decorator
+        @total_ordering it is possible to define a sorting methodology for the
+        instaces within a list eg.: sorted(b_nodes) rather than
         b_nodes =  sorted(b_nodes, key=lambda n: (n.parameters[1], n.parameters[2]) )"""
         if self.parameters[1] > other.parameters[1]:
             return True

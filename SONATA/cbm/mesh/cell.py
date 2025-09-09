@@ -9,22 +9,19 @@ import operator
 
 # Third party modules
 import numpy as np
-from OCC.Core.BRepBuilderAPI import (BRepBuilderAPI_MakeEdge,
-                                     BRepBuilderAPI_MakeWire,)
 from OCC.Core.Geom2dAPI import (Geom2dAPI_PointsToBSpline,
                                 Geom2dAPI_ProjectPointOnCurve,)
 from OCC.Core.gp import gp_Pnt2d, gp_Vec2d
 
 # First party modules
-from SONATA.cbm.topo.utils import (PolygonArea, calc_angle_between,
-                                   point2d_list_to_TColgp_Array1OfPnt2d,)
+from SONATA.cbm.topo.utils import (PolygonArea, point2d_list_to_TColgp_Array1OfPnt2d,)
 
 
 class Cell(object):
     __slots__ = ("id", "nodes", "theta_1", "theta_3", "MatID", "structured",
                  "interior_nodes", "strain", "strainM", "stress", "stressM",
                  "sf", "failure_mode","fm_to_strain")
-    # fm_to_strain is the the mapping calculated with ANBA from the 
+    # fm_to_strain is the the mapping calculated with ANBA from the
     # Force/Moment at section to the strain (using engineering shear strain)
     # within the element.
     class_counter = 1
@@ -67,7 +64,7 @@ class Cell(object):
     @property
     def area(self):
         return self.calc_area()
-    
+
     @property
     def center(self):
         return self.calc_center()
@@ -78,9 +75,9 @@ class Cell(object):
 
     def __repr__(self):
         """
-        tells Python how to represent an the Cell object (when using a print 
+        tells Python how to represent an the Cell object (when using a print
         statement) for a general purposes we use  def __repr__(self):
-            
+
         Returns: String
         """
         STR = ""
@@ -100,19 +97,19 @@ class Cell(object):
         # self.wire = self.build_wire()
 
     def calc_theta_1(self):
-        """This method calculates the theta_1 vector. theta_1[0] represents the 
-        ply coordinate system, which is formed by roating the global coordinate 
-        system in the right-hand sense about x1 by the amount theta_1[0] 
-        (theta_11). Afterwards the ply coordinate system us ritated avizt y3 in 
-        the right-hand sens by the amount of Theta_3 to form the material 
-        system. 
+        """This method calculates the theta_1 vector. theta_1[0] represents the
+        ply coordinate system, which is formed by roating the global coordinate
+        system in the right-hand sense about x1 by the amount theta_1[0]
+        (theta_11). Afterwards the ply coordinate system us ritated avizt y3 in
+        the right-hand sens by the amount of Theta_3 to form the material
+        system.
         For a detailed description see docs/man/VABS-Manual.pdf Figure 4.
-        
-        theta_11 is calculated as the angle between the x-axis and the Vector 
+
+        theta_11 is calculated as the angle between the x-axis and the Vector
         from Node 1 to Node 2.
-        
+
         Returns:
-           None, but stores the theta_1 definition      
+           None, but stores the theta_1 definition
         """
         theta_1 = [0] * 9
         if self.structured:
@@ -140,13 +137,13 @@ class Cell(object):
         for node in self.nodes:
             corners.append(node.coordinates)
         return PolygonArea(corners)
-    
+
     def calc_center(self):
         """Calculates the coordinates of the center of mass of the element"""
         corners = []
         for node in self.nodes:
             corners.append(node.coordinates)
-        
+
         if len(corners) == 3:
             # See https://en.wikipedia.org/wiki/Centroid#Of_a_triangle
             center = np.array(corners).mean(axis=0)
@@ -156,15 +153,15 @@ class Cell(object):
             print('Center not calculated for non-triangular cells,'
                   + ' returning nan.')
             center = np.array([np.nan, np.nan])
-        
+
         return center
-        
+
 
     def calc_orientation(self):
         """Calculates the orientation of the cell.
-        
+
         Returns:
-            - True: if counterclockwise 
+            - True: if counterclockwise
             - False: else
         """
         corners = []
@@ -189,7 +186,7 @@ class Cell(object):
                 P_distances.append(projection.Distance(j))
 
         return min(P_distances or [10e6])
-    
+
     def split_quads(self):
         """method that splits quad cells into triangles and returns the list of
         cells [originalcell, newcell]"""

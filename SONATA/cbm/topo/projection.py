@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-The SONATA.topo.projection module uses the python invervaltree package 
-(Editable interval tree data structure for Python) to determine the cummulated 
+The SONATA.topo.projection module uses the python invervaltree package
+(Editable interval tree data structure for Python) to determine the cummulated
 layup boundaries of the SONATA Layup definition.
 
  consits of the following functions:
-    
-    - insert_interval_in_layup(layup,begin,end): insert_interval_in_layup 
-            generates a intervaltree structure t1 from layup 
-            and inserts a new intervaltree set t2 [begin, end] or 
+
+    - insert_interval_in_layup(layup,begin,end): insert_interval_in_layup
+            generates a intervaltree structure t1 from layup
+            and inserts a new intervaltree set t2 [begin, end] or
             [0,end][begin,1] into the existing the set t1
-    - chop_interval_from_layup(layup,begin,end): chops an intervaltree 
-            structure t1 from layup to a given interval [begin, end] or 
+    - chop_interval_from_layup(layup,begin,end): chops an intervaltree
+            structure t1 from layup to a given interval [begin, end] or
             [0,end][begin,1].
 
 Created on Mon Dec 19 16:32:15 2016
@@ -25,24 +25,24 @@ import numpy as np
 # =====================================================
 
 def insert_interval_in_layup(layup, begin, end, **kw):
-    """ insert_interval_in_layup generates a intervaltree structure t1 from layup 
+    """ insert_interval_in_layup generates a intervaltree structure t1 from layup
     and inserts a new intervaltree set t2 [begin, end] or [0,end][begin,1] into
     the existing the set t1. First t1 is chopped with t2, then t2 is added to t1.
-    
-    for documentation of the intervaltree module refer to: 
+
+    for documentation of the intervaltree module refer to:
         https://pypi.python.org/pypi/intervaltree
-    
+
     Args:
-        begin: float[0:1]: start of the interval 
+        begin: float[0:1]: start of the interval
         end: float[0:1]  end of the interval to be inserted. Note that begin
             can be larger than end (The layer is defined across the origin)
-            
-    Returns: 
+
+    Returns:
         Projection: numpy array of the intervaltree structure of the form:
                   start end layer#
         np.array([[ 0.3  0.7  3. ]
                   [ 0.7  1.   2. ]
-                  [ 0.   0.3  2. ]])                
+                  [ 0.   0.3  2. ]])
     """
 
     # KWARGS:
@@ -80,24 +80,24 @@ def insert_interval_in_layup(layup, begin, end, **kw):
 
 
 def chop_interval_from_layup(layup, begin, end):
-    """ chop_interval_from_layup chops an intervaltree structure t1 from layup 
+    """ chop_interval_from_layup chops an intervaltree structure t1 from layup
     to a given interval [begin, end] or [0,end][begin,1].
-    
-    for documentation of the intervaltree module refer to: 
+
+    for documentation of the intervaltree module refer to:
         https://pypi.python.org/pypi/intervaltree
-    
+
     Args:
-        begin: float[0:1]: start of the interval 
+        begin: float[0:1]: start of the interval
         end: float[0:1]  end of the interval to which t1 is beeing chopped.
         Note that begin can be larger than end (The layer is defined across
         the origin)
-            
-    Returns: 
+
+    Returns:
         Projection: numpy.array of the intervaltree structure of the form:
                   start end layer#
         np.array([[ 0.3  0.7  3. ]
                   [ 0.7  1.   2. ]
-                  [ 0.   0.3  2. ]])                
+                  [ 0.   0.3  2. ]])
     """
     # get layup to intervaltree definition
     t1 = intervaltree.IntervalTree()
@@ -121,20 +121,20 @@ def chop_interval_from_layup(layup, begin, end):
 
 def sort_layup_projection(Projection):
     """The sort_layup_projection fuctions sorts the interval structure.
-        
-    Args:         
+
+    Args:
         Projection: list of numpy array of the intervaltree structure of the form:
                   start end layer#
         np.array([[ 0.3  0.5  3. ]
                   [ 0.7  1.   2. ]
-                  [ 0.   0.3  2. ]])    
-            
-    Returns: 
+                  [ 0.   0.3  2. ]])
+
+    Returns:
         Projection: list of sorted numpy array of the intervaltree structure of the form:
                   start end layer#
         np.array([[ 0.7  1.   2. ]
                   [ 0.   0.3  2. ]
-                  [ 0.3  0.5  3. ]])               
+                  [ 0.3  0.5  3. ]])
     """
     # print(Projection)
     sorted_Projection = []
@@ -160,23 +160,23 @@ def sort_layup_projection(Projection):
 
 
 def relevant_cummulated_layup_boundaries(Layup):
-    """The relevant_cummulated_layup_boundaries function chops this valuable 
+    """The relevant_cummulated_layup_boundaries function chops this valuable
     information to the interval of the Layup itself to determin the offset
-    origin in the given interval.        
-    
-    Args:        
+    origin in the given interval.
+
+    Args:
         Layup = np.array([[  0.  ,   0.5  ,   0.23 , 45.  ,   1.  ],
                   [  0.   ,  1.  ,   0.23 , 45.  ,   1.  ],
                   [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
                   #Start[-]	End[-] thickness [mm] Orientation [deg] MatID
-            
-        Returns: Projection: list of numpy arrays of the intervaltree structure 
+
+        Returns: Projection: list of numpy arrays of the intervaltree structure
             of the form:
                           start end layer#
                   np.array([[ 0.3  0.7  3. ]
                           [ 0.7  1.   2. ]
-                          [ 0.   0.3  2. ]])                
+                          [ 0.   0.3  2. ]])
     """
     if Layup.size == 0:
         return []
@@ -208,20 +208,20 @@ def inverse_relevant_cummulated_layup_boundaries(Layup):
     determine the a_nodes during the meshing process.
     It basically uses the relevant_cummulated_layup_boundaries with a flipped
     Layup definition and assigns the correct layer number.
-    
-    Args:         
+
+    Args:
         Layup = np.array([[  0.  ,   0.5  ,   0.23 , 45.  ,   1.  ],
                   [  0.   ,  1.  ,   0.23 , 45.  ,   1.  ],
                   [  0.20 ,  0.532,  0.6  , 45.  ,   2.  ],
                   [  0.25 ,  0.3 ,  0.6  , 45.  ,   2.  ]],)
                   #Start[-]	End[-] thickness [mm] Orientation [deg] MatID
-            
-    Returns: Projection: list of numpy arrays of the intervaltree structure 
+
+    Returns: Projection: list of numpy arrays of the intervaltree structure
             of the form:
                       start end layer#
             np.array([[ 0.3  0.7  3. ]
                       [ 0.7  1.   2. ]
-                      [ 0.   0.3  2. ]])                
+                      [ 0.   0.3  2. ]])
     """
     flipped_Projection = relevant_cummulated_layup_boundaries(np.flipud(Layup))
     b = np.flipud(np.arange(1, len(Layup) + 1))
@@ -238,7 +238,7 @@ def inverse_relevant_cummulated_layup_boundaries(Layup):
 
 # ==============================================================================
 if __name__ == "__main__":
-    """Executes the following code if the file is exceuted as the main file 
+    """Executes the following code if the file is exceuted as the main file
     directly. This is used in this context to test the fuctions from abobe. """
 
     plt.close("all")

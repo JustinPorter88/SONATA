@@ -8,28 +8,28 @@ Created on Wed May 15 09:48:14 2019
 # Third party modules
 import numpy as np
 from OCC.Core.gp import (gp_Ax1, gp_Ax2, gp_Ax3, gp_Dir,
-                         gp_Pnt, gp_Pnt2d, gp_Trsf, gp_Vec2d,)
+                         gp_Pnt, gp_Trsf,)
 
 
 def trsf_blfr_to_cbm(Ax2_blfr, Ax2_befr):
     """
-    generates the transform from the SONATA reference frame to the local 2d cbm 
+    generates the transform from the SONATA reference frame to the local 2d cbm
     frame
-    
+
     Parameters
     --------
     Ax2_blfr : gp_Ax2
-        Opencascade blade reference frame, 
+        Opencascade blade reference frame,
         Describes a right-handed coordinate system in 3D space.
     Ax2_befr : gp_Ax2
-        Opencascade locale beam reference frame, 
+        Opencascade locale beam reference frame,
         Opencascade: Describes a right-handed coordinate system in 3D space.
-    
+
     Returns
     --------
     Trsf : gp_Trsf
         Opencascade: non-persistent transformation in 3D space
-    
+
     """
     Ax2_cbm = gp_Ax2(Ax2_befr.Location(), Ax2_befr.XDirection(), Ax2_befr.YDirection())
     # print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
@@ -49,21 +49,21 @@ def trsf_blfr_to_cbm(Ax2_blfr, Ax2_befr):
 def trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr):
     """
     generates the transform from the cbm local 2d frame to the blade frame
-    
+
     Parameters
     --------
     Ax2_blfr : gp_Ax2
-        Opencascade blade reference frame, 
+        Opencascade blade reference frame,
         Describes a right-handed coordinate system in 3D space.
     Ax2_befr : gp_Ax2
-        Opencascade locale beam reference frame, 
+        Opencascade locale beam reference frame,
         Opencascade: Describes a right-handed coordinate system in 3D space.
-    
+
     Returns
     --------
     Trsf : gp_Trsf
         Opencascade: non-persistent transformation in 3D space
-    
+
     """
     Ax2_cbm = gp_Ax2(Ax2_befr.Location(), Ax2_befr.XDirection(), Ax2_befr.YDirection())
     # print('Ax2_cbm.Direction:', Ax2_cbm.XDirection().Coord(), Ax2_cbm.YDirection().Coord())
@@ -84,9 +84,9 @@ def trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr):
 def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation=None):
     """
     Defines the transformation in 3D space to the blade reference frame location
-    and pitch-axis information, scales it with chord information and rotates 
+    and pitch-axis information, scales it with chord information and rotates
     it with twist information
-    
+
     Parameters
     ----------
     loc : array
@@ -97,18 +97,18 @@ def trsf_af_to_blfr(loc, pa_loc, chord, twist, deformation=None):
         chordlength
     twist : float
         twist angle about x in radians
-    
+
     Returns
     ---------
-    Trsf : OCC.gp_Trsf 
+    Trsf : OCC.gp_Trsf
         non-persistent transformation in 3D space.
-        
-    Todo 
-    --------- 
+
+    Todo
+    ---------
     implement to transfer to the deformed stated, check for rotational definition!
         [xnew,ynew,znew,phi,theta,psi] deformation vector is defined as...
-        
-    
+
+
     """
     trsf_rot1 = gp_Trsf()
     trsf_rot2 = gp_Trsf()

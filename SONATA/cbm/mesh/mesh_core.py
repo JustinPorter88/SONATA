@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Functionalities concerning the unstructured discretization (triangulation) 
-of the core or balance weight. 
+Functionalities concerning the unstructured discretization (triangulation)
+of the core or balance weight.
 
 Created on Thu Nov 02 10:46:29 2017
 @author: TPflumm
@@ -11,10 +11,9 @@ Created on Thu Nov 02 10:46:29 2017
 import pickle
 
 # Third party modules
-import matplotlib.pyplot as plt
 import numpy as np
 from OCC.Core.gp import gp_Pnt2d
-from triangle import plot, triangulate
+from triangle import triangulate
 
 # First party modules
 from SONATA.cbm.mesh.cell import Cell
@@ -26,23 +25,23 @@ from SONATA.cbm.topo.BSplineLst_utils import get_BSplineLst_length
 
 
 def triangle_mesh(array, options):
-    """The triangle_mesh function generates the triagular mesh within the 
-    a_nodes polygon. It uses the Python Triangle module, which is a python 
+    """The triangle_mesh function generates the triagular mesh within the
+    a_nodes polygon. It uses the Python Triangle module, which is a python
     wrapper around Jonathan Richard Shewchuks two-dimensional quality mesh
-    generator and delaunay triangulator library, available here.  
-    
+    generator and delaunay triangulator library, available here.
+
     - http://dzhelil.info/triangle/
     - http://www.cs.cmu.edu/~quake/triangle.html
-        
+
     Args:
         array: (array of nodes), the array contains all nodes that are on the
-            innermost boundary of the generated topology. And are the boundary 
+            innermost boundary of the generated topology. And are the boundary
             for the triangulation
-            
+
         options: the options can be passed to the triagle_mesh function,
             default is the optionstring 'pa%s' % (area)
-            
-   Returns: 
+
+   Returns:
         mesh: a dictionary with 'vertices', 'segments', 'holes' and 'regions'
             as keys
     """
@@ -64,24 +63,24 @@ def triangle_mesh(array, options):
     return mesh
 
 def gen_core_cells(a_nodes, area=1.0, **kwargs):
-    """The gen_core_cells function generates the triagular mesh within the 
-    a_nodes polygon.        
-    
+    """The gen_core_cells function generates the triagular mesh within the
+    a_nodes polygon.
+
     Args:
         a_nodes: (list of nodes), the list contains all nodes that are on the
             innermost boundary of the generated topology.
-        area: (float), is a resolution parameter / area constraint for the 
+        area: (float), is a resolution parameter / area constraint for the
             triangle_mesh function.
-    
-    Kwargs: 
+
+    Kwargs:
         options: the options can be passed to the triagle_mesh function,
             default is the optionstring 'pa%s' % (area)
-            
-        
-    Returns: 
-        [c_cells,c_nodes]: c_cells is a list of the newly generated cell 
-            objects, while c_nodes is a list of the newly generated node 
-            objects.              
+
+
+    Returns:
+        [c_cells,c_nodes]: c_cells is a list of the newly generated cell
+            objects, while c_nodes is a list of the newly generated node
+            objects.
     """
 
     # KWARGS:
@@ -159,4 +158,3 @@ if __name__ == "__main__":
         c.theta_3 = 0
         c.MatID = int(seg.CoreMaterial)
         c.calc_theta_1()
-

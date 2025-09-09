@@ -51,7 +51,7 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
         IncEnd(Include EndPoint)
         (BSplineLst, IC=False, either NbPoints or MinLen)
         (BSplineLst, IC=True,  MinLen)
-        
+
     """
     if IC == True:
         closed = False
@@ -167,18 +167,18 @@ def move_node_on_BSplineLst(BSplineLst, node, dist, tol=1e-6):
 
 
 def grab_nodes_of_cells_on_BSplineLst(cells, BSplineLst):
-    """the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of 
-    the cells that are located on the BSplineLst (list of geom2d_BSpline 
-    objects) with a given tolerance and uses the subfunction 
+    """the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of
+    the cells that are located on the BSplineLst (list of geom2d_BSpline
+    objects) with a given tolerance and uses the subfunction
     grab_nodes_on_BSplineLst
-                    
+
     Args:
         cells: (list of cells)
         BSplineLst: (list of geom2d_BSpline objects) to be searched
-            
-   Returns: 
-        disco_nodes: (list of nodes) the discovered nodes that are located on 
-        the BSplineLst 
+
+   Returns:
+        disco_nodes: (list of nodes) the discovered nodes that are located on
+        the BSplineLst
     """
 
     disco_nodes = []
@@ -199,23 +199,23 @@ def grab_nodes_of_cells_on_BSplineLst(cells, BSplineLst):
 
 
 def grab_nodes_on_BSplineLst(nodes, BSplineLst, tolerance=1e-5):
-    """the grab_nodes_on_BSplineLst fuction determines the nodes of the input 
-    argument list 'nodes' that are located on the BSplineLst. It loops though 
-    all nodes and for each nodes it generates a projection on all bsplins in 
-    the list of Bsplines (BSplineLst). If the projection distance is below a 
+    """the grab_nodes_on_BSplineLst fuction determines the nodes of the input
+    argument list 'nodes' that are located on the BSplineLst. It loops though
+    all nodes and for each nodes it generates a projection on all bsplins in
+    the list of Bsplines (BSplineLst). If the projection distance is below a
     certain tolerance, the node is to be returned in the disco_nodes list.
-                
+
     Args:
         nodes: (list of nodes)
         BSplineLst: (list of geom2d_BSpline objects) to be searched
-        tolerance: (float) to decide whether a node is on the BSpline, 
+        tolerance: (float) to decide whether a node is on the BSpline,
                     the default value is 1e-5.
-            
-   Returns: 
-        disco_nodes: (list of nodes) the discovered nodes that are located on 
-        the BSplineLst 
-        
-    Notes: Projection is slow. It would be nice to not use this function very 
+
+   Returns:
+        disco_nodes: (list of nodes) the discovered nodes that are located on
+        the BSplineLst
+
+    Notes: Projection is slow. It would be nice to not use this function very
         often.
     """
 

@@ -3,7 +3,6 @@
 #------------------------------------------------------------------------------------
 
 # Core Library modules
-import itertools
 import numbers
 import os
 
@@ -11,14 +10,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 # PythonOCC Libraries
-from OCC.Core.gp import gp_Pnt, gp_Vec
+from OCC.Core.gp import gp_Pnt
 
 # First party modules
-from SONATA.cbm.display.display_utils import (display_config,)
 from SONATA.cbm.topo.BSplineLst_utils import (BSplineLst_from_dct,)
-from SONATA.cbm.topo.utils import (PntLst_to_npArray,)
 from SONATA.cbm.topo.wire_utils import (build_wire_from_BSplineLst,
-                                        equidistant_Points_on_wire,
                                         trsf_wire,)
 from SONATA.utl.trsf import trsf_af_to_blfr
 

@@ -5,15 +5,13 @@ Created on Mon Nov 21 15:37:44 2016
 @author: TPflumm
 """
 # Third party modules
-import matplotlib.pyplot as plt
 import numpy as np
 import shapely.geometry as shp
 from shapely.geometry import MultiPolygon
 from shapely.ops import linemerge
 
 # Local modules
-from .utils import (P2Pdistance, Polygon_orientation,
-                    calc_DCT_angles, isclose, unique_rows,)
+from .utils import (P2Pdistance, Polygon_orientation,)
 
 def get_largest_polygon(multipolygon):
     # Ensure the input is a MultiPolygon
@@ -38,25 +36,25 @@ def get_largest_polygon(multipolygon):
 def combine_close_points(points, tolerance, length_threshold):
     def distance(p1, p2):
         return np.linalg.norm(p1 - p2)
-    
+
     def segment_length(start_idx, end_idx):
         # Calculate the length of the segment from points[start_idx] to points[end_idx]
         segment_length = 0
         for i in range(start_idx, end_idx):
             segment_length += distance(points[i], points[i+1])
         return segment_length
-    
+
     combined_points = []
     i = 0
-    
+
     while i < len(points):
         close_points = [points[i]]
         j = i + 1
-        
+
         while j < len(points) and distance(points[j], points[j-1]) <= tolerance:
             close_points.append(points[j])
             j += 1
-        
+
         if len(close_points) > 1:
             # Check if the length of the segment is within the threshold
             segment_len = segment_length(i, j-1)
@@ -78,9 +76,9 @@ def combine_close_points(points, tolerance, length_threshold):
                 combined_points.extend(close_points)
         else:
             combined_points.append(points[i])
-        
+
         i = j
-    
+
     return np.array(combined_points)
 
 # Function to check if two line segments (p1, q1) and (p2, q2) intersect
@@ -141,7 +139,7 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
             afpoly = shp.Polygon(arrPts)
             noffafpoly = afpoly.buffer(-dist)  # Inward offset
             data = np.array(noffafpoly.exterior.xy).T
-        except AttributeError as e:
+        except AttributeError:
             afpoly = shp.Polygon(arrPts)
             noffaf_multipoly = afpoly.buffer(-dist)  # Inward offset
             noffafpoly = get_largest_polygon(noffaf_multipoly) # If there are overlaps find polygon with largest area
@@ -153,7 +151,7 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
         offset = line.parallel_offset(dist, side, res, join_style)
 
         if isinstance(offset, shp.MultiLineString):
-            
+
             merged = linemerge(offset)  # Merge connected parts into a single LineString if possible
             if isinstance(merged, shp.LineString):
                 data = np.array(merged.coords)
@@ -175,7 +173,7 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
     # ==============CHECK ORIENTATION if closed=================================
     # Check Orientation and reverse if neccessary
     # TODO: Be careful not to reverse Linestring!
-    
+
     if closed == True:
         Orientation = Polygon_orientation(data)
         if Orientation == True:

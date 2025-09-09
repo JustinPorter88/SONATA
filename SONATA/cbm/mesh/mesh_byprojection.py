@@ -55,11 +55,11 @@ def three_pnt_projection_method(points, bspline, min_dist):
     vec1 = curr - prev
     vec2 = next - curr
     angle = angle_between(vec1,vec2)
-    
+
     # Find the two normal vectors pointing from the middle point to the adjacent points
     vec1_perp = np.array([-vec1[1], vec1[0]]) / np.linalg.norm([-vec1[1], vec1[0]])
     vec2_perp = np.array([-vec2[1], vec2[0]]) / np.linalg.norm([-vec2[1], vec2[0]])
-    
+
     # Finding the vector that bisects the two normal vectors. The project point will be in the direction of the bisecting vector.
     bisecting_vector = - np.sqrt((1 + np.dot(vec1_perp, vec2_perp)) / 2) * (vec1_perp + vec2_perp) / np.linalg.norm(vec1_perp + vec2_perp)
     direction_2d = gp_Dir2d(bisecting_vector[0],bisecting_vector[1])
@@ -79,11 +79,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                                            crit_angle=95, LayerID=0, refL=1.0,
                                            **kw):
     """
-    *function to mesh the SONATA topologies by projecting nodes onto the 
-    generated BSplineLists.   
-    
+    *function to mesh the SONATA topologies by projecting nodes onto the
+    generated BSplineLists.
+
     :rtype: [list,list,list]
-    
+
     Variables and arguments:
     ----------
     a_BSplineLst & a_nodes: the projection source
@@ -92,16 +92,16 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                      a distance, in which the resulting projection point has to be.
     crit_angle: is the critical angle to determine a corner if 2 projection points are found.
     display: the kwargs display object can be passed to plot/display within the main OCC3DViewer
-                    
-    
+
+
     Workflow:
-    ----------        
-      
-    
+    ----------
+
+
     Notes & Comments:
-    ----------  
+    ----------
     TODO: * scale distance not only to layerthickenss but also to min_len.
-            or adapt the distance individually for each node. 
+            or adapt the distance individually for each node.
     """
     # display_bsplinelst(a_BSplineLst, 'blue')
     # display_bsplinelst(b_BSplineLst, 'green')
@@ -118,7 +118,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
     flag_integrate_leftover_interior_nodes = False
 
     # Is a_BSplineLst closed?
-    
+
     closed_a = False
     if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(), 1e-5):
         closed_a = True
@@ -337,7 +337,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                         else:
                             idx = j + pIdx[1] - len(b_BSplineLst)
                         exterior_corners_para.append([LayerID, idx, u1])
-                        # display.DisplayShape(item.EndPoint(),color='WHITE')            
+                        # display.DisplayShape(item.EndPoint(),color='WHITE')
 
             # =======================generate b_nodes===========================
             # print node,'corner: ', node.corner, ', regular_corner = ',node.regular_corner, ',  Len:exterior_corners =',len(exterior_corners)

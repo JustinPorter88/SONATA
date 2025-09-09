@@ -11,18 +11,18 @@ class ANBAXConfig(object):
 
     """
     this class contains the Configuration for a anbax
-    
+
     Attributes:
     ----------
 
-    F : nparray([F1, F2, F3]]) 
-        F1 is the sectional aial force, F2 and F3 are the sectional transverse 
+    F : nparray([F1, F2, F3]])
+        F1 is the sectional aial force, F2 and F3 are the sectional transverse
         shear forces along x2 and x3 respectively
-        
-    M : nparray([M1, M2, M3]]) 
-        M1 is the sectional torque, M2 is the setional bending moment around x2 
+
+    M : nparray([M1, M2, M3]])
+        M1 is the sectional torque, M2 is the setional bending moment around x2
         and M3 is the sectional bending moment around x3.
-        
+
 
     """
 

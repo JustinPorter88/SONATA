@@ -173,7 +173,7 @@ class Material:
 
         transformMatrix[4, 0] = cn_a * sn_b * cn_b
         transformMatrix[4, 2] = -cn_a * sn_b * cn_b
-        transformMatrix[4, 3] = sn_a * cn_b;
+        transformMatrix[4, 3] = sn_a * cn_b
         transformMatrix[4, 4] = -cn_a * sn_b * sn_b + cn_a* cn_b * cn_b
         transformMatrix[4, 5] = sn_a * sn_b
 
@@ -231,10 +231,10 @@ class IsotropicMaterial(Material):
         self.YS = None
         self.UTS = None
 
-        if not kw.get("E") is None:
+        if kw.get("E") is not None:
             self.E = float(kw.get("E"))
 
-        if not kw.get("nu") is None:
+        if kw.get("nu") is not None:
             self.nu = float(kw.get("nu"))
 
 
@@ -243,18 +243,18 @@ class IsotropicMaterial(Material):
         viscoelastic_dict = {}
 
         for k in viscoelastic_mat_keys:
-            if not kw.get(k) is None:
+            if kw.get(k) is not None:
                 viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
 
         self.viscoelastic = viscoelastic_dict
 
-        if not kw.get("alpha") is None:
+        if kw.get("alpha") is not None:
             self.alpha = float(kw.get("alpha"))
 
-        if not kw.get("YS") is None:
+        if kw.get("YS") is not None:
             self.YS = float(kw.get("YS"))
 
-        if not kw.get("UTS") is None:
+        if kw.get("UTS") is not None:
             self.UTS = float(kw.get("UTS"))
 
     def constitutive_tensor(self):
@@ -289,11 +289,11 @@ class IsotropicMaterial(Material):
 
         E = self.E
         nu = self.nu
-        G = E / (2 * (1 + nu));
+        G = E / (2 * (1 + nu))
 
-        delta = E / (1. + nu) / (1 - 2.*nu);
-        diag = (1. - nu) * delta;
-        off_diag = nu * delta;
+        delta = E / (1. + nu) / (1 - 2.*nu)
+        diag = (1. - nu) * delta
+        off_diag = nu * delta
 
         constitutive_tensor = np.zeros((6, 6))
 
@@ -375,16 +375,16 @@ class OrthotropicMaterial(Material):
         self.Yc = None
         self.S21 = None
 
-        if not kw.get('E') is None:
+        if kw.get('E') is not None:
             self.E = np.asarray(kw.get('E')).astype(float)
 
-        if not kw.get('G') is None:
+        if kw.get('G') is not None:
             self.G = np.asarray(kw.get('G')).astype(float)
 
-        if not kw.get('nu') is None:
+        if kw.get('nu') is not None:
             self.nu = np.asarray(kw.get('nu')).astype(float)
 
-        if not kw.get('alpha') is None:
+        if kw.get('alpha') is not None:
             self.alpha = np.asarray(kw.get('alpha')).astype(float)
 
         if all(k in kw for k in ('E_1', 'E_2', 'E_3')):
@@ -405,41 +405,41 @@ class OrthotropicMaterial(Material):
         viscoelastic_dict = {}
 
         for k in viscoelastic_mat_keys:
-            if not kw.get(k) is None:
+            if kw.get(k) is not None:
                 viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
 
         self.viscoelastic = viscoelastic_dict
 
         if flag_mat:  # wisdem includes vectors for the following material properties that are to be converted in order to comply with SONATA and VABS/anbax
-            if not kw.get('Xt') is None:
+            if kw.get('Xt') is not None:
                 self.Xt = float(kw.get('Xt')[0])  # retrieve axial tensile strength in [MPa] from provided 3D vector
 
-            if not kw.get('Xc') is None:
+            if kw.get('Xc') is not None:
                 self.Xc = float(kw.get('Xc')[0])  # retrieve axial compression strength in [MPa] from provided 3D vector
 
-            if not kw.get('Yt') is None:
+            if kw.get('Yt') is not None:
                 self.Yt = float(kw.get('Xt')[1])  # retrieve transverse tensile strength in [MPa] from provided 3D vector
 
-            if not kw.get('Yc') is None:
+            if kw.get('Yc') is not None:
                 self.Yc = float(kw.get('Xc')[1])  # retrieve transverse compression strength in [MPa] from provided 3D vector
 
-            if not kw.get('S') is None:
+            if kw.get('S') is not None:
                 self.S21 = float(kw.get('S')[0])  # retrieve in-/out of plane shear strength [MPa] in [MPa] from provided 3D vector
 
         else:
-            if not kw.get('Xt') is None:
+            if kw.get('Xt') is not None:
                 self.Xt = float(kw.get('Xt'))  # Axial Tensile Strength in [MPa]
 
-            if not kw.get('Xc') is None:
+            if kw.get('Xc') is not None:
                 self.Xc = float(kw.get('Xc'))  # Axial Compression Strength  [MPa]
 
-            if not kw.get('Yt') is None:
+            if kw.get('Yt') is not None:
                 self.Yt = float(kw.get('Yt'))  # Transverse Tensile strenght  [MPa]
 
-            if not kw.get('Yc') is None:
+            if kw.get('Yc') is not None:
                 self.Yc = float(kw.get('Yc'))  # Transverse  Compression strenght  [Mpa]
 
-            if not kw.get('S21') is None:
+            if kw.get('S21') is not None:
                 self.S21 = float(kw.get('S21'))  # in-/out of plane shear strength [MPa]
 
         # self.S23 = float(kw.get('S23'))

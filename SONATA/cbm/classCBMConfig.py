@@ -22,33 +22,33 @@ if __name__ == "__main__":
 
 class CBMConfig(object):
     """
-    Second Generation Configuration Class for the SONATA_CBM Disciplin  
-    
+    Second Generation Configuration Class for the SONATA_CBM Disciplin
+
     Attributes
     ----------
     filename : str
         filename, when config filename is given.
-        
+
     setup: dict
-        contains the following fields: datasource, material_db, 
+        contains the following fields: datasource, material_db,
         radial_station, Theta, scale_factor, BalanceWeight and mesh_resolution
-    
+
     webs: OrderedDict
-        Ordered Dictionary that contains subdictionaries of with Pos1 and Pos2 
+        Ordered Dictionary that contains subdictionaries of with Pos1 and Pos2
         keys
-    
+
     segments: OrderedDict
-         Ordered Dictionary that contains subdictionaries with Corematerial, 
+         Ordered Dictionary that contains subdictionaries with Corematerial,
          Layup and Layup_names as keys
-    
+
     bw: dict
-    
+
     flags: dict
 
     vabs_cfg: VABSConfig
     anbax_cfg: ANBAXConfig
 
-    
+
     """
 
     __slots__ = ("filename", "setup", "webs", "segments", "bw", "flags", "vabs_cfg", "anbax_cfg")
@@ -69,7 +69,7 @@ class CBMConfig(object):
     def read_yaml_cbm(self, yml, materials):
         """ read the yml dictionary of a cross section and assign class
         attributes to this configuration object
-        
+
         Parameters:
         ----------
         yml : dict
@@ -119,7 +119,7 @@ class CBMConfig(object):
             if layerlst and all(isinstance(l, list) for l in layerlst):
                 layerlst = s.get("layup")
                 d["Layup_names"] = np.asarray(layerlst)[:, 5].tolist()
-                d["Layup"] = np.asarray(layerlst)[:, :5].astype(float)               
+                d["Layup"] = np.asarray(layerlst)[:, :5].astype(float)
             elif layerlst and all(isinstance(l, dict) and l for l in layerlst):
                 d["Layup"] = np.asarray([[l.get("start"), l.get("end"), l.get("thickness"), l.get("orientation"), find_material(materials, "name", l.get("material_name")).id] for l in layerlst])
                 d["Layup_names"] = [l.get("name") for l in layerlst]

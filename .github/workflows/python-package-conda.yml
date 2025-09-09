@@ -35,7 +35,7 @@ jobs:
           environment-file: environment.yaml
           activate-environment: test
           auto-activate-base: false
-          
+
       - name: Download and install anba
         run: |
           git clone https://github.com/ANBA4/anba4.git
@@ -61,13 +61,13 @@ jobs:
           cd examples/1_IEA15MW
           export MPLBACKEND=Agg
           python 1_sonata_IEA15.py
-      
+
       - name: Run example 2
         run: |
           cd examples/2_IEA22MW
           export MPLBACKEND=Agg
           python 2_sonata_IEA22.py
-      
+
       - name: Run example 5
         run: |
           cd examples/5_IEA_5MW
@@ -79,4 +79,3 @@ jobs:
           cd examples/6_beam_stress
           export MPLBACKEND=Agg
           python 6_sonata_beam_stress.py
-

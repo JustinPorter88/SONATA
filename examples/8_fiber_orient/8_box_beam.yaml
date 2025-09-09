@@ -41,7 +41,7 @@ components:
             layers:
                -  name: Shell_skin1
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -49,7 +49,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin2
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -57,7 +57,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin3
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -65,7 +65,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin4
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -73,7 +73,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin5
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -81,7 +81,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin1
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -89,7 +89,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin2
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -97,7 +97,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin3
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -105,7 +105,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin4
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:
@@ -113,7 +113,7 @@ components:
                       values: [0.01, 0.01]
                -  name: Shell_skin5
                   material: CarbonUD
-                  fiber_orientation: 
+                  fiber_orientation:
                       grid: [0.0, 1.0]
                       values: [0.2618, 0.2618]
                   thickness:

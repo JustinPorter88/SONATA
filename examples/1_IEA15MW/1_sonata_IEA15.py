@@ -98,4 +98,3 @@ beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str,
 job.blade_plot_sections(attribute=attribute_str, plotTheta11=flag_plotTheta11, plotDisplacement=flag_plotDisplacement, savepath=run_dir)
 if flag_3d:
     job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'], flag_lft=flags_dict['flag_lft'], flag_topo=flags_dict['flag_topo'])
-

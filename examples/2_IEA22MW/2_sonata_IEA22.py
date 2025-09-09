@@ -36,7 +36,7 @@ c2_axis                 = False
 flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
 flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
 flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
-flag_estimate_structural_damping = True # Estimate structural damping from SONATA and BeamDyn 
+flag_estimate_structural_damping = True # Estimate structural damping from SONATA and BeamDyn
 flag_output_zero_twist = False # Output sectional analysis so that BeamDyn sees everything at 0 twist?
 
 # Shape of corners
@@ -54,9 +54,9 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
 
-#radial_stations = [0.        , 0.02040816, 0.04081633, 0.06122449, 0.08163265, 0.10204082, 0.12244898, 0.14285714, 0.16326531, 0.18367347, 0.20408163, 0.2244898 , 0.24489796, 
-#               0.26530612, 0.28571429, 0.30612245, 0.32653061, 0.34693878, 0.36734694, 0.3877551 , 0.40816327, 0.42857143, 0.44897959, 0.46938776, 0.48979592, 0.51020408, 
-#               0.53061224, 0.55102041, 0.57142857, 0.59183673, 0.6122449 , 0.63265306, 0.65306122, 0.67346939, 0.69387755, 0.71428571, 0.73469388, 0.75510204, 0.7755102 , 
+#radial_stations = [0.        , 0.02040816, 0.04081633, 0.06122449, 0.08163265, 0.10204082, 0.12244898, 0.14285714, 0.16326531, 0.18367347, 0.20408163, 0.2244898 , 0.24489796,
+#               0.26530612, 0.28571429, 0.30612245, 0.32653061, 0.34693878, 0.36734694, 0.3877551 , 0.40816327, 0.42857143, 0.44897959, 0.46938776, 0.48979592, 0.51020408,
+#               0.53061224, 0.55102041, 0.57142857, 0.59183673, 0.6122449 , 0.63265306, 0.65306122, 0.67346939, 0.69387755, 0.71428571, 0.73469388, 0.75510204, 0.7755102 ,
 #               0.79591837, 0.81632653, 0.83673469, 0.85714286, 0.87755102, 0.89795918, 0.91836735, 0.93877551, 0.95918367, 1.]
 radial_stations = np.linspace(0., 1., 10, endpoint=True)
 
@@ -113,4 +113,3 @@ if flag_3d:
     job.blade_post_3dtopo(flag_wf=flags_dict['flag_wf'],
                           flag_lft=flags_dict['flag_lft'],
                           flag_topo=flags_dict['flag_topo'])
-

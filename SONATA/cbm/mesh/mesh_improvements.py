@@ -19,7 +19,7 @@ from SONATA.cbm.topo.BSplineLst_utils import ProjectPointOnBSplineLst
 
 def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, LayerID=0, tol=1e-2, alpha_crit=50, **kwargs):
     """
-    
+
     """
 
     # KWARGS:
@@ -132,7 +132,7 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                     FrontCellLst = []
                     # print '@', c.nodes[0],'  len(Middle):',len(MiddleNodes),'len(Front):',len(FrontNodes),'len(Back):',len(BackNodes)
                     if len(MiddleNodes) == len(FrontNodes) and len(BackNodes) == len(MiddleNodes) and MiddleNodes:
-                            
+
                         for i in range(0, len(MiddleNodes)):
 
                             if i == 0:  # FIRST

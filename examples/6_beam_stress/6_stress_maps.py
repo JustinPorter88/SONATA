@@ -4,7 +4,7 @@ Example of stress recovery maps. Steps:
     2. Output of stress map through SONATA
     3. Reloading the stress map and reproducing the plot without calling SONATA
         a second time.
-        
+
 Stress maps are useful if you just want to run SONATA once to generate the 6x6
 inputs and then you plan to later recover stress fields for one or many
 load cases based on simulations with the 6x6 stiffness matrices.
@@ -13,7 +13,7 @@ load cases based on simulations with the 6x6 stiffness matrices.
 import os
 import numpy as np
 from SONATA.classBlade import Blade
-from SONATA.utl.beam_struct_eval import beam_struct_eval, strain_energy_eval
+from SONATA.utl.beam_struct_eval import beam_struct_eval
 
 import matplotlib.pyplot as plt
 

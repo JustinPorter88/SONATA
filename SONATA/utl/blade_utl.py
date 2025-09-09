@@ -16,8 +16,7 @@ from OCC.Core.GeomAbs import GeomAbs_C2
 from OCC.Core.Approx import Approx_ChordLength
 
 # First party modules
-from SONATA.cbm.topo.utils import (Array_to_PntLst, PntLst_to_npArray,
-                                   lin_pln_intersect,)
+from SONATA.cbm.topo.utils import (lin_pln_intersect,)
 
 
 class assert_isdone(object):
@@ -42,38 +41,38 @@ class assert_isdone(object):
 def interp_loads(loads, grid_loc):
     """
     Interpolates the loads at the given radial station (grid location)
-    
+
     Parameters
     ----------
     loads : dict
         dictionary of the following keys and values, (default=None)
-        for detailed information see the VABSConfig documentation or the 
+        for detailed information see the VABSConfig documentation or the
         VABS user manual
-        F : nparray([[grid, F1, F2, F3]]) 
-        M : nparray([[grid, M1, M2, M3]]) 
+        F : nparray([[grid, F1, F2, F3]])
+        M : nparray([[grid, M1, M2, M3]])
         f : nparray([[grid, f1, f2, f2]])
         df : nparray([[grid, f1', f2', f3']])
         dm :  nparray([[grid, m1', m2', m3']])
         ddf : nparray([[grid, f1'', f2'', f3'']])
         ddm : nparray([[grid, m1'', m2'', m3'']])
-        
+
     grid_loc : float
         location of interpolation
-        
+
     Returns
     ----------
     sectional_load : dict
     dictionary of the following keys and values, (default=None)
-        for detailed information see the VABSConfig documentation or the 
+        for detailed information see the VABSConfig documentation or the
         VABS user manual
-        F : nparray([F1, F2, F3]) 
-        M : nparray([M1, M2, M3]) 
+        F : nparray([F1, F2, F3])
+        M : nparray([M1, M2, M3])
         f : nparray([f1, f2, f2])
         df : nparray([f1', f2', f3'])
         dm :  nparray([m1', m2', m3'])
         ddf : nparray([f1'', f2'', f3''])
         ddm : nparray([m1'', m2'', m3''])
-        
+
     """
 
     d = {}
@@ -85,8 +84,8 @@ def interp_loads(loads, grid_loc):
 
 def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
     """
-    
-    
+
+
     Parameters
     ----------
     airfoil_position: tuple
@@ -124,18 +123,18 @@ def interp_airfoil_position(airfoil_position, airfoils, grid_loc):
     return af1.transformed(af2, k)
 
 
-def make_loft(elements, solid=False, ruled=False, tolerance=1e-6, 
+def make_loft(elements, solid=False, ruled=False, tolerance=1e-6,
               continuity=GeomAbs_C2, max_degree=8, check_compatibility=True, **kwargs):
     """
-    A set of sections that are used to generate a surface with the 
+    A set of sections that are used to generate a surface with the
         BRepOffsetAPI_ThruSections function from OCC
-        
+
 
     Parameters
     ----------
     elements : list
         list of OCC.TopoDS_Wire or TopoDS_Vertex
-        A set of sections that are used to generate a surface with the 
+        A set of sections that are used to generate a surface with the
         BRepOffsetAPI_ThruSections function from OCC.
     solid : bool, optional
         solid or surface. The default is False.
@@ -164,7 +163,7 @@ def make_loft(elements, solid=False, ruled=False, tolerance=1e-6,
         surface of the ThruSections Loft
 
     """
-    
+
     generator = BRepOffsetAPI_ThruSections(solid, ruled, tolerance)
     generator.SetMaxDegree(max_degree)
     generator.SetParType(Approx_ChordLength)
@@ -179,23 +178,23 @@ def make_loft(elements, solid=False, ruled=False, tolerance=1e-6,
     generator.CheckCompatibility(check_compatibility)
     generator.SetContinuity(continuity)
     generator.Build()
-    
+
     with assert_isdone(generator, 'failed lofting'):
-        loft = generator.Shape() 
+        loft = generator.Shape()
         return loft
-        
+
 
 def check_uniformity(grid, values, tol=1e-6):
     """
-    Checks the uniformity of the values along the grid by calculating the 
+    Checks the uniformity of the values along the grid by calculating the
     gradient and checking if it's constant with respect to a giving tolererance
-    
+
     Parameters
     ----------
     grid : array
     values : array
     tol : float, optional
-    
+
     Returns
     ----------
     bool
@@ -207,14 +206,14 @@ def check_uniformity(grid, values, tol=1e-6):
 
 def array_pln_intersect(array, ax2):
     """
-    intersects an array of connecting points with the yz plane of the 
+    intersects an array of connecting points with the yz plane of the
     ax2 coordinate system.
-    
+
     Parameters:
         ax2 : gp_Ax2
             right handed coordinate system
-        array : 
-    
+        array :
+
     """
     factors = []
     coords = []

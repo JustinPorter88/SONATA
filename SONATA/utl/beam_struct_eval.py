@@ -8,7 +8,6 @@ Created on Wednesday Nov 20 13:33:33 2019
 
 
 from builtins import len, range
-from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
@@ -16,8 +15,7 @@ import os
 from scipy.interpolate import PchipInterpolator
 
 from SONATA.cbm.cbm_utl import trsf_sixbysix
-from SONATA.utl_openfast.utl_sonata2beamdyn import convert_structdef_SONATA_to_beamdyn, \
-    write_beamdyn_axis, write_beamdyn_prop, write_beamdyn_viscoelastic
+from SONATA.utl_openfast.utl_sonata2beamdyn import write_beamdyn_axis, write_beamdyn_prop, write_beamdyn_viscoelastic
 
 # from SONATA.utl.analytical_rectangle.utls_analytical_rectangle import utls_analytical_rectangle
 
@@ -42,9 +40,9 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
     cs_pos              - radial station of blade cross sections
     job                 - contains the whole blade data (yaml file content, wires, mesh, etc.)
     folder_str          - name of operating folder
-    job_str             - name of job that is currently under investigation 
+    job_str             - name of job that is currently under investigation
 
-    Outputs: 
+    Outputs:
     - None -
 
 
@@ -55,23 +53,23 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
     Forces =  np.array([0, 0, 0])  # forces, N (F1: axial force; F2,F3: sectional transverse shear forces)
     Moments =  np.array([0, 5000000, 0])  # moments, Nm
     loads_dict = {"Forces": Forces, "Moments": Moments}
-    
+
     Notes
     -----
-    
+
     Flag options for `flags_dict` include `'viscoelastic' : True` to evaluate
     viscoelastic 6x6 matrices and save them in an additional file. This flag
     is optional and is assumed `False` by default.
 
     """
-    
+
     optional_keys = ['viscoelastic', 'flag_OpenTurbine_transform',
                      'flag_write_OpenTurbine', 'flag_output_zero_twist']
-    
+
     for key in optional_keys:
         if key not in flags_dict.keys():
             flags_dict[key] = False
-        
+
 
     # --- ANBAX --- #
     # --------------------------------------- #
@@ -121,11 +119,11 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
         job.blade_run_anbax()  # run anbax
     else:
         # flags_dict['viscoelastic'] == True
-        
+
         if flags_dict['flag_recovery']:
             print('Recovery of stress/strain not supported with viscoelastic'
                   + ' material simulations.')
-        
+
         job.blade_run_viscoelastic()
 
     # init used matrices and arrays
@@ -134,7 +132,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
     anbax_beam_stiff = np.zeros([len(cs_pos), 6, 6])
     anbax_beam_inertia = np.zeros([len(cs_pos), 6, 6])
     anbax_beam_section_mass = np.zeros([len(cs_pos), 1])
-    
+
     if flags_dict['viscoelastic']:
         anbax_beam_viscoelastic \
             = np.zeros((len(cs_pos), len(job.beam_properties[0][1].tau), 6, 6))
@@ -150,14 +148,14 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
         if flags_dict['viscoelastic']:
             for k in range(len(job.beam_properties[0][1].tau)):
                 anbax_beam_viscoelastic[i, k, :, :] = job.beam_properties[i, 1].TSv[k]
-    
+
     # --------------------------------------- #
-    # rotate anbax results from SONATA/VABS def to BeamDyn def coordinate 
+    # rotate anbax results from SONATA/VABS def to BeamDyn def coordinate
     # system (for flag_DeamDyn_def_transform = True)
     # OpenTurbine transform is from BeamDyn, so rotate in that case as well.
     if flags_dict['flag_DeamDyn_def_transform'] \
         or flags_dict['flag_OpenTurbine_transform']:
-            
+
         print('STATUS:\t Transform to BeamDyn coordinates')
         # B = np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]])  # transformation matrix
         B = np.array([[0, 0, 1], [0, -1, 0], [1, 0, 0]])  # transformation matrix
@@ -165,13 +163,13 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
         for n_sec in range(len(cs_pos)):
             anbax_beam_stiff[n_sec, :, :] = trsf_sixbysix(anbax_beam_stiff_init[n_sec, :, :], T)
             anbax_beam_inertia[n_sec, :, :] = trsf_sixbysix(anbax_beam_inertia_init[n_sec, :, :], T)
-            
+
             if flags_dict['viscoelastic']:
                 for k in range(len(job.beam_properties[0][1].tau)):
                     anbax_beam_viscoelastic[n_sec, k, :, :] = trsf_sixbysix(
                                         anbax_beam_viscoelastic[n_sec, k, :, :], T)
-                    
-            
+
+
         str_ext = '_BeamDyn_def'
         coordsys = 'BeamDyn'
 
@@ -242,7 +240,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
                         anbax_beam_viscoelastic[n_sec, k, :, :], rot_mat)
 
         job.true_twist = np.copy(job.twist[:, 1])
-        
+
         print('Setting twist to zero now that 6x6 are rotated.')
         job.twist[:, 1] = np.zeros_like(job.twist[:, 1])
 
@@ -254,7 +252,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
         write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, anbax_beam_stiff, anbax_beam_inertia, mu)
 
         if flags_dict['viscoelastic']:
-            
+
             print('STATUS:\t Writing viscoelastic BeamDyn input file.')
             write_beamdyn_viscoelastic(folder_str, flags_dict,
                                        job.yml.get('name'), cs_pos,
@@ -262,7 +260,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
                                        anbax_beam_viscoelastic)
 
     if flags_dict['flag_OpenTurbine_transform']:
-            
+
         print('STATUS:\t Transform from BeamDyn to OpenTurbine coordinates')
         # transformation matrix
         T = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
@@ -270,13 +268,13 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
         for n_sec in range(len(cs_pos)):
             anbax_beam_stiff[n_sec, :, :] = trsf_sixbysix(anbax_beam_stiff[n_sec, :, :], T)
             anbax_beam_inertia[n_sec, :, :] = trsf_sixbysix(anbax_beam_inertia[n_sec, :, :], T)
-            
+
             if flags_dict['viscoelastic']:
                 for k in range(len(job.beam_properties[0][1].tau)):
                     anbax_beam_viscoelastic[n_sec, k, :, :] = trsf_sixbysix(
                                         anbax_beam_viscoelastic[n_sec, k, :, :], T)
-                    
-            
+
+
         str_ext = '_OpenTurbine_def'
         coordsys = 'OpenTurbine'
 
@@ -284,22 +282,22 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
 
     if flags_dict['flag_write_OpenTurbine'] \
         & flags_dict['flag_OpenTurbine_transform']:
-            
+
         print('STATUS:\t Write OpenTurbine input files')
 
         write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'),
                            cs_pos, anbax_beam_stiff, anbax_beam_inertia, mu,
                            format_name='OpenTurbine')
-    
+
         if flags_dict['viscoelastic']:
-            
+
             print('STATUS:\t Writing viscoelastic OpenTurbine input file.')
             write_beamdyn_viscoelastic(folder_str, flags_dict,
                                        job.yml.get('name'), cs_pos,
                                        job.beam_properties[0][1].tau,
                                        anbax_beam_viscoelastic,
                                        format_name='OpenTurbine')
-            
+
 # ============================================= #
 def plot_beam_props_6by6(cs_pos, data, fig_title, save_path):
     # plots 6x6 matrix
@@ -666,8 +664,8 @@ def strain_energy_eval(blade, MatID=None, station_weights=None):
     # directional_energy = np.trapz(energyM_length.T, stations_array) * length
 
     # Quadrature rule integration.
-    directional_energy = (energyM_length 
-                          * quad_length_weights.reshape(-1, 1) 
+    directional_energy = (energyM_length
+                          * quad_length_weights.reshape(-1, 1)
                           * length).sum(axis=0)
 
     total_energy = np.sum(directional_energy)

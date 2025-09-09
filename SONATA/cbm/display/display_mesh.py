@@ -30,19 +30,19 @@ def centroid(points):
     centroid = (sum(x) / len(points), sum(y) / len(points))
     return centroid
 
-def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None, 
+def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None,
               show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
-    
+
     """
     To be continued...
-    
+
     Parameters
-    ---------- 
+    ----------
     nodes : list
     elements : list
-    data : 
+    data :
     data_name : string
-    
+
     """
     alpha = 1.
     if "cmap" in kw:
@@ -53,13 +53,13 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         cmap_name = 'my_list'
         cmap = LinearSegmentedColormap.from_list(
         cmap_name, colors, N=6)
-        
+
     elif data_name == 'MatID':
         cmap = plt.cm.get_cmap()
         # extract all colors from the .jet map
         cmaplist = [cmap(i) for i in range(cmap.N)]
         cmap = LinearSegmentedColormap.from_list('Custom cmap', cmaplist, max(data))
-        
+
         cmap = cm.get_cmap('tab20',max(data))
     else:
         cmap = plt.cm.get_cmap()
@@ -87,7 +87,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
             centroids.append(centroid(array))
         polygon = Polygon(array, closed=True, edgecolor="k")
         patches.append(polygon)
-    
+
     p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.2)
     p.set_array(data)
     p.set_clim(vmin, vmax)
@@ -112,11 +112,11 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
 
     if len(theta_11)==len(elements):
         for i,cent in enumerate(centroids):
-            
+
             dx = lfactor*math.cos(math.radians(theta_11[i]))
             dy = lfactor*math.sin(math.radians(theta_11[i]))
             ax.arrow(cent[0], cent[1], dx, dy, width = 0.01e-2, head_width=0.1e-2, head_length=0.1e-2, fc='k', ec='k')
-        
+
     plt.axis('equal')
 
 
@@ -165,10 +165,10 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
 
 
     return (fig,ax)
-    
+
 def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
     """
-    
+
 
     Parameters
     ----------
@@ -234,10 +234,10 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
         for c in cells:
             theta_11.append(getattr(c, "theta_11"))
         theta_11 = np.asarray(theta_11)
-    
-    
-    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)    
-   
+
+
+    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)
+
     if 'savepath' in kw:
 
         if not os.path.exists(os.path.join(kw['savepath'],'figures')):  # create 'figures' Folder if not already existing

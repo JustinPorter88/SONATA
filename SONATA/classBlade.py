@@ -3,7 +3,6 @@
 #------------------------------------------------------------------------------------
 
 # Standard library
-from typing import Optional, Union, List, Dict, Any
 
 # Third party modules
 import matplotlib.pyplot as plt
@@ -13,9 +12,8 @@ from scipy.interpolate import interp1d, PchipInterpolator
 
 # OpenCASCADE imports
 from OCC.Core.gp import (
-    gp_Ax1, gp_Ax2, gp_Ax3,
-    gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d,
-    gp_Trsf, gp_Vec
+    gp_Ax1, gp_Ax2, gp_Dir, gp_Pnt, gp_Pnt2d,
+    gp_Vec
 )
 
 # SONATA core classes
@@ -42,7 +40,6 @@ from SONATA.cbm.topo.BSplineLst_utils import (
     BSplineLst_from_dct,
     set_BSplineLst_to_Origin2
 )
-from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
 from SONATA.cbm.topo.utils import Array_to_PntLst, PntLst_to_npArray
 from SONATA.cbm.topo.wire_utils import equidistant_Points_on_wire
 
@@ -57,7 +54,7 @@ from SONATA.utl.blade_utl import (
 from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
-from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
+from SONATA.utl.trsf import trsf_blfr_to_cbm
 
 
 #------------------------------------------------------------------------------------
