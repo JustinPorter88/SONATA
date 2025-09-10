@@ -120,23 +120,23 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     plt.axis('equal')
 
 
-    if title!=None:
+    if title is not None:
         ax.set_title(title, fontweight = 'bold')
     ax.set_xlabel('x, m', fontweight = 'bold')
     ax.set_ylabel('y, m', fontweight = 'bold')
     # plt.grid(color=[0.8,0.8,0.8], linestyle='--')
 
     ##display element number
-    if show_element_number == True:
+    if show_element_number:
         for i, item in enumerate(centroids):
             ax.annotate(i + 1, (item[0], item[1]))
 
     ##display node number
-    if show_node_number == True:
+    if show_node_number:
         for i, item in enumerate(nodes):
             ax.annotate(i + 1, (item[0], item[1]), color="red")
 
-    if VABSProperties != None:
+    if VABSProperties is not None:
         pass
         (CG,) = plt.plot(VABSProperties.Xm[0], VABSProperties.Xm[1], "ro", label="CG: Mass Center")
         # ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
@@ -148,6 +148,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
             plt.legend(handles=[CG, GC, NA])
         except:
             plt.legend(handles=[CG, NA])
+            raise
 
         if isinstance(VABSProperties.Xs, np.ndarray):
             (SC,) = plt.plot(VABSProperties.Xs[0], VABSProperties.Xs[1], "kD", label="SC: Generalized Shear Center")
@@ -156,6 +157,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
                 plt.legend(handles=[CG, GC, NA, SC])
             except:
                 plt.legend(handles=[CG, NA, SC])
+                raise
 
     if invert_xaxis:
         ax.invert_xaxis()
@@ -230,7 +232,7 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
     data_name = attr1
 
     theta_11 = []
-    if plotTheta11 == True:
+    if plotTheta11:
         for c in cells:
             theta_11.append(getattr(c, "theta_11"))
         theta_11 = np.asarray(theta_11)

@@ -106,7 +106,7 @@ class CBMConfig(object):
         for i, s in enumerate(yml.get("segments")):
             d = {}
             key = s.get("id")
-            if s.get("filler") == None:
+            if s.get("filler") is None:
                 d["CoreMaterial"] = 0
 
             elif isinstance(s.get("filler"), int):
@@ -116,13 +116,23 @@ class CBMConfig(object):
                 d["CoreMaterial"] = find_material(materials, "name", s.get("filler")).id
 
             layerlst = s.get("layup")
-            if layerlst and all(isinstance(l, list) for l in layerlst):
+            if layerlst and all(isinstance(lay, list) for lay in layerlst):
                 layerlst = s.get("layup")
                 d["Layup_names"] = np.asarray(layerlst)[:, 5].tolist()
                 d["Layup"] = np.asarray(layerlst)[:, :5].astype(float)
-            elif layerlst and all(isinstance(l, dict) and l for l in layerlst):
-                d["Layup"] = np.asarray([[l.get("start"), l.get("end"), l.get("thickness"), l.get("orientation"), find_material(materials, "name", l.get("material_name")).id] for l in layerlst])
-                d["Layup_names"] = [l.get("name") for l in layerlst]
+            elif layerlst and all(isinstance(lay, dict) and lay for lay in layerlst):
+
+                d["Layup"] = np.asarray([
+                    [lay.get("start"),
+                     lay.get("end"),
+                     lay.get("thickness"),
+                     lay.get("orientation"),
+                     find_material(materials,
+                                   "name",
+                                   lay.get("material_name")).id]
+                    for lay in layerlst])
+
+                d["Layup_names"] = [lay.get("name") for lay in layerlst]
 
             else:
                 d["Layup"] = np.empty((0, 0))

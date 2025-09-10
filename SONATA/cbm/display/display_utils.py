@@ -6,10 +6,6 @@
 # Third party modules
 import matplotlib as plt
 
-try:
-    from OCC.Display.SimpleGui import init_display
-except:
-    pass
 from OCC.Core.gp import gp_Pnt, gp_Vec
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
 from OCC.Core.Quantity import Quantity_Color
@@ -84,16 +80,16 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
 
 def show_coordinate_system(display, length=1, event=None):
     """CREATE AXIS SYSTEM for Visualization"""
-    O = gp_Pnt(0.0, 0.0, 0.0)
+    Orig = gp_Pnt(0.0, 0.0, 0.0)
     p1 = gp_Pnt(length, 0.0, 0.0)
     p2 = gp_Pnt(0.0, length, 0.0)
     p3 = gp_Pnt(0.0, 0.0, length)
 
-    h1 = BRepBuilderAPI_MakeEdge(O, p1).Shape()
-    h2 = BRepBuilderAPI_MakeEdge(O, p2).Shape()
-    h3 = BRepBuilderAPI_MakeEdge(O, p3).Shape()
+    h1 = BRepBuilderAPI_MakeEdge(Orig, p1).Shape()
+    h2 = BRepBuilderAPI_MakeEdge(Orig, p2).Shape()
+    h3 = BRepBuilderAPI_MakeEdge(Orig, p3).Shape()
 
-    display.DisplayShape(O, color="BLACK")
+    display.DisplayShape(Orig, color="BLACK")
     display.DisplayShape(h1, color="RED")
     display.DisplayShape(h2, color="GREEN")
     display.DisplayShape(h3, color="BLUE")
@@ -161,8 +157,14 @@ def display_Ax2(display, Ax2, length=1):
     return None
 
 def close():
-    win = findMainWindow()
-    win.close()
+    # This function used to do these two lines, but they are undefined
+    # win = findMainWindow()
+    # win.close()
+
+    pass
+    assert False, 'This function no longer does anything.' \
+        + ' Not sure when this function is actually called,' \
+        + ' but cannot delete it since integrated with other functions.'
 
 
 if __name__ == "__main__":
