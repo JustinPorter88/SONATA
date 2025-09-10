@@ -23,8 +23,8 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
     """
 
     # KWARGS:
-    if kwargs.get("display") != None:
-        display = kwargs.get("display")
+    if kwargs.get("display") is not None:
+        _ = kwargs.get("display")
 
     enhanced_cells = []
     for i, c in enumerate(cells):
@@ -173,17 +173,19 @@ def modify_sharp_corners(cells, b_BSplineLst, global_minLen, layer_thickness, La
                 # print('modify_sharp_corners has not been implemented for cornerstyle ', c.nodes[0].cornerstyle)
         else:
             enhanced_cells.append(c)
-    try:
+
+    # replaced a try accept with this:
+    if 'FrontNodes' in locals() and 'BackNodes' in locals():
         new_b_nodes = FrontNodes + BackNodes
-    except:
+    else:
         new_b_nodes = []
 
     return enhanced_cells, new_b_nodes
 
 def second_stage_improvements(cells, b_BSplineLst, global_minLen, LayerID=0, factor1=1.8, factor2=0.15, **kw):
 
-    if kw.get("display") != None:
-        display = kw.get("display")
+    if kw.get("display") is not None:
+        _ = kw.get("display")
 
     enhanced_cells2 = []
     new_b_nodes = []
@@ -212,7 +214,10 @@ def second_stage_improvements(cells, b_BSplineLst, global_minLen, LayerID=0, fac
                 enhanced_cells2[-1].calc_theta_1()
 
             # MERGE NODES when to small
-            elif magnitude <= factor2 * global_minLen and c.nodes[1].corner == False and c.nodes[2].corner == False:
+            elif magnitude <= factor2 * global_minLen \
+                and not c.nodes[1].corner\
+                and not c.nodes[2].corner:
+
                 cP = c.nodes[1].Pnt2d.Translated(v.Multiplied(0.5))
                 # display.DisplayColoredShape(cP, 'GREEN')
                 p2 = ProjectPointOnBSplineLst(b_BSplineLst, cP, 1)
@@ -235,9 +240,8 @@ def second_stage_improvements(cells, b_BSplineLst, global_minLen, LayerID=0, fac
         else:
             enhanced_cells2.append(c)
 
-        try:
+        # replaced a try accept with this:
+        if 'newNode' in locals():
             new_b_nodes.append(newNode)
-        except:
-            None
 
     return enhanced_cells2, new_b_nodes
