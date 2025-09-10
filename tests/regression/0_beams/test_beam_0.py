@@ -6,6 +6,8 @@ import os
 import numpy as np
 from SONATA.classBlade import Blade
 
+import pytest
+
 def test_6x6_beam0():
 
     # ===== Provide Path Directory & Yaml Filename ===== #
@@ -82,3 +84,6 @@ def test_6x6_beam0():
         # 6x6 mass matrix
         assert np.allclose(job.beam_properties[i, 1].MM, ref_MM), \
             "Mass matrix does not match."
+
+if __name__ == "__main__":
+    pytest.main(["-s", "test_beam_0.py"])

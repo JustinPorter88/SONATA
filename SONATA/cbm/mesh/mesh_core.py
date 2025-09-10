@@ -84,7 +84,7 @@ def gen_core_cells(a_nodes, area=1.0, **kwargs):
     """
 
     # KWARGS:
-    if kwargs.get("options") != None:
+    if kwargs.get("options") is not None:
         options = kwargs.get("options")
     else:
         if area < 1.0:

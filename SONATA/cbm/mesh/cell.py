@@ -120,6 +120,7 @@ class Cell(object):
             except:
                 print("WARNING: Vector with Null Magnitude at cell", self)
                 theta_11 = 0
+                raise
             # print 'v0 Magnitude:',v0.Magnitude(), 'v1 Magnitude:',v1.Magnitude(),
             if theta_11 < 0:
                 theta_11 = 360 + theta_11
