@@ -62,6 +62,10 @@ cd SONATA
 pip install -e .
 ```
 
+To improve readability of git blame run (ignores commits involved with linting):
+```
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
 If you are contributing code to SONATA, you also need to install pre-commit
 ```
 pre-commit install
