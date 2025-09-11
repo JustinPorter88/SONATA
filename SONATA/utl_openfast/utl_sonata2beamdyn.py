@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thursday Oct 10 10:52:28 2019
-
-@author: Roland Feil
-"""
-# ============================================= #
 """
 Convert SONATA structural results to OpenFAST input files
 
@@ -23,7 +16,6 @@ Outputs:
     - None -
 
 """
-# ============================================= #
 
 import os
 import numpy as np

@@ -152,7 +152,7 @@ class Airfoil(object):
 
         """
         Trsf = trsf_af_to_blfr(loc, pa_loc, chord, twist)
-        if self.wire == None or self.BSplineLst == None:
+        if self.wire is None or self.BSplineLst is None:
             self.gen_OCCtopo()
 
         wire = trsf_wire(self.wire, Trsf)

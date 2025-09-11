@@ -32,7 +32,7 @@ class interpBSplineLst(object):
         """
 
         self.BSplineLst = BSplineLst
-        if check_uniformity(xgrid, xvalues) == False:
+        if not check_uniformity(xgrid, xvalues):
             print("WARNING:\t The reference axis is not uniformly defined along x!")
         self._f_xint = interp1d(xgrid, xvalues, bounds_error=False, fill_value="extrapolate")
 

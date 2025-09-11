@@ -38,7 +38,8 @@ class Web(object):
 
         if curvature is None:
             self.curvature = 0
-        else: self.curvature = curvature
+        else:
+            self.curvature = curvature
 
         self.Pos1_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos1, SegmentLst)    # p1 - start point at arc
         self.Pos2_Pnt2d = SegmentLst[0].get_Pnt2d(self.Pos2, SegmentLst)    # p2 - end point at arc

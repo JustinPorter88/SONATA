@@ -272,9 +272,9 @@ def test_external_mesh_iea15mw():
     flag_lft                = True      # plot lofted shape of blade surface (flag_wf=True obligatory); Note: create loft with grid refinement without too many radial_stations; can also export step file of lofted shape
     flag_topo               = True      # plot mesh topology
     c2_axis                 = False
-    flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
-    flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
-    flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
+    # flag_DeamDyn_def_transform = True               # transform from SONATA to BeamDyn coordinate system
+    # flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
+    # flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
 
     # create flag dictionary
     flags_dict = {"flag_wt_ontology": flag_wt_ontology,

@@ -236,14 +236,14 @@ def array_pln_intersect(array, ax2):
     # iterate first over points j and than over airfoils i
     for j, lmbs in enumerate(factors.swapaxes(0, 1)):
         found = False
-        for i, l in enumerate(lmbs):
-            if 0 <= l <= 1:
-                # print(i,j,l,res2[i,j])
+        for i, l1 in enumerate(lmbs):
+            if 0 <= l1 <= 1:
+                # print(i,j,l1,res2[i,j])
                 result.append(coords[i, j])
                 found = True
                 break
 
-        if found == False:
+        if not found:
             # print(j, lmbs, lmbs[-1]>0,lmbs[0]<0)
             # try last
             if lmbs[-1] > 0:

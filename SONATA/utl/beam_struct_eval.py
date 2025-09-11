@@ -79,7 +79,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
 
     # --------------------------------------- #
     # --- ANBAX --- #
-    if flags_dict['flag_recovery'] == True and not flags_dict['viscoelastic']:
+    if flags_dict['flag_recovery'] and not flags_dict['viscoelastic']:
 
         if np.asarray(loads_dict['Forces']).shape == (3,):
             # Assume the format is provided for just a uniform load at all
@@ -170,14 +170,14 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
                                         anbax_beam_viscoelastic[n_sec, k, :, :], T)
 
 
-        str_ext = '_BeamDyn_def'
+        # str_ext = '_BeamDyn_def'
         coordsys = 'BeamDyn'
 
         print('STATUS:\t Structural characteristics of ANBAX converted from SONATA/VABS to BeamDyn coordinate system definition!')
     else:
         anbax_beam_stiff = anbax_beam_stiff_init
         anbax_beam_inertia = anbax_beam_inertia_init
-        str_ext = ''
+        # str_ext = ''
         coordsys = 'VABS/SONATA'
 
 
@@ -247,7 +247,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
 
     if flags_dict['flag_write_BeamDyn'] & flags_dict['flag_DeamDyn_def_transform']:
         print('STATUS:\t Write BeamDyn input files')
-        refine = int(30/len(cs_pos))  # initiate node refinement parameter
+        # refine = int(30/len(cs_pos))  # initiate node refinement parameter
         write_beamdyn_axis(folder_str, flags_dict, job.yml.get('name'), job.blade_ref_axis, job.twist)
         write_beamdyn_prop(folder_str, flags_dict, job.yml.get('name'), cs_pos, anbax_beam_stiff, anbax_beam_inertia, mu)
 
@@ -275,7 +275,7 @@ def beam_struct_eval(flags_dict, loads_dict, cs_pos, job, folder_str, job_str, m
                                         anbax_beam_viscoelastic[n_sec, k, :, :], T)
 
 
-        str_ext = '_OpenTurbine_def'
+        # str_ext = '_OpenTurbine_def'
         coordsys = 'OpenTurbine'
 
         print('STATUS:\t Structural characteristics converted to OpenTurbine!')
@@ -400,7 +400,7 @@ def vabs_export_beam_struct_properties(folder_str, job_str, radial_stations, coo
 
     # -------------------------------------------------- #
     # Export mass per unit length for the defined radial stations
-    if os.path.isdir(folder_str + 'csv_export/') == False:
+    if not os.path.isdir(folder_str + 'csv_export/'):
         os.mkdir(folder_str + 'csv_export/')
     with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
         beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -468,7 +468,7 @@ def anbax_export_beam_struct_properties(folder_str, job_str, radial_stations, co
 
     # -------------------------------------------------- #
     # Export mass per unit length for the defined radial stations
-    if os.path.isdir(folder_str + 'csv_export/') == False:
+    if not os.path.isdir(folder_str + 'csv_export/'):
         os.mkdir(folder_str + 'csv_export/')
     with open(''.join([folder_str + 'csv_export/' + job_str[0:-5] + '_' + export_name_general]), mode='w') as csv_file:
         beam_prop_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -616,7 +616,7 @@ def strain_energy_eval(blade, MatID=None, station_weights=None):
 
         for ind,c in enumerate(cells):
 
-            if c.MatID == MatID or MatID == None:
+            if c.MatID == MatID or MatID is None:
                 # In Material Coordinates
                 # Stresses
                 stressM[ind, 0] = c.stressM.sigma11

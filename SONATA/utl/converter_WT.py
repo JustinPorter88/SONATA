@@ -98,7 +98,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     unordered_webs        = byml.get('internal_structure_2d_fem').get('webs')
     x           = cs_pos # Non dimensional span position of the stations
 
-    if unordered_webs == None:
+    if unordered_webs is None:
         n_webs = 0
     else:
         n_webs  = len(unordered_webs) # Max number of webs along span
@@ -135,7 +135,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     # Determine start and end positions (s-coordinates) of each web
     for i in range(len(x)):
         n_webs_i = 0
-        web_config = [dict() for n in range(len(x))]
+        # web_config = [dict() for n in range(len(x))]
         for j in range(n_webs):
             if x[i] >=tmp0[j]['start_nd_arc']['grid'][0] and x[i] <=tmp0[j]['start_nd_arc']['grid'][-1] and web_exist[i,j] == 1:
                 n_webs_i = n_webs_i + 1

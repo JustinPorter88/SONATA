@@ -285,11 +285,12 @@ class Blade(Component):
             tmp_ra[:,2] -= y
             tmp_ra[:,3] += z
 
-        if check_uniformity(tmp_ra[:, 0], tmp_ra[:, 1]) == False:
+        if not check_uniformity(tmp_ra[:, 0], tmp_ra[:, 1]):
             print("WARNING:\t The blade beference axis is not uniformly defined along x")
 
         # print(tmp_ra[:,1:])
-        BSplineLst = BSplineLst_from_dct(tmp_ra[:, 1:], angular_deflection=5, twoD=False)
+        BSplineLst = BSplineLst_from_dct(tmp_ra[:, 1:], angular_deflection=5,
+                                         twoD=False)
         f_ra = interpBSplineLst(BSplineLst, tmp_ra[:, 0], tmp_ra[:, 1])
         return (BSplineLst, f_ra, tmp_ra)
 
@@ -910,7 +911,7 @@ class Blade(Component):
                     v2.Normalize()
                     v2.Multiply(0.1)
                     v3 = v1.Added(v2)
-                    p2 = gp_Pnt(v3.XYZ())
+                    _ = gp_Pnt(v3.XYZ())
 
         self.display.View_Iso()
         self.display.FitAll()

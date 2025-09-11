@@ -39,8 +39,8 @@ def run_stresses(job_str, loads_dict, flag_constant_loads):
     flag_write_BeamDyn = True                       # write BeamDyn input files for follow-up OpenFAST analysis (requires flag_DeamDyn_def_transform = True)
     flag_write_BeamDyn_unit_convert = ''  #'mm_to_m'     # applied only when exported to BeamDyn files
 
-    # Shape of corners
-    choose_cutoff = 2    # 0 step, 2 round
+    # # Shape of corners
+    # choose_cutoff = 2    # 0 step, 2 round
 
     # Flag applies twist rotations in SONATA before output and then sets the output
     # twist to all be zero degrees.
@@ -81,7 +81,7 @@ def run_stresses(job_str, loads_dict, flag_constant_loads):
     # ===== Recovery Analysis + BeamDyn Outputs ===== #
 
     # # Define flags
-    flag_3d = False
+    # flag_3d = False
     flag_csv_export = False                         # export csv files with structural data
     # Update flags dictionary
     flags_dict['flag_csv_export'] = flag_csv_export

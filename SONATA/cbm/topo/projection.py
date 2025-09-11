@@ -46,7 +46,7 @@ def insert_interval_in_layup(layup, begin, end, **kw):
     """
 
     # KWARGS:
-    if kw.get("value") != None:
+    if kw.get("value") is not None:
         idx = kw.get("value")
     else:
         idx = max(layup[:, 2]) + 1
@@ -230,7 +230,7 @@ def inverse_relevant_cummulated_layup_boundaries(Layup):
     inverse_projection = []
     for iv_tree in flipped_Projection:
         part1 = iv_tree[:, :2]
-        part2 = np.asarray([[d[l] for l in iv_tree[:, 2]]])
+        part2 = np.asarray([[d[lay] for lay in iv_tree[:, 2]]])
         inverse_projection.append(np.concatenate((part1, part2.T), axis=1))
 
     inverse_projection = reversed(inverse_projection)
@@ -257,6 +257,6 @@ if __name__ == "__main__":
         ],
     )
 
-    plot_layup_projection(Layup)
+    # plot_layup_projection(Layup)
     relevant_projectionlist = relevant_cummulated_layup_boundaries(Layup)
     inverse_projection = inverse_relevant_cummulated_layup_boundaries(Layup)

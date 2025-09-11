@@ -174,9 +174,9 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
     # Check Orientation and reverse if neccessary
     # TODO: Be careful not to reverse Linestring!
 
-    if closed == True:
+    if closed:
         Orientation = Polygon_orientation(data)
-        if Orientation == True:
+        if Orientation:
             data = np.flipud(data)
 
     # ==============Interpolate large linear spaces=============================
@@ -194,7 +194,7 @@ def shp_parallel_offset(arrPts, dist, join_style=1, side="right", res=16):
     else:
         Refinement = False
 
-    while Refinement == True:
+    while Refinement:
         temp_data = []
         for i in range(0, len(data) - 1):
             if P2Pdistance(data[i], data[i + 1]) > (cumm_length / Resolution):

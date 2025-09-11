@@ -50,12 +50,13 @@ class Segment(object):
         self.Projection = relevant_cummulated_layup_boundaries(self.Layup)
         self.wire = None
 
-        if self.OCC == True:
+        if self.OCC:
             self.BSplineLst = kwargs.get("Boundary")
 
-        elif self.OCC == False:
-            if kwargs.get("airfoil") != None:
-                BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get("airfoil"), 30, self.scale_factor)
+        elif not self.OCC:
+            if kwargs.get("airfoil") is not None:
+                _ = self.BSplineLst_from_airfoil_database(
+                    kwargs.get("airfoil"), 30, self.scale_factor)
 
 
     def __repr__(self):

@@ -139,7 +139,7 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset=0, description=Tru
         r"\cdot \left( \begin{matrix} \epsilon_{1} \\ \epsilon_{2} \\ \epsilon_{3} \\ \kappa_{1} \\ \kappa_{2} \\ \kappa_{3} \end{matrix} \right) $$ \end{minipage} "
     )
 
-    if description == True:
+    if description:
 
         plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True, bbox=dict(ec=(1.0, 0.5, 0.5), fc=(1.0, 0.8, 0.8)))
 
