@@ -50,17 +50,23 @@ class Layer(object):
         self.b_nodes = []  # type: List
 
         # KWARGS:
-        if kwargs.get("name") == None:
+        if kwargs.get("name") is None:
             self.name = "DEFAULT"
         else:
             self.name = kwargs.get("name")
 
-        if (kwargs.get("cutoff_style") == None) or (type(kwargs.get("cutoff_style")) is not int):  # cutoff_style (step, linear, smooth_bezier)
+        if (kwargs.get("cutoff_style") is None) \
+            or not isinstance(kwargs.get("cutoff_style"), int):
+                # cutoff_style (step, linear, smooth_bezier)
+
             self.cutoff_style = 2
         else:
             self.cutoff_style = kwargs.get("cutoff_style")
 
-        if (kwargs.get("join_style") == None) or (type(kwargs.get("join_style")) is not int):  # offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+        if (kwargs.get("join_style") is None) \
+            or not isinstance(kwargs.get("join_style"), int):
+                # offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+
             self.join_style = 1
         else:
             self.join_style = kwargs.get("join_style")
@@ -224,10 +230,17 @@ class Layer(object):
         self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
         try:
-            self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
+            self.cells, nb_nodes = second_stage_improvements(self.cells,
+                             self.b_BSplineLst, global_minLen, self.ID,
+                             growing_factor, shrinking_factor, display=display)
             self.b_nodes.extend(nb_nodes)
         except:
-            pass
+
+            print('This may not need to be an error, may be okay passing')
+            print('after previous branch failed. However, not currently hit')
+            print('on tests, so just raising an exception here.')
+
+            raise
 
         # self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
 
@@ -273,11 +286,11 @@ class Layer(object):
                 First = item.FirstParameter()
                 Last = item.LastParameter()
 
-                if isclose(OriPara[1], First) == True:
+                if isclose(OriPara[1], First):
                     OBSplineLst.append(item)
                     CorrectOrigin = True
 
-                elif isclose(OriPara[1], Last) == True:
+                elif isclose(OriPara[1], Last):
                     CorrectOrigin = False
                     BSplineCurve2 = item
 
@@ -300,7 +313,7 @@ class Layer(object):
             else:
                 None
 
-        if CorrectOrigin == False:
+        if not CorrectOrigin:
             OBSplineLst.append(BSplineCurve2)
         else:
             None

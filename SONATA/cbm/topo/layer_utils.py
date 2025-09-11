@@ -21,7 +21,7 @@ def get_layer(lid, SegmentLst):
             else:
                 x = None
 
-        if x == None:
+        if x is None:
             print("ERROR:\t the lid:", lid, " was not found")
 
         return x

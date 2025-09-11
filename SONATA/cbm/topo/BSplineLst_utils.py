@@ -559,6 +559,8 @@ def BSplineLst_from_dct(DCT_data, angular_deflection=15,  cutoff_style = 2, clos
                 plt.annotate(i, (it[0], it[1]), color="black")
             plt.show()
 
+            raise
+
         tmp_interpolation.Perform()
         tmp_bspline = tmp_interpolation.Curve()
         list_of_bsplines.append(tmp_bspline)
@@ -596,11 +598,11 @@ def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-1):
             First = item.FirstParameter()
             Last = item.LastParameter()
 
-            if isclose(OriPara[1], First) == True:
+            if isclose(OriPara[1], First):
                 OBSplineLst.append(item)
                 CorrectOrigin = True
 
-            elif isclose(OriPara[1], Last) == True:
+            elif isclose(OriPara[1], Last):
                 CorrectOrigin = False
                 BSplineCurve2 = item
 
@@ -623,7 +625,7 @@ def set_BSplineLst_to_Origin2(BSplineLst, gp_Pnt2d, tol=1e-1):
         else:
             None
 
-    if CorrectOrigin == False:
+    if not CorrectOrigin:
         OBSplineLst.append(BSplineCurve2)
     else:
         None

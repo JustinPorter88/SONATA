@@ -5,7 +5,6 @@ import math
 # Third party modules
 import numpy as np
 # from OCC.AIS import AIS_Shape
-from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve
 from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformAbscissa
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
@@ -53,16 +52,16 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
         (BSplineLst, IC=True,  MinLen)
 
     """
-    if IC == True:
+    if IC:
         closed = False
         if BSplineLst[0].StartPoint().IsEqual(BSplineLst[-1].EndPoint(), 1e-5):
             closed = True
 
         # KWARGS:
-        if kwargs.get("minLen") != None:
+        if kwargs.get("minLen") is not None:
             minLen = kwargs.get("minLen")
 
-        if kwargs.get("LayerID") != None:
+        if kwargs.get("LayerID") is not None:
             LayerID = kwargs.get("LayerID")
 
         nodes = []
@@ -77,14 +76,14 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
                     para = discretization.Parameter(j)
                     Pnt = gp_Pnt2d()
                     item.D0(para, Pnt)
-                    if j == 1 and IncStart == False and idx == 0:
+                    if j == 1 and not IncStart and idx == 0:
                         pass
 
                     else:
                         node = Node(Pnt, [LayerID, idx, para])
                         nodes.append(node)
 
-        if closed == False and IncEnd == True:  # add last point
+        if not closed and IncEnd:  # add last point
             para = discretization.Parameter(j + 1)
             Pnt = gp_Pnt2d()
             item.D0(para, Pnt)
@@ -92,25 +91,30 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
             nodes.append(node)
 
     else:
-        wire = build_wire_from_BSplineLst(BSplineLst)
-        wire_length = get_wire_length(wire)
+        print('This branch does not have the correct functions imported.')
+        print('Therefore it was commented out and an error raised here.')
+        raise
+        # wire = build_wire_from_BSplineLst(BSplineLst)
+        # wire_length = get_wire_length(wire)
 
-        # KWARGS:
-        if kwargs.get("NbPoints") != None:
-            NbPoints = kwargs.get("NbPoints")
+        # # KWARGS:
+        # if kwargs.get("NbPoints") is not None:
+        #     NbPoints = kwargs.get("NbPoints")
 
-        elif kwargs.get("minLen") != None and kwargs.get("NbPoints") == None:
-            NbPoints = int(wire_length // kwargs.get("minLen")) + 2
+        # elif kwargs.get("minLen") is not None \
+        #     and kwargs.get("NbPoints") is None:
 
-        AdaptorComp = BRepAdaptor_CompCurve(wire, True)
-        discretization = GCPnts_QuasiUniformAbscissa(AdaptorComp, NbPoints)
+        #     NbPoints = int(wire_length // kwargs.get("minLen")) + 2
 
-        nodes = []
-        for j in range(1, NbPoints + 1):
-            para = discretization.Parameter(j)
-            P = AdaptorComp.Value(para)
-            node = Node(gp_Pnt2d(P.X(), P.Y()))
-            nodes.append(nodes)
+        # AdaptorComp = BRepAdaptor_CompCurve(wire, True)
+        # discretization = GCPnts_QuasiUniformAbscissa(AdaptorComp, NbPoints)
+
+        # nodes = []
+        # for j in range(1, NbPoints + 1):
+        #     para = discretization.Parameter(j)
+        #     P = AdaptorComp.Value(para)
+        #     node = Node(gp_Pnt2d(P.X(), P.Y()))
+        #     nodes.append(nodes)
 
     return nodes
 
@@ -137,7 +141,7 @@ def move_node_on_BSplineLst(BSplineLst, node, dist, tol=1e-6):
         L = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tol)
         # Add new Spline to CRL
         if j == 0:
-            if direction == False:
+            if not direction:
                 U = last - (U - first)
             CRL += GCPnts_AbscissaPoint().Length(Adaptor, U, last, tol)
         else:
