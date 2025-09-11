@@ -69,7 +69,7 @@ class interpBSplineLst(object):
                 resCoords.append(IntCoords[0])
             except:
                 print("No Intersection Found")
-                raise Exception
+                raise
 
         return (np.asarray(res), np.asarray(resCoords))
 
