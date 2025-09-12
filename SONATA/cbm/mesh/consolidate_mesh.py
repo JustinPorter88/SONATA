@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Functionalities concerning the consolidation between the individual meshes in 
-the different segments. Segments>0 are seperated by a web and meshed individually. 
-The web is defining the interface between the segemnts. The functions in this 
-module make sure that the nodes of both segments are matched and hanging nodes 
+Functionalities concerning the consolidation between the individual meshes in
+the different segments. Segments>0 are seperated by a web and meshed individually.
+The web is defining the interface between the segemnts. The functions in this
+module make sure that the nodes of both segments are matched and hanging nodes
 are eliminated by splitting cells.
 
 Created on Thu Nov 02 10:46:29 2017
@@ -21,23 +21,23 @@ from SONATA.cbm.mesh.mesh_utils import find_cells_that_contain_node
 
 def consolidate_mesh_on_web(web, w_tol, display=None):
     """ Consolidates mesh on the web interface.
-    
+
     After the mesh has been generated for every segment. This function makes
     sure that no hanging nodes remain in the mesh.
-    
+
     Args:
         mesh: The overall mesh (list of cells) to consolidate and also to return
         w_BSplineLst: is the definition of the web as a BSplineLst, usually
                     it is a List with one spline that is a straight line.
         w1_nodes: are the nodes of the left segment that lie on the web
-        w2_nodes: are the nodes of the right segment that lie on the web 
-        w_tol (float) : tolerance to decide whether to match a left node to a right node 
+        w2_nodes: are the nodes of the right segment that lie on the web
+        w_tol (float) : tolerance to decide whether to match a left node to a right node
                or if the cell should rather be devided into triangles.
-        display: 
-            
-    Returns: 
+        display:
+
+    Returns:
         mesh: the updated mesh formulation (list of cells)
-                
+
     """
     w1_nodes = web.wl_nodes
     w2_nodes = web.wr_nodes
@@ -93,20 +93,20 @@ def consolidate_mesh_on_web(web, w_tol, display=None):
 
 def split_cells_to_consolidate(cells, rem_nodes, display):
     """Subfunction to split cells with hanging nodes.
-    
+
     Subfunction of consolidate_mesh_on_web to split cells with hanging nodes.
     It first identifies cells that are beeing intersected by the hanging nodes
     and then splits quad cells into 1 triangle and one quad and a triangle cell
     into two triangles.
-    
+
     Args:
         mesh: The overall mesh (list of cells) to consolidate and also to return
         rem_nodes: remaining hanging nodes, where no match was found
         display: passes OCC display environment
-            
-    Returns: 
+
+    Returns:
         mesh: the updated mesh formulation (list of cells)
-                        
+
     """
     newcells = []
     for c in cells:

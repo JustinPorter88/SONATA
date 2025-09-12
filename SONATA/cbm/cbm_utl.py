@@ -11,16 +11,16 @@ import numpy as np
 
 def trsf_sixbysix(M, T):
     """
-    Transform six-by-six compliance/stiffness matrix. 
+    Transform six-by-six compliance/stiffness matrix.
     change of reference frame in engineering (or Voigt) notation.
-    
+
     Parameters
     ----------
     M : np.ndarray
         6x6 Siffness or Mass Matrix
     T : np.ndarray
         Transformation Matrix
-        
+
     Returns
     ----------
     res : np.ndarray

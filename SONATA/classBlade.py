@@ -3,7 +3,6 @@
 #------------------------------------------------------------------------------------
 
 # Standard library
-from typing import Optional, Union, List, Dict, Any
 
 # Third party modules
 import matplotlib.pyplot as plt
@@ -13,9 +12,8 @@ from scipy.interpolate import interp1d, PchipInterpolator
 
 # OpenCASCADE imports
 from OCC.Core.gp import (
-    gp_Ax1, gp_Ax2, gp_Ax3,
-    gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d,
-    gp_Trsf, gp_Vec
+    gp_Ax1, gp_Ax2, gp_Dir, gp_Pnt, gp_Pnt2d,
+    gp_Vec
 )
 
 # SONATA core classes
@@ -42,7 +40,6 @@ from SONATA.cbm.topo.BSplineLst_utils import (
     BSplineLst_from_dct,
     set_BSplineLst_to_Origin2
 )
-from SONATA.cbm.topo.to3d import bsplinelst_to3d, pnt_to3d, vec_to3d
 from SONATA.cbm.topo.utils import Array_to_PntLst, PntLst_to_npArray
 from SONATA.cbm.topo.wire_utils import equidistant_Points_on_wire
 
@@ -57,7 +54,7 @@ from SONATA.utl.blade_utl import (
 from SONATA.utl.converter_WT import converter_WT
 from SONATA.utl.interpBSplineLst import interpBSplineLst
 from SONATA.utl.plot import plot_beam_properties
-from SONATA.utl.trsf import trsf_af_to_blfr, trsf_blfr_to_cbm
+from SONATA.utl.trsf import trsf_blfr_to_cbm
 
 
 #------------------------------------------------------------------------------------
@@ -288,11 +285,12 @@ class Blade(Component):
             tmp_ra[:,2] -= y
             tmp_ra[:,3] += z
 
-        if check_uniformity(tmp_ra[:, 0], tmp_ra[:, 1]) == False:
+        if not check_uniformity(tmp_ra[:, 0], tmp_ra[:, 1]):
             print("WARNING:\t The blade beference axis is not uniformly defined along x")
 
         # print(tmp_ra[:,1:])
-        BSplineLst = BSplineLst_from_dct(tmp_ra[:, 1:], angular_deflection=5, twoD=False)
+        BSplineLst = BSplineLst_from_dct(tmp_ra[:, 1:], angular_deflection=5,
+                                         twoD=False)
         f_ra = interpBSplineLst(BSplineLst, tmp_ra[:, 0], tmp_ra[:, 1])
         return (BSplineLst, f_ra, tmp_ra)
 
@@ -719,66 +717,6 @@ class Blade(Component):
             cs.cbm_exp_stress_strain_map(ind, x, curr_twist, **kwargs)
         pass
 
-
-    def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='vabs', filename = None):
-        """
-        Exports the beam_properties in the
-
-        Parameters
-        ----------
-        cosy : str, optional
-            either 'global' for the global beam coordinate system or
-            'local' for a coordinate system that is always pointing with
-            the chord-line (in the twisted frame)
-
-        style : str, optional
-            select the style you want the beam_properties to be exported
-            'DYMORE' will return an array of the following form:
-            [[Massterms(6) (m00, mEta2, mEta3, m33, m23, m22)
-            Stiffness(21) (k11, k12, k22, k13, k23, k33,... k16, k26, ...k66)
-            Viscous Damping(1) mu, Curvilinear coordinate(1) eta]]
-            ...
-
-        eta_offset : float, optional
-            if the beam eta coordinates from start to end of the beam doesn't
-            coincide with the global coorinate system of the blade. The unit
-            is in nondimensional r coordinates (x/Radius)
-
-        solver : str, optional
-            solver : if multiple or other solvers than vabs were applied, use
-            this option
-
-        filename : str, optional
-            if the user wants to write the output to a file.
-
-        Returns
-        ----------
-        arr : ndarray
-            an array that reprensents the beam properties for the
-        """
-
-        lst = []
-        for cs in self.sections:
-            # collect data for each section
-            R = self.blade_ref_axis[-1, 1]
-            # eta = -eta_offset/(1-eta_offset) + (1/(1-eta_offset))*cs[0]
-            eta = (cs[0] * R) - (eta_offset * R)
-            if style == "DYMORE":
-                lst.append(cs[1].cbm_exp_dymore_beamprops(eta=eta, solver=solver))
-
-            elif style == "BeamDyn":
-                lst.append(cs[1].cbm_exp_BeamDyn_beamprops(eta=eta, solver=solver))
-
-            elif style == "CAMRADII":
-                pass
-
-            elif style == "CPLambda":
-                pass
-
-        arr = np.asarray(lst)
-
-        return arr
-
     def blade_plot_attributes(self):
         """
         plot the coordinates, chord, twist and pitch axis location of the blade
@@ -913,7 +851,7 @@ class Blade(Component):
                     v2.Normalize()
                     v2.Multiply(0.1)
                     v3 = v1.Added(v2)
-                    p2 = gp_Pnt(v3.XYZ())
+                    _ = gp_Pnt(v3.XYZ())
 
         self.display.View_Iso()
         self.display.FitAll()

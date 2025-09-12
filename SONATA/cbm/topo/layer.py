@@ -2,7 +2,6 @@
 import numpy as np
 from OCC.Core.gp import gp_Pnt2d
 from scipy.spatial import distance
-import matplotlib.pyplot as plt
 
 # First party modules
 from SONATA.cbm.mesh.mesh_byprojection import \
@@ -29,8 +28,8 @@ from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 
 
 class Layer(object):
-    """ 
-    The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations. 
+    """
+    The layer object is constructed from multiple BSplineCurveSegments. It is the basis for all future operations.
     The object can be constructed from either a discrete formulation of point tables or from an existing TopoDS_Wire.
     """
 
@@ -51,17 +50,23 @@ class Layer(object):
         self.b_nodes = []  # type: List
 
         # KWARGS:
-        if kwargs.get("name") == None:
+        if kwargs.get("name") is None:
             self.name = "DEFAULT"
         else:
             self.name = kwargs.get("name")
 
-        if (kwargs.get("cutoff_style") == None) or (type(kwargs.get("cutoff_style")) is not int):  # cutoff_style (step, linear, smooth_bezier)
+        if (kwargs.get("cutoff_style") is None) \
+            or not isinstance(kwargs.get("cutoff_style"), int):
+                # cutoff_style (step, linear, smooth_bezier)
+
             self.cutoff_style = 2
         else:
             self.cutoff_style = kwargs.get("cutoff_style")
 
-        if (kwargs.get("join_style") == None) or (type(kwargs.get("join_style")) is not int):  # offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+        if (kwargs.get("join_style") is None) \
+            or not isinstance(kwargs.get("join_style"), int):
+                # offset algorithm join_style = 1#( 1:round,2:mitre,3:bevels)
+
             self.join_style = 1
         else:
             self.join_style = kwargs.get("join_style")
@@ -174,48 +179,48 @@ class Layer(object):
         self.a_nodes = remove_duplicates_from_list_preserving_order(new_a_nodes)
         self.a_nodes = merge_nodes_if_too_close(self.a_nodes, self.a_BSplineLst, global_minLen, 0.01)
 
-    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=9e-2, 
-                   proj_tol_2=4e-1, crit_angle_1=150, alpha_crit_2=60, 
+    def mesh_layer(self, SegmentLst, global_minLen, proj_tol_1=9e-2,
+                   proj_tol_2=4e-1, crit_angle_1=150, alpha_crit_2=60,
                    growing_factor=1.8, shrinking_factor=0.01, display=None, l0=None):
         """
-        The mesh layer function discretizes the layer, which is composed of a 
-        a_BsplineLst and a b_BsplineLst. Between the a_BsplineLst and the 
+        The mesh layer function discretizes the layer, which is composed of a
+        a_BsplineLst and a b_BsplineLst. Between the a_BsplineLst and the
         b_BsplineLst the cells are created. First nodes on the a_BSplineLst are
-        determined with the determine_a_nodes procedure. Subsequently the 
-        a_nodes are projected onto the b_BsplineLst. The following functions 
+        determined with the determine_a_nodes procedure. Subsequently the
+        a_nodes are projected onto the b_BsplineLst. The following functions
         (modify_cornerstyle_one, modify_sharp_corners and
         second_stage_improvements) try to improve the quality of the mesh.
         everything is stored in the layer.cells and is returned
-        
+
         Parameters
         --------
-        SegmentLst:               The overall list of Segments within the 
+        SegmentLst:               The overall list of Segments within the
                                 segemet. This list is needed to determine
                                 the a_nodes
-        global_minLen:          
-        proj_tol_1 = 5e-2:      tolerance value to determine a distance, 
-                                in which the resulting projection point 
-                                has to be. 
+        global_minLen:
+        proj_tol_1 = 5e-2:      tolerance value to determine a distance,
+                                in which the resulting projection point
+                                has to be.
                                 (mesh_by_projecting_nodes_on_BSplineLst)
-        proj_tol_2 = 2e-1:      tolerance value to determine a distance, 
-                                in which the resulting projection point 
+        proj_tol_2 = 2e-1:      tolerance value to determine a distance,
+                                in which the resulting projection point
                                 has to be. (modify_sharp_corners)
-        crit_angle_1 = 150:     is the critical angle to determine a corner 
+        crit_angle_1 = 150:     is the critical angle to determine a corner
                                 if 2 projection points are found.
                                 If this value is too small, can hit a case were
                                 both projections are seen as corners, but the
                                 node is not and thus the edge case is not
                                 handled and a mesh warning ultimately gets
                                 raised.
-        alpha_crit_2 = 60:      is the critical angle to refine  a corner 
-        growing_factor = 1.8:   critical growing factor of cell before 
-                                splitting 
-        shrinking_factor = 0.10:  critical shrinking factor for cells 
+        alpha_crit_2 = 60:      is the critical angle to refine  a corner
+        growing_factor = 1.8:   critical growing factor of cell before
+                                splitting
+        shrinking_factor = 0.10:  critical shrinking factor for cells
                                 before merging nodes
-        
+
         Returns
         -------
-        self.cells: (list of cells) 
+        self.cells: (list of cells)
         """
         self.determine_a_nodes(SegmentLst, global_minLen, display)
         self.a_nodes, self.b_nodes, self.cells = mesh_by_projecting_nodes_on_BSplineLst(
@@ -225,10 +230,17 @@ class Layer(object):
         self.cells, nb_nodes = modify_sharp_corners(self.cells, self.b_BSplineLst, global_minLen, self.thickness, self.ID, proj_tol_2, alpha_crit_2, display=display)
         self.b_nodes.extend(nb_nodes)
         try:
-            self.cells, nb_nodes = second_stage_improvements(self.cells, self.b_BSplineLst, global_minLen, self.ID, growing_factor, shrinking_factor, display=display)
+            self.cells, nb_nodes = second_stage_improvements(self.cells,
+                             self.b_BSplineLst, global_minLen, self.ID,
+                             growing_factor, shrinking_factor, display=display)
             self.b_nodes.extend(nb_nodes)
         except:
-            pass
+
+            print('This may not need to be an error, may be okay passing')
+            print('after previous branch failed. However, not currently hit')
+            print('on tests, so just raising an exception here.')
+
+            raise
 
         # self.b_nodes = sorted(self.b_nodes, key=lambda Node: (Node.parameters[1],Node.parameters[2]))
 
@@ -242,12 +254,12 @@ class Layer(object):
 
     def set_layer_origin(self):
         """
-        this procedure reorders the self.BSplineLst to an origin if the layer 
-        is closed. The Origin is detected by searching for an orthogonal 
-        projection of the StartPoint of the self.Boundary_BSplineLst. If no 
-        projection is found it takes the closest neighbor of the discrete 
+        this procedure reorders the self.BSplineLst to an origin if the layer
+        is closed. The Origin is detected by searching for an orthogonal
+        projection of the StartPoint of the self.Boundary_BSplineLst. If no
+        projection is found it takes the closest neighbor of the discrete
         offlinepts (Offset Line Points).
-                
+
         """
         # Determine Origin as point
         if self.IsClosed:
@@ -274,11 +286,11 @@ class Layer(object):
                 First = item.FirstParameter()
                 Last = item.LastParameter()
 
-                if isclose(OriPara[1], First) == True:
+                if isclose(OriPara[1], First):
                     OBSplineLst.append(item)
                     CorrectOrigin = True
 
-                elif isclose(OriPara[1], Last) == True:
+                elif isclose(OriPara[1], Last):
                     CorrectOrigin = False
                     BSplineCurve2 = item
 
@@ -301,7 +313,7 @@ class Layer(object):
             else:
                 None
 
-        if CorrectOrigin == False:
+        if not CorrectOrigin:
             OBSplineLst.append(BSplineCurve2)
         else:
             None

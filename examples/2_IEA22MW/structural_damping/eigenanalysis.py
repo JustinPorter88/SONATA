@@ -285,7 +285,7 @@ for key in output_data.keys():
 # Write out the yaml file of the modal information
 with open(output_fname, 'w') as file:
     yaml.dump(output_data, file)
-    
+
 
 ###############################################################################
 ######## Load Some OTTR Mode Data to Run                               ########
@@ -337,7 +337,7 @@ for station_ind, map_curr in enumerate(map_data):
 
 # Loop over modes
 for mode_ind in range(N_modes):
-    
+
     force_moments = np.vstack((np.array(output_data['FzL'])[:, mode_ind],
                               np.array(output_data['FyL'])[:, mode_ind],
                               -np.array(output_data['FxL'])[:, mode_ind],
@@ -351,33 +351,33 @@ for mode_ind in range(N_modes):
         # second index is element number
         stresses = np.einsum('ijk,j->ik', map_curr['fc_to_stress_m'],
                             force_moments[:, station_ind])
-        
+
         strains = np.einsum('ijk,j->ik', map_curr['fc_to_strain_m'],
                             force_moments[:, station_ind])
-        
+
         # energy densities at each element and each station
         energy_densities = 0.5*stresses * strains
-        
+
         # energy scaled by volume for each element (area and length quadrature
         # weight)
         energy = energy_densities * map_curr['elem_areas'].reshape(1, -1) \
                     * quad_length_weights[station_ind]
-        
+
         # loop over materials and add up energies for each direction
         for mat_ind, mat_name in enumerate(map_curr['material_names']):
-            
+
             elem_mask = map_curr['elem_materials'] == mat_ind
 
             if elem_mask.sum() > 0:
-                
+
                 # first index for each material is direction with order
                 # [11, 22, 33, 23, 13, 12]
-                
-                
+
+
                 # sum energy over elements and then over stations
                 energy_dict[mat_name][:, mode_ind] \
                     += energy[:, elem_mask].sum(axis=1)
-                
+
 ###############################################################################
 ######## For a given mode, print energy fractions                      ########
 ###############################################################################
@@ -390,17 +390,17 @@ mode_energy = np.zeros(N_modes)
 for mode_ind in range(N_modes):
     print('Mode {}:'.format(mode_ind + 1))
     for key in energy_dict.keys():
-        
+
         mode_energy[mode_ind] += energy_dict[key][:, mode_ind].sum()
-    
+
     for key in energy_dict.keys():
         print('{} Energy Fractions: {}'.format(key,
                        energy_dict[key][:, mode_ind]/mode_energy[mode_ind]))
-        
+
         energy_dict[key][:, mode_ind] = energy_dict[key][:, mode_ind] \
                                             / mode_energy[mode_ind]
 
-    
+
     # Replace the energy dictionary with the fraction for each mode
 
 

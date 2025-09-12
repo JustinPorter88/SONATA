@@ -15,23 +15,23 @@ import numpy as np
 
 def plot_beam_properties(data, sigma=None, ref=None, x_offset=0, description=True):
     """
-    generates a plot of the beamproperties using the 
-    
+    generates a plot of the beamproperties using the
+
     Parameters
     ----------
-    Data : np.ndarray 
-        Massterms(6), Stiffness(21), damping(1), and coordinate(1) stacked 
-        horizontally for the use in DYMORE/PYMORE/MARC  
+    Data : np.ndarray
+        Massterms(6), Stiffness(21), damping(1), and coordinate(1) stacked
+        horizontally for the use in DYMORE/PYMORE/MARC
     sigma: np.ndarray
         standart deviation of Data
-    
+
     ref: np.ndarray
         of reference to select = 'all', 'Massterms', 'Stiffness'
-    
-    x_offset : float 
-        x offset if curvilinear coordinate doen't start at the rotational 
+
+    x_offset : float
+        x offset if curvilinear coordinate doen't start at the rotational
         center of the rotordefault UH-60A value = 0.8178698
-            
+
     """
 
     # Inertia Properties:
@@ -139,8 +139,7 @@ def plot_beam_properties(data, sigma=None, ref=None, x_offset=0, description=Tru
         r"\cdot \left( \begin{matrix} \epsilon_{1} \\ \epsilon_{2} \\ \epsilon_{3} \\ \kappa_{1} \\ \kappa_{2} \\ \kappa_{3} \end{matrix} \right) $$ \end{minipage} "
     )
 
-    if description == True:
-        from matplotlib import rcParams
+    if description:
 
         plt.figtext(0.05, 0.05, desc, usetex=True, wrap=True, bbox=dict(ec=(1.0, 0.5, 0.5), fc=(1.0, 0.8, 0.8)))
 

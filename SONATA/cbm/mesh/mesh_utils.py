@@ -5,7 +5,6 @@ import math
 # Third party modules
 import numpy as np
 # from OCC.AIS import AIS_Shape
-from OCC.Core.BRepAdaptor import BRepAdaptor_CompCurve
 from OCC.Core.GCPnts import GCPnts_AbscissaPoint, GCPnts_QuasiUniformAbscissa
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCC.Core.Geom2dAPI import Geom2dAPI_ProjectPointOnCurve
@@ -51,18 +50,18 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
         IncEnd(Include EndPoint)
         (BSplineLst, IC=False, either NbPoints or MinLen)
         (BSplineLst, IC=True,  MinLen)
-        
+
     """
-    if IC == True:
+    if IC:
         closed = False
         if BSplineLst[0].StartPoint().IsEqual(BSplineLst[-1].EndPoint(), 1e-5):
             closed = True
 
         # KWARGS:
-        if kwargs.get("minLen") != None:
+        if kwargs.get("minLen") is not None:
             minLen = kwargs.get("minLen")
 
-        if kwargs.get("LayerID") != None:
+        if kwargs.get("LayerID") is not None:
             LayerID = kwargs.get("LayerID")
 
         nodes = []
@@ -77,14 +76,14 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
                     para = discretization.Parameter(j)
                     Pnt = gp_Pnt2d()
                     item.D0(para, Pnt)
-                    if j == 1 and IncStart == False and idx == 0:
+                    if j == 1 and not IncStart and idx == 0:
                         pass
 
                     else:
                         node = Node(Pnt, [LayerID, idx, para])
                         nodes.append(node)
 
-        if closed == False and IncEnd == True:  # add last point
+        if not closed and IncEnd:  # add last point
             para = discretization.Parameter(j + 1)
             Pnt = gp_Pnt2d()
             item.D0(para, Pnt)
@@ -92,25 +91,30 @@ def equidistant_nodes_on_BSplineLst(BSplineLst, IC=False, IncStart=True, IncEnd=
             nodes.append(node)
 
     else:
-        wire = build_wire_from_BSplineLst(BSplineLst)
-        wire_length = get_wire_length(wire)
+        print('This branch does not have the correct functions imported.')
+        print('Therefore it was commented out and an error raised here.')
+        raise
+        # wire = build_wire_from_BSplineLst(BSplineLst)
+        # wire_length = get_wire_length(wire)
 
-        # KWARGS:
-        if kwargs.get("NbPoints") != None:
-            NbPoints = kwargs.get("NbPoints")
+        # # KWARGS:
+        # if kwargs.get("NbPoints") is not None:
+        #     NbPoints = kwargs.get("NbPoints")
 
-        elif kwargs.get("minLen") != None and kwargs.get("NbPoints") == None:
-            NbPoints = int(wire_length // kwargs.get("minLen")) + 2
+        # elif kwargs.get("minLen") is not None \
+        #     and kwargs.get("NbPoints") is None:
 
-        AdaptorComp = BRepAdaptor_CompCurve(wire, True)
-        discretization = GCPnts_QuasiUniformAbscissa(AdaptorComp, NbPoints)
+        #     NbPoints = int(wire_length // kwargs.get("minLen")) + 2
 
-        nodes = []
-        for j in range(1, NbPoints + 1):
-            para = discretization.Parameter(j)
-            P = AdaptorComp.Value(para)
-            node = Node(gp_Pnt2d(P.X(), P.Y()))
-            nodes.append(nodes)
+        # AdaptorComp = BRepAdaptor_CompCurve(wire, True)
+        # discretization = GCPnts_QuasiUniformAbscissa(AdaptorComp, NbPoints)
+
+        # nodes = []
+        # for j in range(1, NbPoints + 1):
+        #     para = discretization.Parameter(j)
+        #     P = AdaptorComp.Value(para)
+        #     node = Node(gp_Pnt2d(P.X(), P.Y()))
+        #     nodes.append(nodes)
 
     return nodes
 
@@ -137,7 +141,7 @@ def move_node_on_BSplineLst(BSplineLst, node, dist, tol=1e-6):
         L = GCPnts_AbscissaPoint().Length(Adaptor, first, last, tol)
         # Add new Spline to CRL
         if j == 0:
-            if direction == False:
+            if not direction:
                 U = last - (U - first)
             CRL += GCPnts_AbscissaPoint().Length(Adaptor, U, last, tol)
         else:
@@ -167,18 +171,18 @@ def move_node_on_BSplineLst(BSplineLst, node, dist, tol=1e-6):
 
 
 def grab_nodes_of_cells_on_BSplineLst(cells, BSplineLst):
-    """the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of 
-    the cells that are located on the BSplineLst (list of geom2d_BSpline 
-    objects) with a given tolerance and uses the subfunction 
+    """the grab_nodes_of_cells_on_BSplineLst fuction determines the nodes of
+    the cells that are located on the BSplineLst (list of geom2d_BSpline
+    objects) with a given tolerance and uses the subfunction
     grab_nodes_on_BSplineLst
-                    
+
     Args:
         cells: (list of cells)
         BSplineLst: (list of geom2d_BSpline objects) to be searched
-            
-   Returns: 
-        disco_nodes: (list of nodes) the discovered nodes that are located on 
-        the BSplineLst 
+
+   Returns:
+        disco_nodes: (list of nodes) the discovered nodes that are located on
+        the BSplineLst
     """
 
     disco_nodes = []
@@ -199,23 +203,23 @@ def grab_nodes_of_cells_on_BSplineLst(cells, BSplineLst):
 
 
 def grab_nodes_on_BSplineLst(nodes, BSplineLst, tolerance=1e-5):
-    """the grab_nodes_on_BSplineLst fuction determines the nodes of the input 
-    argument list 'nodes' that are located on the BSplineLst. It loops though 
-    all nodes and for each nodes it generates a projection on all bsplins in 
-    the list of Bsplines (BSplineLst). If the projection distance is below a 
+    """the grab_nodes_on_BSplineLst fuction determines the nodes of the input
+    argument list 'nodes' that are located on the BSplineLst. It loops though
+    all nodes and for each nodes it generates a projection on all bsplins in
+    the list of Bsplines (BSplineLst). If the projection distance is below a
     certain tolerance, the node is to be returned in the disco_nodes list.
-                
+
     Args:
         nodes: (list of nodes)
         BSplineLst: (list of geom2d_BSpline objects) to be searched
-        tolerance: (float) to decide whether a node is on the BSpline, 
+        tolerance: (float) to decide whether a node is on the BSpline,
                     the default value is 1e-5.
-            
-   Returns: 
-        disco_nodes: (list of nodes) the discovered nodes that are located on 
-        the BSplineLst 
-        
-    Notes: Projection is slow. It would be nice to not use this function very 
+
+   Returns:
+        disco_nodes: (list of nodes) the discovered nodes that are located on
+        the BSplineLst
+
+    Notes: Projection is slow. It would be nice to not use this function very
         often.
     """
 

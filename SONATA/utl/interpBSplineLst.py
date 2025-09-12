@@ -18,21 +18,21 @@ from SONATA.utl.blade_utl import check_uniformity
 
 class interpBSplineLst(object):
     """
-    
-    
+
+
     """
 
     def __init__(self, BSplineLst, xgrid, xvalues):
         """
         Parameters
         --------
-        BSplineLst : 
+        BSplineLst :
         xgrid : array
         xvalues : array
         """
 
         self.BSplineLst = BSplineLst
-        if check_uniformity(xgrid, xvalues) == False:
+        if not check_uniformity(xgrid, xvalues):
             print("WARNING:\t The reference axis is not uniformly defined along x!")
         self._f_xint = interp1d(xgrid, xvalues, bounds_error=False, fill_value="extrapolate")
 
@@ -40,18 +40,18 @@ class interpBSplineLst(object):
         """
         interpolates the BSplineLst at a certain radial station by intersecting
         with a plane.
-        
+
         Parameters
         --------
         grid : float
             nondimensional x coordinate in the blade ref. frame
-        
+
         Retruns
         --------
         res, resCoords : (array,array)
-            tuple of arrays. res contains the coordinates, while resCoords 
+            tuple of arrays. res contains the coordinates, while resCoords
             contains the BSpline List parameter coordinates i and u.
-            
+
         """
 
         if not isinstance(grid, np.ndarray):
@@ -69,7 +69,7 @@ class interpBSplineLst(object):
                 resCoords.append(IntCoords[0])
             except:
                 print("No Intersection Found")
-                raise Exception
+                raise
 
         return (np.asarray(res), np.asarray(resCoords))
 

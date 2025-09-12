@@ -25,4 +25,3 @@ Usage
 
 Input File Format
 -----------------
-
