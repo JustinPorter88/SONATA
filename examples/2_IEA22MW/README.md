@@ -43,6 +43,6 @@ This example demonstrates the use of SONATA to compute the cross sectional stiff
     "MzL"
     END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
    ```
-7. Run the model. OpenFAST will linearize it
+7. Run the model. OpenFAST will linearize it. OpenFAST 4.1.0 was used in the development of this example. Other versions may require modifications to input files.
 8. With the openfast-toolbox, run the script `eigenanalysis.py`
 9. Run the script `generate_pie_charts.py`
