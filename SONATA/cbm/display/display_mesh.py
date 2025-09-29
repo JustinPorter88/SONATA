@@ -64,6 +64,9 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     else:
         cmap = plt.cm.get_cmap()
 
+
+    show_beam_props = kw.get('show_beam_props', True)
+
     if "vmin" in kw:
         vmin = kw["vmin"]
     else:
@@ -136,7 +139,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
         for i, item in enumerate(nodes):
             ax.annotate(i + 1, (item[0], item[1]), color="red")
 
-    if VABSProperties is not None:
+    if (VABSProperties is not None) and show_beam_props:
         pass
         (CG,) = plt.plot(VABSProperties.Xm[0], VABSProperties.Xm[1], "ro", label="CG: Mass Center")
         # ax.annotate('CG', (VABSProperties.Xm2,VABSProperties.Xm3),fontsize=20)
