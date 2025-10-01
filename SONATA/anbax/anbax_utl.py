@@ -108,7 +108,8 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
     return mesh, matLibrary, materials, plane_orientations, fiber_orientations, maxE
 
 
-def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
+def anbax_recovery(anba, n_el, force, moment, voigt_convention, T,
+                   calc_disp_field=False):
     """
     Function to recover stresses and strains from an applied loading
     Results are generated in the global and local ('M' for material coordinate system) coordinates
@@ -120,6 +121,8 @@ def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
     moment  -   Moments in anbax coordinates, [M1, M2, M3], e.g. moment = [4.2, 5.7, 6.2]
     voigt_convention    -   "anba" with [s_xx, s_yy, s_zz, s_yz, s_xz, s_xy] or "paraview" with [s_xx, s_yy, s_zz, s_xy, s_yz, s_xz]
     T       -   Transformation matrix to convert results from ANBA to SONATA/VABS coordinates
+    calc_disp_field - This is a flag to extract a displacement warping field
+        from ANBA and return it as an extra set of variables
 
     OUTPUTS:
     *_tran issues that outputs were converted to the SONATA/VABS coordinates
@@ -129,7 +132,9 @@ def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
     tmp_StressF_M_tran  -   local stress field
     tmp_StrainF_tran    -   global strain field
     tmp_StrainF_M_tran  -   local strain field
-
+    disp_nodes_u_u_prime - (if calc_disp_field) tuple of (nodal coordinates,
+                                     displacement at nodes,
+                                     displacement prime values at nodes)
 
 
     """
@@ -146,8 +151,47 @@ def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
     tmp_StrainF_vec = np.array(anba.STRAIN.vector().vec())  # global strain field
     anba.strain_field(force, moment, reference="local", voigt_convention=voigt_convention)  # get strain field in local sys (material coordinates)
     tmp_StrainF_M_vec = np.array(anba.STRAIN.vector().vec())  # local strain field
-
     # cd = anba.STRESS.function_space().dofmap().cell_dofs  # index numbers of cells from dolfin mesh that was used for stress recovery (each cell has 6 dofs)
+
+
+    if calc_disp_field:
+
+        # Extract in plane displacements from ANBA solution
+        U_fun = anba.UL.split(deepcopy=True)[0]
+
+        # split into components for different directions.
+        # third component is zero matching the fact that it is not used in the
+        # ANBA4 strain calculation
+        components = U_fun.split(deepcopy=True)
+
+        disp_u_vals = np.asarray([c.compute_vertex_values(anba.mesh)
+                                for c in components])
+
+        ######### Repeat steps on anba.ULP
+
+        # third component of displacement gradient comes from UP (uprime)
+        # in the ANBA4 strain calculation
+        UP_fun = anba.ULP.split(deepcopy=True)[0]
+
+        components = UP_fun.split(deepcopy=True)
+
+        disp_u_prime_vals = np.asarray([c.compute_vertex_values(anba.mesh)
+                                      for c in components])
+
+        # Verification of the nodal coordinates
+        # This verifies between the function space output and the mesh on anba4
+        # however, these coordinates still need to be verified against the
+        # SONATA mesh.
+        fun_space = U_fun.function_space()
+        fun_space_coords = fun_space.mesh().coordinates()
+
+        assert np.abs(anba.mesh.coordinates() - fun_space_coords).max() == 0, \
+            'Mesh coordinates from anba mesh and function space do not ' \
+            + 'match, this is likely a problem.'
+
+        disp_nodes_u_u_prime = (anba.mesh.coordinates(),
+                                disp_u_vals, disp_u_prime_vals)
+
 
     s_11 = np.zeros(n_el)
     s_22 = np.zeros(n_el)
@@ -238,8 +282,15 @@ def anbax_recovery(anba, n_el, force, moment, voigt_convention, T):
     # file_res.parameters["flush_output"] = True
     # file_res.write(anba.STRESS, t=2)  # t=unique_number
 
+    if calc_disp_field:
 
-    return tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran
+        return tmp_StressF_tran, tmp_StressF_M_tran,\
+            tmp_StrainF_tran, tmp_StrainF_M_tran, \
+            disp_nodes_u_u_prime
+
+    else:
+
+        return tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran
 
 
 

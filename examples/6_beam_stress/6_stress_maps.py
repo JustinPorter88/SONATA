@@ -191,3 +191,43 @@ plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.gca().set_aspect('equal')
 plt.show()
+
+
+# ===== Plot the warped mesh ===== #
+
+
+disp_scale_factor = 1e7
+
+show_3d = True
+
+fc = np.array([0.0, 0.0, 0.0, 1.0e3, 0.0, 0.0])
+fc = np.array([0.0, 0.0, 1.0e3, 0.0, 0.0, 0.0])
+
+
+fig = plt.figure()
+if show_3d:
+    ax = fig.add_subplot(projection='3d')
+else:
+    ax = fig.add_subplot()
+
+ref_coords = map_data['disp_ref_coords']
+
+displacements = np.einsum('ijk,j->ik', map_data['fc_to_disp'], fc).T
+
+displacements *= disp_scale_factor
+
+if show_3d:
+
+    ax.scatter(ref_coords[:, 0], ref_coords[:, 1], 0*ref_coords[:, 0], color='0.8')
+
+    ax.scatter(ref_coords[:, 0]+displacements[:, 0],
+                ref_coords[:, 1]+displacements[:, 1],
+                displacements[:, 2])
+
+else:
+    ax.scatter(ref_coords[:, 0], ref_coords[:, 1], color='0.8')
+
+    ax.scatter(ref_coords[:, 0]+displacements[:, 0],
+                ref_coords[:, 1]+displacements[:, 1])
+
+plt.show()

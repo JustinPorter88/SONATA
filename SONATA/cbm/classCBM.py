@@ -960,6 +960,10 @@ class CBM(object):
         elem_materials = np.zeros((len(self.mesh)))
         elem_cxy = np.zeros((len(self.mesh), 2))
 
+
+        fc_to_disp = np.zeros((3,6,len(nodes)))
+        fc_to_disp_prime = np.zeros((3,6,len(nodes)))
+
         # 1. Initialize memory on each element to store the mapping
         # ASSIGN stresses and strains to mesh elements:
         for i,c in enumerate(self.mesh):
@@ -999,9 +1003,12 @@ class CBM(object):
             # This ends up being potentially excessively slow since
             # it does a new calculation for each stress and strain field (4),
             # but only need the material coordinate strain field.
-            [tmp_StressF_tran, tmp_StressF_M_tran, tmp_StrainF_tran, tmp_StrainF_M_tran] = \
+            [tmp_StressF_tran, tmp_StressF_M_tran,
+             tmp_StrainF_tran, tmp_StrainF_M_tran,
+             disp_nodes_u_u_prime] = \
                 anbax_recovery(anba, len(self.mesh), F, M,
-                               self.config.anbax_cfg.voigt_convention, T)
+                               self.config.anbax_cfg.voigt_convention, T,
+                               calc_disp_field=True)
 
 
             # 3. Store Strain results in each case / element
@@ -1040,6 +1047,22 @@ class CBM(object):
                                                     curr_stress.sigma23,
                                                     curr_stress.sigma13,
                                                     curr_stress.sigma12])
+
+            # Create displacement maps, but first verify that the nodes are
+            # correctly ordered between SONATA and ANBA
+            if i == 0:
+                disp_ref_coords = disp_nodes_u_u_prime[0]
+            else:
+                assert np.max(np.abs(disp_nodes_u_u_prime[0]
+                                     - disp_ref_coords)) == 0, \
+                    'Nodal coordinates for repeat ANBA calls have changed.'
+
+            # Save the displacements into mappings
+            fc_to_disp[:, i, :] = disp_nodes_u_u_prime[1]
+            fc_to_disp_prime[:, i, :] = disp_nodes_u_u_prime[2]
+
+
+
 
         # Save the material names as strings to be output
         material_names = (np.max([mat for mat in self.materials]) + 1)*['None']
@@ -1093,6 +1116,9 @@ class CBM(object):
                  cells=cells,
                  theta_11=theta_11,
                  theta_3=theta_3,
+                 disp_ref_coords=disp_ref_coords,
+                 fc_to_disp=fc_to_disp,
+                 fc_to_disp_prime=fc_to_disp_prime,
                  allow_pickle=False)
 
         return
