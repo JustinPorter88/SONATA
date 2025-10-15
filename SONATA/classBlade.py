@@ -16,6 +16,8 @@ from OCC.Core.gp import (
     gp_Vec
 )
 
+from OCC.Core.Quantity import Quantity_Color, Quantity_TOC_RGB
+
 # SONATA core classes
 from SONATA.classAirfoil import Airfoil
 from SONATA.classComponent import Component
@@ -782,9 +784,23 @@ class Blade(Component):
             cs.cbm_post_2dmesh(title=string, section = str(x), **kwargs)
         return None
 
-    def blade_post_3dtopo(self, flag_wf=True, flag_lft=False, flag_topo=False, flag_mesh=False, flag_wopwop=False):
+    def blade_post_3dtopo(self, flag_wf=True, flag_lft=False, flag_topo=False,
+                          flag_mesh=False, flag_wopwop=False,
+                          rotate_colors=True, proj_vec=None,
+                          output_name=None):
         """
         generates the wireframe and the loft surface of the blade
+
+        Parameters
+        ----------
+        rotate_colors : bool, optional
+            Plot each layer segment as a rotating set of 6 colors. If False,
+            all done in black.
+            The default is True.
+        proj_vec : None or (3,) numpy.ndarray, optional
+            Vector defining the orientation to show the 3D model.
+            If None, does an iso view.
+            The default is None.
 
         Returns
         ----------
@@ -799,7 +815,19 @@ class Blade(Component):
         ----------
 
         """
-        (self.display, self.start_display, self.add_menu, self.add_function_to_menu) = display_config(cs_size=0.5, DeviationAngle=1e-4, DeviationCoefficient=1e-4)
+        (self.display, self.start_display, self.add_menu,
+         self.add_function_to_menu) = display_config(cs_size=0.5,
+                                                     DeviationAngle=1e-4,
+                                                     DeviationCoefficient=1e-4)
+
+        # Set background to white with no gradient
+        self.display.set_bg_gradient_color([255, 255, 255],
+                                           [255, 255, 255], 0)
+
+        self.display.View.SetBackgroundColor(Quantity_Color(1.0, 1.0, 1.0,
+                                                            Quantity_TOC_RGB))
+        self.display.View.Update()
+
 
         if flag_wf:
             wireframe = []
@@ -816,7 +844,6 @@ class Blade(Component):
                 (wire, te_pnt) = afl.trsf_to_blfr(bm[1:4], bm[6], bm[4], bm[5])
                 wireframe.append(wire)
                 self.display.DisplayShape(wire, color='BLACK')
-
 
         if flag_lft:
             # # step/iges file export
@@ -837,7 +864,10 @@ class Blade(Component):
             for (x, cs) in self.sections:
                 # display sections
                 display_Ax2(self.display, cs.Ax2, length=0.2)
-                display_cbm_SegmentLst(self.display, cs.SegmentLst, self.Ax2, cs.Ax2)
+                display_cbm_SegmentLst(self.display, cs.SegmentLst,
+                                       self.Ax2, cs.Ax2,
+                                       rotate_colors=rotate_colors)
+
 
         if flag_wopwop:
             for bspl in self.wopwop_bsplinelst:
@@ -853,8 +883,38 @@ class Blade(Component):
                     v3 = v1.Added(v2)
                     _ = gp_Pnt(v3.XYZ())
 
-        self.display.View_Iso()
+        if proj_vec is None:
+
+            self.display.View_Iso()
+
+        else:
+
+            """
+            # Manually get orientation
+
+
+            breakpoint()
+
+            # rotate to desired orientation
+
+            self.display.View.Proj()
+
+            # use these in proj_vec
+            """
+
+            proj_vec /= np.linalg.norm(proj_vec)
+
+            self.display.View.SetProj(proj_vec[0], proj_vec[1], proj_vec[2])
+            self.display.View.SetUp(0.0, 0.0, 1.0)
+            self.display.View.Redraw()
+
         self.display.FitAll()
+
+        if output_name is not None:
+            # To get higher resolution, but a breakpoint here and manually
+            # resize the window before saving.
+            self.display.View.Dump(output_name + '.png')
+
         self.start_display()
 
     def blade_exp_beam_props(self, cosy='local', style='DYMORE', eta_offset=0, solver='anbax', filename = None):

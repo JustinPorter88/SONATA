@@ -30,8 +30,10 @@ def centroid(points):
     centroid = (sum(x) / len(points), sum(y) / len(points))
     return centroid
 
-def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None, VABSProperties=None,
-              show_element_number=False, show_node_number=False, invert_xaxis = True, lfactor=0.5e-2, **kw):
+def plot_mesh(nodes, elements, theta_11, data, data_name, materials,
+              title=None, VABSProperties=None,
+              show_element_number=False, show_node_number=False,
+              invert_xaxis = True, lfactor=0.5e-2, **kw):
 
     """
     To be continued...
@@ -96,7 +98,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
     p.set_clim(vmin, vmax)
     _ = ax.add_collection(p)
 
-    cbar = fig.colorbar(p, ax=ax, drawedges=(data_name == 'MatID'))
+    cbar = fig.colorbar(p, ax=ax, drawedges=(data_name == 'MatID'),
+                        orientation=kw.get('color_bar_orient', 'vertical'))
     cbar.ax.set_ylabel(data_name)
 
     if data_name == "MatID":
@@ -175,7 +178,8 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials, title=None,
 
     return (fig,ax)
 
-def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None', plotTheta11=False, plotDisplacement=False, **kw):
+def plot_cells(cells,nodes, attr1, materials, VABSProperties=None,
+               title='None', plotTheta11=False, plotDisplacement=False, **kw):
     """
 
 
@@ -245,7 +249,8 @@ def plot_cells(cells,nodes, attr1, materials, VABSProperties=None, title='None',
         theta_11 = np.asarray(theta_11)
 
 
-    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name, materials, title, VABSProperties, **kw)
+    fig,ax = plot_mesh(nodes_array, element_array, theta_11, data, data_name,
+                       materials, title, VABSProperties, **kw)
 
     if 'savepath' in kw:
 

@@ -99,7 +99,8 @@ def show_coordinate_system(display, length=1, event=None):
 
 # =======================SONATA DISPLAY FUCTIONS===================================
 
-def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
+def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr,
+                           rotate_colors=True):
     """
     replaces the display SONATA_SegmentLst in the future!
 
@@ -124,12 +125,21 @@ def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
     if SegmentLst:
         for i, seg in enumerate(SegmentLst):
             wire = trsf_wire(seg.wire, Trsf)
-            display.DisplayColoredShape(wire, Quantity_Color(0, 0, 0, 0), update=True)
+            display.DisplayColoredShape(wire, Quantity_Color(0, 0, 0, 0),
+                                        update=True)
             k = 0
             for j, layer in enumerate(seg.LayerLst):
-                [R, G, B, T] = plt.cm.jet(k * 50)
+                if rotate_colors:
+                    [R, G, B, T] = plt.cm.jet(k/5.0)
+                else:
+                    R = 0.0
+                    G = 0.0
+                    B = 0.0
+
                 wire = trsf_wire(layer.wire, Trsf)
-                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0), update=True)
+                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),
+                                            update=True)
+
                 k = k + 1
                 if k > 5:
                     k = 0
