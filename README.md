@@ -5,7 +5,10 @@
 ## Background
 SONATA is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis. SONATA has originally been developed at the Helicopter Technology Institute of the Technical University of Munich (TUM), Germany. The original repository is available at https://gitlab.lrz.de/HTMWTUM/SONATA. The original work was supported by the German Federal Ministry for Economic Affairs and Energy through the German Aviation Research Program LuFo V-2 and the Austrian Research Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
 
-SONATA has been adapted to wind energy applications thanks to work performed at the National Renewable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program. This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NREL.
+SONATA has been adapted to wind energy applications thanks to work performed at the National Renewable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA
+ and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program.
+NREL has since been renamed National Laboratory of the Rockies (NLR).
+This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NLR.
 
 
 
@@ -88,6 +91,12 @@ cd ../examples/1_IEA15MW
 python 1_sonata_IEA15.py
 ```
 
+### Structural Damping Example
+
+The IEA 22MW example includes instructions on how to estimate structural damping via the modal strain energy approach.
+Detailed instructions can be found [here](examples/2_IEA22MW/README.md). Further details are provided in publications including Porter et al (2025).
+
+
 
 ## Publications:
 
@@ -96,3 +105,5 @@ python 1_sonata_IEA15.py
 **Pflumm, T., Garre, W., Hajek, M.:** A Preprocessor for Parametric Composite Rotor Blade Cross-Sections, 44th European Rotorcraft Forum, Delft, The Netherlands, 2018  [[pdf]](docs/Pflumm,%20T.%20-%20A%20Preprocessor%20for%20Parametric%20Composite%20Rotor%20Blade%20Cross-Sections%20(2018,%20ERF).pdf) [[more…\]](https://mediatum.ub.tum.de/604993?query=Pflumm&show_id=1455385) [[BibTeX\]](https://mediatum.ub.tum.de/export/1455385/bibtex)
 
 **Pflumm, T., Rex, W., Hajek, M.:** Propagation of Material and Manufacturing Uncertainties in Composite Helicopter Rotor Blades, 45th European Rotorcraft Forum, Warsaw, Poland, 2019 [[more…\]](https://mediatum.ub.tum.de/1520025) [BibTeX\]](https://mediatum.ub.tum.de/export/1520025/bibtex)
+
+**Porter, J. H., Mace, T., Bortolotti, P., et al.:** Prediction of structural damping in a composite structure from coupon tests, 2025, Preprint. [[link]](doi.org/10.2139/ssrn.5408061)
