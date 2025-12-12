@@ -1,10 +1,8 @@
 # Third party modules
 import numpy as np
-import matplotlib.pyplot as plt
 # First party modules
 from SONATA.cbm.mesh.mesh_core import gen_core_cells
-from SONATA.cbm.mesh.mesh_utils import (grab_nodes_of_cells_on_BSplineLst,
-    grab_nodes_on_BSplineLst, remove_dublicate_nodes,
+from SONATA.cbm.mesh.mesh_utils import (grab_nodes_on_BSplineLst, remove_dublicate_nodes,
     remove_duplicates_from_list_preserving_order,)
 from SONATA.cbm.topo.BSplineLst_utils import (copy_BSplineLst,
                                               get_BSplineLst_Pnt2d,
@@ -21,15 +19,15 @@ from SONATA.cbm.topo.wire_utils import build_wire_from_BSplineLst
 
 
 class Segment(object):
-    """ 
-    The Segment object is constructed from multiple Layers obejcts. 
+    """
+    The Segment object is constructed from multiple Layers obejcts.
     Each Segment has one Segment boundary.
     """
 
     def __init__(self, ID=0, **kwargs):  # gets called whenever we create a new instance of a class
         """ Initialize with BSplineLst:             Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=True, Boundary = BSplineLst)
             Initialize with airfoil database:       Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, airfoil = 'naca23012')
-            Initialize from file:                   Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')   
+            Initialize from file:                   Segment(ID, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i], OCC=False, filename = 'naca23012.dat')
         #empty initialization with no Boundary: Segment(item, Layup = Configuration.Layup[1], CoreMaterial = Configuration.SEG_CoreMaterial[i])"""
 
         self.Segment0 = None
@@ -52,12 +50,13 @@ class Segment(object):
         self.Projection = relevant_cummulated_layup_boundaries(self.Layup)
         self.wire = None
 
-        if self.OCC == True:
+        if self.OCC:
             self.BSplineLst = kwargs.get("Boundary")
 
-        elif self.OCC == False:
-            if kwargs.get("airfoil") != None:
-                BSplineLst_tmp = self.BSplineLst_from_airfoil_database(kwargs.get("airfoil"), 30, self.scale_factor)
+        elif not self.OCC:
+            if kwargs.get("airfoil") is not None:
+                _ = self.BSplineLst_from_airfoil_database(
+                    kwargs.get("airfoil"), 30, self.scale_factor)
 
 
     def __repr__(self):
@@ -107,13 +106,13 @@ class Segment(object):
         self.build_wire()
 
     def ivLst_to_BSplineLst(self, ivLst):
-        """The member function ivLst_to_BSplineLst generates the 
-        BSplineLst from the InvervalLst definitions. It loops through all 
-        intervals,trims them accordingly and assembles them into the 
+        """The member function ivLst_to_BSplineLst generates the
+        BSplineLst from the InvervalLst definitions. It loops through all
+        intervals,trims them accordingly and assembles them into the
         iv_BSplineLst, which is returned.
-        
+
         Args:   self: the attributes of the Segment class
-                iVLst: the iVLst is a entry of the Layup Projection. 
+                iVLst: the iVLst is a entry of the Layup Projection.
                 It has the following form: array([[ 0.2  ,  0.3  ,  6.   ],
                                                   [ 0.3  ,  0.532,  8.   ]])
         returns: iv_BSplineLst: (list of BSplines)
@@ -330,14 +329,14 @@ class Segment(object):
         return self.c_cells
 
     def determine_final_boundary(self, WebLst=None, Segment0=None):
-        """The member function determin_final_boundary2 generates the 
-        BSplineLst that encloses all Layers of the Segement. This final 
-        boundary is needed for the generation of the subordinate segments, 
+        """The member function determin_final_boundary2 generates the
+        BSplineLst that encloses all Layers of the Segement. This final
+        boundary is needed for the generation of the subordinate segments,
         where the final boundary BSplineLst is intersected with the Webs.
-        
+
         Args:   self: only the attributes of the Segment class itself.
-        
-        returns: None, but assignes the final_Boundary_BSplineLst class 
+
+        returns: None, but assignes the final_Boundary_BSplineLst class
             attribute
         """
         cum_ivLst = self.boundary_ivLst

@@ -54,12 +54,12 @@ def three_pnt_projection_method(points, bspline, min_dist):
     next = points[2]
     vec1 = curr - prev
     vec2 = next - curr
-    angle = angle_between(vec1,vec2)
-    
+    _ = angle_between(vec1,vec2)
+
     # Find the two normal vectors pointing from the middle point to the adjacent points
     vec1_perp = np.array([-vec1[1], vec1[0]]) / np.linalg.norm([-vec1[1], vec1[0]])
     vec2_perp = np.array([-vec2[1], vec2[0]]) / np.linalg.norm([-vec2[1], vec2[0]])
-    
+
     # Finding the vector that bisects the two normal vectors. The project point will be in the direction of the bisecting vector.
     bisecting_vector = - np.sqrt((1 + np.dot(vec1_perp, vec2_perp)) / 2) * (vec1_perp + vec2_perp) / np.linalg.norm(vec1_perp + vec2_perp)
     direction_2d = gp_Dir2d(bisecting_vector[0],bisecting_vector[1])
@@ -79,11 +79,11 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                                            crit_angle=95, LayerID=0, refL=1.0,
                                            **kw):
     """
-    *function to mesh the SONATA topologies by projecting nodes onto the 
-    generated BSplineLists.   
-    
+    *function to mesh the SONATA topologies by projecting nodes onto the
+    generated BSplineLists.
+
     :rtype: [list,list,list]
-    
+
     Variables and arguments:
     ----------
     a_BSplineLst & a_nodes: the projection source
@@ -92,22 +92,22 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                      a distance, in which the resulting projection point has to be.
     crit_angle: is the critical angle to determine a corner if 2 projection points are found.
     display: the kwargs display object can be passed to plot/display within the main OCC3DViewer
-                    
-    
+
+
     Workflow:
-    ----------        
-      
-    
+    ----------
+
+
     Notes & Comments:
-    ----------  
+    ----------
     TODO: * scale distance not only to layerthickenss but also to min_len.
-            or adapt the distance individually for each node. 
+            or adapt the distance individually for each node.
     """
     # display_bsplinelst(a_BSplineLst, 'blue')
     # display_bsplinelst(b_BSplineLst, 'green')
 
     # KWARGS:
-    if kw.get("display") != None:
+    if kw.get("display") is not None:
         display = kw.get("display")
 
     # LayerID = 'T_' + a_nodes[0].parameters[0]
@@ -118,13 +118,13 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
     flag_integrate_leftover_interior_nodes = False
 
     # Is a_BSplineLst closed?
-    
+
     closed_a = False
     if a_BSplineLst[0].StartPoint().IsEqual(a_BSplineLst[-1].EndPoint(), 1e-5):
         closed_a = True
 
     # ==================PROJECT POINTS ON LOWER BOUNDARY =======================
-    if closed_a == True:
+    if closed_a:
         prj_nodes = a_nodes
     else:
         prj_nodes = a_nodes[1:-1]
@@ -304,7 +304,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
             exterior_corners = []
             exterior_corners_para = []
             aglTol = 5.0
-            if node.regular_corner == True:
+            if node.regular_corner:
                 for j, item in enumerate(b_BSplineLst[pIdx[0] : pIdx[1]], start=pIdx[0]):
                     spline1 = item
                     # print node, pIdx[0], pIdx[1]
@@ -337,13 +337,13 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                         else:
                             idx = j + pIdx[1] - len(b_BSplineLst)
                         exterior_corners_para.append([LayerID, idx, u1])
-                        # display.DisplayShape(item.EndPoint(),color='WHITE')            
+                        # display.DisplayShape(item.EndPoint(),color='WHITE')
 
             # =======================generate b_nodes===========================
             # print node,'corner: ', node.corner, ', regular_corner = ',node.regular_corner, ',  Len:exterior_corners =',len(exterior_corners)
 
             # ===CORNERSTYLE 0======
-            if len(exterior_corners) == 0 and node.corner == False:
+            if len(exterior_corners) == 0 and not node.corner:
                 node.cornerstyle = 0
                 # TODO: a more robust possibilit is to use a bisector vres
 
@@ -355,7 +355,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                     newPara = [LayerID, p2[1], p2[2]]
                     b_nodes.append(Node(newPnt, newPara))
 
-                elif node.regular_corner == False:
+                elif not node.regular_corner:
                     print("WARNING: cornerstyle 0: this possibility has not been implemented yet.")
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
 
@@ -366,13 +366,13 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                         print("ERROR: cornerstyle 0: this possibility has not been implemented yet. pIdx[0] != pIdx[0]. Create Bisector and intersect with bsplinelist!")
 
             # ===CORNERSTYLE 1======
-            elif len(exterior_corners) == 1 and node.corner == False:
+            elif len(exterior_corners) == 1 and not node.corner:
                 node.cornerstyle = 1
                 # print('Node ID: ',node.id,', Len(exterior_corners):', len(exterior_corners))
                 b_nodes.append(Node(exterior_corners[0], exterior_corners_para[0]))
 
             # ===CORNERSTYLE 2======
-            elif len(exterior_corners) == 0 and node.corner == True:
+            elif len(exterior_corners) == 0 and node.corner:
                 node.cornerstyle = 2
                 v = gp_Vec2d(pPnts[0], pPnts[1])
                 mid_Pnt = pPnts[0].Translated(v.Multiplied(0.5))
@@ -397,10 +397,10 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
 
             # ===CORNERSTYLE 3======
-            elif len(exterior_corners) == 1 and node.corner == True:
+            elif len(exterior_corners) == 1 and node.corner:
                 node.cornerstyle = 3
                 # print 'node.cornerstyle = 3 @', node
-                if node.regular_corner == True:
+                if node.regular_corner:
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
                     b_nodes[-1].corner = True
@@ -413,10 +413,10 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
 
             # ===CORNERSTYLE 4======
-            elif len(exterior_corners) == 2 and node.corner == True:
+            elif len(exterior_corners) == 2 and node.corner:
                 node.cornerstyle = 4
 
-                if node.regular_corner == True:
+                if node.regular_corner:
                     # print 'R',[exterior_corners_para[0][0],exterior_corners_para[0][1],exterior_corners_para[0][2]],[exterior_corners_para[1][0],exterior_corners_para[1][1],exterior_corners_para[1][2]]
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
                     b_nodes.append(Node(exterior_corners[0], [exterior_corners_para[0][0], exterior_corners_para[0][1], exterior_corners_para[0][2]]))
@@ -450,7 +450,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                     b_nodes[-1].corner = True
                     b_nodes.append(Node(pPnts[0], [LayerID, pIdx[0], pPara[0]]))
 
-            elif len(exterior_corners) == 2 and node.corner == False:
+            elif len(exterior_corners) == 2 and not node.corner:
 
                 print("WARNING: Two exterior corners found but node is not seen as a corner.")
                 print("Projection is not included, try increasing crit_angle.")
@@ -464,7 +464,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                 # SONATA/cbm/topo/layer/def mesh_layer
 
             # ===CORNERSTYLE 5======
-            elif len(exterior_corners) > 2 and node.corner == True:
+            elif len(exterior_corners) > 2 and node.corner:
                 node.cornerstyle = 5
                 print("WARNING: cornerstyle 5 has not been implemented yet.")
 
@@ -478,7 +478,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
             # b_nodes.append(Node(pPnts[1],[LayerID,pIdx[1],pPara[1]]))
 
             # ===CORNERSTYLE 6======
-            elif len(exterior_corners) == 4 and node.corner == True:
+            elif len(exterior_corners) == 4 and node.corner:
                 node.cornerstyle = 6
                 print("WARNING: cornerstyle 6 has not been implemented yet.")
                 # TODO:
@@ -530,7 +530,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
                         insert_idx = i
                         break
 
-                if insert_idx != None:
+                if insert_idx is not None:
                     b_nodes.append(new_b_node)
                     print("hello", new_b_node)
                     a_nodes.insert(insert_idx + 1, new_a_node)
@@ -545,7 +545,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
     # ==============CREATE CELLS PROJECTION=========================================
 
     b = 0  # b_nodes idx
-    if closed_a == True:
+    if closed_a:
         start = 0
         end = len(a_nodes)
     else:
@@ -556,10 +556,10 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
     for a in range(start, end):
         try:
             # print 'Closed_a: ', closed_a, ', a: ', a, ', len(a_nodes): ', len(a_nodes),', b: ', b, ', len(b_nodes):', len(b_nodes), '\n',
-            if closed_a == False and a == 1:  # Start Triangle
+            if not closed_a and a == 1:  # Start Triangle
                 cellLst.append(Cell([a_nodes[a], a_nodes[a - 1], b_nodes[b]]))
 
-            elif closed_a == False and a == len(a_nodes) - 2:  # End Triangle
+            elif not closed_a and a == len(a_nodes) - 2:  # End Triangle
                 cellLst.append(Cell([a_nodes[a - 1], b_nodes[b - 1], b_nodes[b], a_nodes[a]]))
                 cellLst.append(Cell([a_nodes[a], b_nodes[b], a_nodes[a + 1]]))
                 # print cellLst[-1]
@@ -587,7 +587,7 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
         b += 1
 
     # ==============OCC3DVIEWER========================================
-    if kw.get("display") != None:
+    if kw.get("display") is not None:
 
         flag_display_a_nodes = True
         flag_display_b_nodes = True
@@ -597,14 +597,14 @@ def mesh_by_projecting_nodes_on_BSplineLst(a_BSplineLst, a_nodes, b_BSplineLst,
 
         if flag_display_a_nodes:
             for i, a in enumerate(a_nodes):
-                if a.corner == True:
+                if a.corner:
                     display.DisplayShape(a.Pnt, color="WHITE")
-                    string = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
+                    _ = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
                     # display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.0,0.0))
 
                 elif a.cornerstyle == 1 or a.cornerstyle == 0:
                     display.DisplayShape(a.Pnt, color="WHITE")
-                    string = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
+                    _ = str(a.id) + " (cs=" + str(a.cornerstyle) + ", rg=" + str(a.regular_corner) + ")"
                     # display.DisplayMessage(a.Pnt,string,message_color=(1.0,0.5,0.0))
 
                 else:

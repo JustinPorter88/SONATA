@@ -5,19 +5,10 @@
 # Core Library modules
 # Third party modules
 import matplotlib as plt
-import os
-import numpy as np
 
-try:
-    from OCC.Display.SimpleGui import init_display
-    from OCC.Display.backend import get_qt_modules
-except:
-    pass
-from OCC.Core.gp import gp_Pnt, gp_Dir, gp_Vec, gp_Ax1
+from OCC.Core.gp import gp_Pnt, gp_Vec
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Core.gp import (gp_Ax1, gp_Dir, gp_Pnt, gp_Vec,)
 from OCC.Core.Quantity import Quantity_Color
-from OCC.Display.backend import get_qt_modules
 from OCC.Display.SimpleGui import init_display
 
 # First party modules
@@ -27,22 +18,22 @@ from SONATA.utl.trsf import trsf_cbm_to_blfr
 
 def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6, 111), (200, 200, 200)), cs_size=25):
     """
-    CBM method that initializes and configures the pythonOcc 3D Viewer 
-    and adds Menues to the toolbar. 
-    
+    CBM method that initializes and configures the pythonOcc 3D Viewer
+    and adds Menues to the toolbar.
+
     Parameters
     ----------
-    DeviationAngle : float, optional 
+    DeviationAngle : float, optional
         default = 1e-5
     DeviationCoefficient : float, optional
-        default = 1e-5 
+        default = 1e-5
     bg_c : tuple, optional
-        Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default 
-        values are a CATIA style gradient for better 3D visualization. 
+        Background Gradient Color ((RBG Tuple),(RBG Tuple)) the default
+        values are a CATIA style gradient for better 3D visualization.
         for a white background use: ((255,255,255,255,255,255))
-    cs_size : float 
+    cs_size : float
         coordinate system size in [mm]
-        
+
     Returns
     ----------
     tuple :
@@ -50,11 +41,11 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
         self.start_display: function handle
         self.add_menu: function handle
         self.add_function_to_menu: function handle)
-    
-    
+
+
     See Also
     ----------
-    OCC.Display.SimpleGui : PyhtonOcc wrapper provides more details on this 
+    OCC.Display.SimpleGui : PyhtonOcc wrapper provides more details on this
         method
     """
 
@@ -89,16 +80,16 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
 
 def show_coordinate_system(display, length=1, event=None):
     """CREATE AXIS SYSTEM for Visualization"""
-    O = gp_Pnt(0.0, 0.0, 0.0)
+    Orig = gp_Pnt(0.0, 0.0, 0.0)
     p1 = gp_Pnt(length, 0.0, 0.0)
     p2 = gp_Pnt(0.0, length, 0.0)
     p3 = gp_Pnt(0.0, 0.0, length)
 
-    h1 = BRepBuilderAPI_MakeEdge(O, p1).Shape()
-    h2 = BRepBuilderAPI_MakeEdge(O, p2).Shape()
-    h3 = BRepBuilderAPI_MakeEdge(O, p3).Shape()
+    h1 = BRepBuilderAPI_MakeEdge(Orig, p1).Shape()
+    h2 = BRepBuilderAPI_MakeEdge(Orig, p2).Shape()
+    h3 = BRepBuilderAPI_MakeEdge(Orig, p3).Shape()
 
-    display.DisplayShape(O, color="BLACK")
+    display.DisplayShape(Orig, color="BLACK")
     display.DisplayShape(h1, color="RED")
     display.DisplayShape(h2, color="GREEN")
     display.DisplayShape(h3, color="BLUE")
@@ -108,24 +99,25 @@ def show_coordinate_system(display, length=1, event=None):
 
 # =======================SONATA DISPLAY FUCTIONS===================================
 
-def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
+def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr,
+                           rotate_colors=True):
     """
     replaces the display SONATA_SegmentLst in the future!
-    
+
     Parameters
     ---------
-    display : OCC.Display.OCCViewer.Viewer3d 
+    display : OCC.Display.OCCViewer.Viewer3d
         OCC 3d Viewer instance
-    
+
     SegmentLst : list
-        list of Segments of the cbm 
-        
+        list of Segments of the cbm
+
     fromAx2 : gp_Ax2
         OCC gp_Ax2 coordinate system
-        
+
     toAx2: : gp_Ax2
         OCC gp_Ax2 coordinate system
-        
+
     """
     Trsf = trsf_cbm_to_blfr(Ax2_blfr, Ax2_befr)
 
@@ -133,12 +125,21 @@ def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
     if SegmentLst:
         for i, seg in enumerate(SegmentLst):
             wire = trsf_wire(seg.wire, Trsf)
-            display.DisplayColoredShape(wire, Quantity_Color(0, 0, 0, 0), update=True)
+            display.DisplayColoredShape(wire, Quantity_Color(0, 0, 0, 0),
+                                        update=True)
             k = 0
             for j, layer in enumerate(seg.LayerLst):
-                [R, G, B, T] = plt.cm.jet(k * 50)
+                if rotate_colors:
+                    [R, G, B, T] = plt.cm.jet(k/5.0)
+                else:
+                    R = 0.0
+                    G = 0.0
+                    B = 0.0
+
                 wire = trsf_wire(layer.wire, Trsf)
-                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0), update=True)
+                display.DisplayColoredShape(wire, Quantity_Color(R, G, B, 0),
+                                            update=True)
+
                 k = k + 1
                 if k > 5:
                     k = 0
@@ -146,8 +147,8 @@ def display_cbm_SegmentLst(display, SegmentLst, Ax2_blfr, Ax2_befr):
 
 def display_Ax2(display, Ax2, length=1):
     """
-    
-    
+
+
     """
     p0 = Ax2.Location()
     px = p0.Translated(gp_Vec(Ax2.XDirection()).Normalized().Multiplied(length))
@@ -166,8 +167,14 @@ def display_Ax2(display, Ax2, length=1):
     return None
 
 def close():
-    win = findMainWindow()
-    win.close()
+    # This function used to do these two lines, but they are undefined
+    # win = findMainWindow()
+    # win.close()
+
+    pass
+    assert False, 'This function no longer does anything.' \
+        + ' Not sure when this function is actually called,' \
+        + ' but cannot delete it since integrated with other functions.'
 
 
 if __name__ == "__main__":

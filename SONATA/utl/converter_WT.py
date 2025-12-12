@@ -21,21 +21,21 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 def arc_length(x, y):
     """
     Small routine that for given x and y of a profile compute the arc length positions
-    
+
     Parameters
     ----------
     x : np array
         x coordinate of an airfoil, 1-TE 0-LE
-    
+
     y : np array
         y coordinate, positive suction side, negative pressure side
-    
-    
+
+
     Returns
     ----------
     arc : float
         arc position, which can normalized from 0 to 1
-        
+
     """
 
     npts = len(x)
@@ -47,19 +47,19 @@ def arc_length(x, y):
 
 def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     """
-    Converts the 
+    Converts the
     @author: Pietro Bortolotti, Roland Feil
-    
+
     Parameters
     ----------
     blade : Blade
         from classBlade
-    
+
     byml : dict
         yaml data of the blade
-    
-    materials : 
-    
+
+    materials :
+
     Returns
     ----------
     cbmconfigs : np.array
@@ -98,7 +98,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     unordered_webs        = byml.get('internal_structure_2d_fem').get('webs')
     x           = cs_pos # Non dimensional span position of the stations
 
-    if unordered_webs == None:
+    if unordered_webs is None:
         n_webs = 0
     else:
         n_webs  = len(unordered_webs) # Max number of webs along span
@@ -112,10 +112,10 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
     tmp2    = [dict([('position', x[n])]) for n in range(len(x))]
     id_webs = [dict() for n in range(len(x))]
-    
+
     # Get sections information and init the CBM instances.
     tmp1 = byml.get('internal_structure_2d_fem').get('layers')
-    
+
     # Set the web_exist flag. This checks whether at every station there is at least a non-zero thickness
     # layer defined in the web. If there isn't, webs are not built even if they are defined in terms of start and end positions
     for i in range(len(x)):
@@ -135,7 +135,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     # Determine start and end positions (s-coordinates) of each web
     for i in range(len(x)):
         n_webs_i = 0
-        web_config = [dict() for n in range(len(x))]
+        # web_config = [dict() for n in range(len(x))]
         for j in range(n_webs):
             if x[i] >=tmp0[j]['start_nd_arc']['grid'][0] and x[i] <=tmp0[j]['start_nd_arc']['grid'][-1] and web_exist[i,j] == 1:
                 n_webs_i = n_webs_i + 1
@@ -188,7 +188,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
         for idx_sec, sec in enumerate(tmp1):
 
             if x[i] >= sec['thickness']['grid'][0] and x[i] <= sec['thickness']['grid'][-1]:
-                
+
                 set_interp_thick = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
                 thick_i = float(set_interp_thick(x[i]))  # added float
 
@@ -286,7 +286,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                     end_i -= (end_i > 1.0)
 
                 if thick_i > 1.e-6 and abs(start_i - end_i) > 1.e-3:
-                    if 'web' not in sec.keys():                        
+                    if 'web' not in sec.keys():
                         if idx_sec>0:
                             tmp2[i]['segments'][0]['layup'].append({})
                         tmp2[i]['segments'][0]['layup'][id_layer]['thickness']     = thick_i
@@ -303,7 +303,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]) * 180 / np.pi)  # added float
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
-                            
+
                         # # Check consistency
                         ch = np.interp(x[i], blade.chord[:,0], blade.chord[:,1])
                         adhesive_extent[i] = min([0.04, 0.04 / ch])
@@ -418,6 +418,20 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                                     web_filler_index = False  #  after completing the te part (this web is finished now!), prepare for next web
 
+        if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
+            # id_seg = n_webs*2 + 2
+            assert 'ADHESIVE' in [materials[mat].name.upper() for mat in materials], \
+                'Adhesive material needs to be included for TE fill.'
+
+            tmp2[i]['segments'][-1]['filler'] = 'Adhesive'
+            tmp2[i]['segments'][-1]['layup'][0]['name'] = 'dummy'
+            tmp2[i]['segments'][-1]['layup'][0]['material_name'] = 'Adhesive'
+            tmp2[i]['segments'][-1]['layup'][0]['thickness'] = 5.e-4
+            tmp2[i]['segments'][-1]['layup'][0]['start'] = 0.0
+            tmp2[i]['segments'][-1]['layup'][0]['end'] = 1.0
+            tmp2[i]['segments'][-1]['layup'][0]['orientation'] = 0.0
+
+
     # Split webs for determining the
     # print(tmp2)
     # exit()
@@ -511,7 +525,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                 w_r['position'] = [web_start_te, web_end_te]
                 w_r['curvature'] = curve_val
                 webs[i][2 * i_web + 2] = w_r
-    
+
     for i in range(len(x)):
         if x[i] > span_adhesive and len(tmp2[i]['segments']) > 1:
             id_segment = sum(web_exist[i,:])*2 + 1

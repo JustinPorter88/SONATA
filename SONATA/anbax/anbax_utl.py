@@ -39,7 +39,7 @@ def build_mat_library(cbm_materials):
             mat = material.OrthotropicMaterial(matMechanicProp, m.rho)
         elif m.orth == 2:
             raise ValueError('material type 2 (anysotropic) not supported by Anba')
-            
+
             #mat = material.
         matLibrary.append(mat)
         matdict[m.id] = matid
@@ -71,7 +71,7 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
 
     Notes
     ----------
-    the cells of cbm_mesh already contain the nodes. So the information is 
+    the cells of cbm_mesh already contain the nodes. So the information is
     currently passed twice. But consistent with the export_cells_for_vabs.
 
     """
@@ -94,11 +94,11 @@ def build_dolfin_mesh(cbm_mesh, cbm_nodes, cbm_materials):
     materials = dolfin.MeshFunction("size_t", mesh, mesh.topology().dim())
     fiber_orientations = dolfin.MeshFunction("double", mesh, mesh.topology().dim())
     plane_orientations = dolfin.MeshFunction("double", mesh, mesh.topology().dim())
-    
+
     materials.set_all(0)
     plane_orientations.set_all(0.0)
     fiber_orientations.set_all(0.0)
-    
+
     for c in cbm_mesh:
         materials[c.id-1] = matdict[c.MatID]
         plane_orientations[c.id-1] = c.theta_1[0]  # rotation around x1-axis (equiv. to beam axis) in SONATA/VABS coordinates; Theta_11
@@ -280,11 +280,9 @@ def PrincipalAxesRotationAngle(decoupled_stiff_matrix):
     K3 = np.array([[decoupled_stiff_matrix[i+3, j+3] for j in range(3)] for i in range(3)])
     (w1, v1) = np.linalg.eig(K1)
     (w3, v3) = np.linalg.eig(K3)
-    
+
     if np.abs(v3[0,0]) < np.abs(v3[0,1]):
         angle = np.arccos(v3[0,0])
     else:
         angle = -np.arcsin(v3[0,1])
     return angle
-
-

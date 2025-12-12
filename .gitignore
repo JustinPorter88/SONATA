@@ -14,7 +14,6 @@ license
 #*.pdf
 *.jpeg
 *.jpg
-*.dat
 *.xlsx
 *.xls
 *.svg
@@ -30,6 +29,13 @@ license
 *.zip
 *.DS_Store
 *.png
-*.dat
 *.pdf
 *.txt
+*.npz
+*.lin
+*.ech
+*.sum*
+
+# may want to force commit some .dat files, but there are lots of auto generated ones.
+*.dat
+examples/2_IEA22MW/structural_damping/*.yaml

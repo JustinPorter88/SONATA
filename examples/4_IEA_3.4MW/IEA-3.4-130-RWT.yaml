@@ -685,7 +685,7 @@ control:
         ss_pcgain: .001
     shutdown:
         limit_type: gen_speed
-        limit_value: 2.0 
+        limit_value: 2.0
 environment:
     air_density: 1.225
     air_dyn_viscosity: 1.81e-5

@@ -1,6 +1,6 @@
 # PythonOCC Libraries
 # Third party modules
-from OCC.Core.Geom2d import Geom2d_BSplineCurve
+# from OCC.Core.Geom2d import Geom2d_BSplineCurve
 from OCC.Core.Geom2dAPI import Geom2dAPI_Interpolate, Geom2dAPI_PointsToBSpline
 from OCC.Core.gp import gp_Pnt2d
 from OCC.Core.TColgp import TColgp_Array1OfPnt2d, TColgp_HArray1OfPnt2d
@@ -9,7 +9,7 @@ from OCC.Display.SimpleGui import init_display
 
 # First party modules
 # Own Libraries:
-from SONATA.cbm.topo.utils import (_Tcol_dim_1,)
+# from SONATA.cbm.topo.utils import (_Tcol_dim_1,)
 
 # ==============================================================================
 # STORE BSPLINE INFORMATION:
@@ -32,23 +32,27 @@ class Para_Geom2d_BSplineCurve(object):
         Geom2d_BSplineCurve.Weights(Weights)
         Geom2d_BSplineCurve.Multiplicities(Multiplicities)
 
-        self.Poles_bin = TColgp_Array1OfPnt2d_to_array(Poles)  # np.array
-        self.Weights_bin = TColStd_to_array(Weights)  # np.array
-        self.Knots_bin = TColStd_to_array(Knots)  # np.array
-        self.Multiplicities_bin = TColStd_to_array(Multiplicities)  # np.array
+        # self.Poles_bin = TColgp_Array1OfPnt2d_to_array(Poles)  # np.array
+        # self.Weights_bin = TColStd_to_array(Weights)  # np.array
+        # self.Knots_bin = TColStd_to_array(Knots)  # np.array
+        # self.Multiplicities_bin = TColStd_to_array(Multiplicities)  # np.array
         self.Degree_bin = Geom2d_BSplineCurve.Degree()  # np.array
         self.Periodic_bin = Geom2d_BSplineCurve.IsPeriodic()  # np.array
 
-    def BSplineCurve2d(self):
-        Poles = TColgp_Array1OfPnt2d_from_nparray(self.Poles_bin.T)
-        Weights = _Tcol_dim_1(self.Weights_bin.tolist(), TColStd_Array1OfReal)
-        Knots = _Tcol_dim_1(self.Knots_bin.tolist(), TColStd_Array1OfReal)
+        print('This class had several errors (now lines are commented out),')
+        print('and not sure if/where it is called.')
+        raise
 
-        Multiplicities = _Tcol_dim_1(self.Multiplicities_bin.tolist(), TColStd_Array1OfInteger)
-        Degree = self.Degree_bin
-        Periodic = self.Periodic_bin
+    # def BSplineCurve2d(self):
+    #     Poles = TColgp_Array1OfPnt2d_from_nparray(self.Poles_bin.T)
+    #     Weights = _Tcol_dim_1(self.Weights_bin.tolist(), TColStd_Array1OfReal)
+    #     Knots = _Tcol_dim_1(self.Knots_bin.tolist(), TColStd_Array1OfReal)
 
-        return Geom2d_BSplineCurve(Poles, Weights, Knots, Multiplicities, Degree, Periodic)
+    #     Multiplicities = _Tcol_dim_1(self.Multiplicities_bin.tolist(), TColStd_Array1OfInteger)
+    #     Degree = self.Degree_bin
+    #     Periodic = self.Periodic_bin
+
+    #     return Geom2d_BSplineCurve(Poles, Weights, Knots, Multiplicities, Degree, Periodic)
 
 
 def ParaLst_from_BSplineLst(BSplineLst):

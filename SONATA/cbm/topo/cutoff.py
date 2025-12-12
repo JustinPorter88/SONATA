@@ -10,8 +10,7 @@ Created on Wed Jan 04 13:52:57 2017
 # Third party modules
 from OCC.Core.Geom2d import Geom2d_BezierCurve
 from OCC.Core.Geom2dAPI import Geom2dAPI_PointsToBSpline
-from OCC.Core.Geom2dConvert import geom2dconvert_CurveToBSplineCurve
-
+from OCC.Core.Geom2dConvert import geom2dconvert
 # First party modules
 from SONATA.cbm.topo.BSplineLst_utils import (get_BSplineLst_D2,
                                               get_BSplineLst_length,
@@ -80,8 +79,8 @@ def cutoff_layer(Trimmed_BSplineLst, OffsetBSplineLst, S1, S2, cutoff_style=2):
             Start_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(Start_Bezier_PntList))
             End_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(End_Bezier_PntList))
 
-            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier)
-            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier)
+            Start_bspline = geom2dconvert.CurveToBSplineCurve(Start_Bezier)
+            End_bspline = geom2dconvert.CurveToBSplineCurve(End_Bezier)
 
         elif cutoff_style == 3:  # BEZIER-CUTOFF
             # cutoff_depth = 1.05*dist
@@ -109,8 +108,8 @@ def cutoff_layer(Trimmed_BSplineLst, OffsetBSplineLst, S1, S2, cutoff_style=2):
             Start_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(Start_Bezier_PntList))
             End_Bezier = Geom2d_BezierCurve(point2d_list_to_TColgp_Array1OfPnt2d(End_Bezier_PntList))
 
-            Start_bspline = geom2dconvert_CurveToBSplineCurve(Start_Bezier)
-            End_bspline = geom2dconvert_CurveToBSplineCurve(End_Bezier)
+            Start_bspline = geom2dconvert.CurveToBSplineCurve(Start_Bezier)
+            End_bspline = geom2dconvert.CurveToBSplineCurve(End_Bezier)
 
         OffsetBSplineLst.insert(0, Start_bspline)
         OffsetBSplineLst.append(End_bspline)

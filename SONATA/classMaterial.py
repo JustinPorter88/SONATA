@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 19 09:38:33 2018
+#------------------------------------------------------------------------------------
+# Import Libraries
+#------------------------------------------------------------------------------------
 
-@author: Tobias Pflumm
-"""
-# Core Library modules
+# Standard library
 from collections import OrderedDict
 
 # Third party modules
@@ -13,35 +10,37 @@ import numpy as np
 import yaml
 
 
-
-class Material(object):
+#------------------------------------------------------------------------------------
+# Material class
+#------------------------------------------------------------------------------------
+class Material:
     """
     general material class
-    
+
     Attributes
     ----------
     id : int
         material identifier
-        
+
     name : str
         short material name
-        
+
     description : str
-        description of the material, e.g.: unidirektional ht-carbon fiber 
+        description of the material, e.g.: unidirektional ht-carbon fiber
         composite with epoxy matrix (FVC of 60%)
-        
+
     source : str
-        source of the material properties e.g.: elasitc properties derived 
+        source of the material properties e.g.: elasitc properties derived
         from Schuermann, (p.184, 417) with a semi-empiric Puck approach
-        
+
     orth : int
-        orth is the flag to indicate whether the material is isotropic (0), 
-        orthotropic (1) or general anisotropic (2) in consitency with VABS 
+        orth is the flag to indicate whether the material is isotropic (0),
+        orthotropic (1) or general anisotropic (2) in consitency with VABS
         Manual for Users (2011)
-        
-    rho : float 
+
+    rho : float
         density in kg/m**3
-    
+
     """
 
     __slots__ = ("id", "name", "description", "source", "orth", "rho")
@@ -67,27 +66,27 @@ class Material(object):
     def constitutive_tensor(self):
         """
         Calculate the local consitutive tensor for the material.
-        
+
         This is just a template function to be overridden by specific
         material types.
-        
+
         Returns
         -------
         constitutive_tensor : (6,6) numpy.ndarray
             Local constitutive tensor. Template just returns zeros.
-            
+
         Notes
         -----
-        
+
         For consistency, shear strain components (gamma_ij) are the engineering
         shear strain
         that is twice the components of the elasticity tensor shear strains
         (e.g., gamma_ij = 2*eps_ij = eps_ij + eps_ji) for use with this tensor.
-        
+
         """
-        
+
         return np.zeros((6,6))
-    
+
     def rotated_constitutive_tensor(self, plane_orientation,
                                     fiber_orientation):
         """
@@ -113,12 +112,12 @@ class Material(object):
 
         Notes
         -----
-        
+
         The returned tensor is size 6x6 and converts from strains in the form:
         [eps11, eps22, eps33, gamma23, gamma13, gamma12]
-        to stresses of 
+        to stresses of
         [sigma11, sigma22, sigma33, sigma23, sigma13, sigma12].
-        
+
         The shear strain components (gamma_ij) are the engineering shear strain
         that is twice the components of the elasticity tensor shear strains
         (e.g., gamma_ij = 2*eps_ij = eps_ij + eps_ji)
@@ -127,19 +126,19 @@ class Material(object):
             anba4/anba4/material/material.cpp/TransformationMatrix
         This is added to the python implementation for easier access when doing
         extra calculations for viscoelastic materials.
-        
+
         """
-        
+
         # material coordinate tensor
         tensor_material = self.constitutive_tensor()
-        
+
         # Angles
         pi180 = np.pi / 180.
-        
+
         # alpha->fiber plane oriention; beta->fiber oriention.
         alpha = plane_orientation
         beta = fiber_orientation
-        
+
         # calculate rotation matrix, this is heavily copied from the c++ code.
         sn_a = -np.sin(alpha*pi180)
         cn_a =  np.cos(alpha*pi180)
@@ -174,7 +173,7 @@ class Material(object):
 
         transformMatrix[4, 0] = cn_a * sn_b * cn_b
         transformMatrix[4, 2] = -cn_a * sn_b * cn_b
-        transformMatrix[4, 3] = sn_a * cn_b;
+        transformMatrix[4, 3] = sn_a * cn_b
         transformMatrix[4, 4] = -cn_a * sn_b * sn_b + cn_a* cn_b * cn_b
         transformMatrix[4, 5] = sn_a * sn_b
 
@@ -184,35 +183,38 @@ class Material(object):
         transformMatrix[5, 3] = -cn_a * cn_a * sn_b + sn_a *sn_a * sn_b
         transformMatrix[5, 4] = 2.0 * sn_a * sn_b * cn_a * cn_b
         transformMatrix[5, 5] = cn_a * cn_a * cn_b - sn_a * sn_a * cn_b
-        
-        
+
+
         # transform from local -> global
         tensor_global = transformMatrix @ tensor_material @ transformMatrix.T
-        
+
         return tensor_global
 
 
+#------------------------------------------------------------------------------------
+# IsotropicMaterial class
+#------------------------------------------------------------------------------------
 class IsotropicMaterial(Material):
     """
     Isotropic Material
 
-    
+
     Attributes
     ----------
     E : float
-        in GPa; Young's modulus   
-        
+        in GPa; Young's modulus
+
     nu : float
-        nondimensional; Poisson's ratio         
-    
+        nondimensional; Poisson's ratio
+
     alpha : np.ndarray
         in 1/K; coefficient of thermal expansion in direction
-  
+
     YS :  float
         in N/m**2; Yield Strenth (Streckgrenze)
     UTS : float
         in N/m**2; Ultimate Tensile Strenght (Zugfestigkeit)
-        
+
     viscoelastic :
         Properties associated with different time scales of the material to
         define viscoelasticity.
@@ -229,30 +231,30 @@ class IsotropicMaterial(Material):
         self.YS = None
         self.UTS = None
 
-        if not kw.get("E") is None:
+        if kw.get("E") is not None:
             self.E = float(kw.get("E"))
 
-        if not kw.get("nu") is None:
+        if kw.get("nu") is not None:
             self.nu = float(kw.get("nu"))
-        
-        
+
+
         viscoelastic_mat_keys = ['time_scales_v', 'E_v']
 
         viscoelastic_dict = {}
 
         for k in viscoelastic_mat_keys:
-            if not kw.get(k) is None:
+            if kw.get(k) is not None:
                 viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
 
         self.viscoelastic = viscoelastic_dict
 
-        if not kw.get("alpha") is None:
+        if kw.get("alpha") is not None:
             self.alpha = float(kw.get("alpha"))
 
-        if not kw.get("YS") is None:
+        if kw.get("YS") is not None:
             self.YS = float(kw.get("YS"))
 
-        if not kw.get("UTS") is None:
+        if kw.get("UTS") is not None:
             self.UTS = float(kw.get("UTS"))
 
     def constitutive_tensor(self):
@@ -265,15 +267,15 @@ class IsotropicMaterial(Material):
             Elasticity constitutive tensor for converting from strains
             to stresses. See Notes for details.
             This is calculated in the local material coordinates.
-        
+
         Notes
         -----
-        
+
         The returned tensor is size 6x6 and converts from strains in the form:
         [eps11, eps22, eps33, gamma23, gamma13, gamma12]
-        to stresses of 
+        to stresses of
         [sigma11, sigma22, sigma33, sigma23, sigma13, sigma12].
-        
+
         The shear strain components (gamma_ij) are the engineering shear strain
         that is twice the components of the elasticity tensor shear strains
         (e.g., gamma_ij = 2*eps_ij = eps_ij + eps_ji)
@@ -284,17 +286,17 @@ class IsotropicMaterial(Material):
         extra calculations for viscoelastic materials.
 
         """
-        
+
         E = self.E
         nu = self.nu
-        G = E / (2 * (1 + nu));
+        G = E / (2 * (1 + nu))
 
-        delta = E / (1. + nu) / (1 - 2.*nu);
-        diag = (1. - nu) * delta;
-        off_diag = nu * delta;
-        
+        delta = E / (1. + nu) / (1 - 2.*nu)
+        diag = (1. - nu) * delta
+        off_diag = nu * delta
+
         constitutive_tensor = np.zeros((6, 6))
-        
+
         constitutive_tensor[0, 0] = diag
         constitutive_tensor[0, 1] = off_diag
         constitutive_tensor[0, 2] = off_diag
@@ -310,34 +312,37 @@ class IsotropicMaterial(Material):
         constitutive_tensor[3, 3] = G
         constitutive_tensor[4, 4] = G
         constitutive_tensor[5, 5] = G
-        
+
         return constitutive_tensor
 
+#------------------------------------------------------------------------------------
+# OrthotropicMaterial class
+#------------------------------------------------------------------------------------
 class OrthotropicMaterial(Material):
     """
     Orthotropic Material
 
-    
+
     Attributes
     ----------
     E : np.ndarray
-        in GPa; [E_1, E_2, E_3], with E_i: axial tensile modules in direction i 
-        and E_2 and E_3 the transverse tensile modules respectively       
-        
+        in GPa; [E_1, E_2, E_3], with E_i: axial tensile modules in direction i
+        and E_2 and E_3 the transverse tensile modules respectively
+
     G : np.ndarray
         in GPa; [G_12, G_13, G_23], with G_ij, is the shear modulus in
-        direction j on the plane whose normal is in direction  i; for 
-        transversal insotropic materials G_13 = G_12  
-    
+        direction j on the plane whose normal is in direction  i; for
+        transversal insotropic materials G_13 = G_12
+
     nu : np.ndarray
-        nondimensional; [nu12, nu_13, nu_23], nu_ij is the Poisson's ratio that 
-        corresponds to a contraction in direction j when an extension is 
+        nondimensional; [nu12, nu_13, nu_23], nu_ij is the Poisson's ratio that
+        corresponds to a contraction in direction j when an extension is
         applied in direction i.
-    
+
     alpha_11 : np.ndarray
-        in 1/K; [alpha_11, alpha_22, alpha_33], alpha_ii is the coefficient of 
+        in 1/K; [alpha_11, alpha_22, alpha_33], alpha_ii is the coefficient of
         thermal expansion in direction ii
-  
+
     Xt :  float
         in N/m**2; 0° tensile strenght
     Xc : float
@@ -347,7 +352,7 @@ class OrthotropicMaterial(Material):
     Yc : float
         in N/m**2; 90° compressive strenght
     S21 :
-        in N/m**2; in-/out of plane shear strength 
+        in N/m**2; in-/out of plane shear strength
 
     viscoelastic :
         Properties associated with different time scales of the material to
@@ -370,16 +375,16 @@ class OrthotropicMaterial(Material):
         self.Yc = None
         self.S21 = None
 
-        if not kw.get('E') is None:
+        if kw.get('E') is not None:
             self.E = np.asarray(kw.get('E')).astype(float)
 
-        if not kw.get('G') is None:
+        if kw.get('G') is not None:
             self.G = np.asarray(kw.get('G')).astype(float)
 
-        if not kw.get('nu') is None:
+        if kw.get('nu') is not None:
             self.nu = np.asarray(kw.get('nu')).astype(float)
 
-        if not kw.get('alpha') is None:
+        if kw.get('alpha') is not None:
             self.alpha = np.asarray(kw.get('alpha')).astype(float)
 
         if all(k in kw for k in ('E_1', 'E_2', 'E_3')):
@@ -400,41 +405,41 @@ class OrthotropicMaterial(Material):
         viscoelastic_dict = {}
 
         for k in viscoelastic_mat_keys:
-            if not kw.get(k) is None:
+            if kw.get(k) is not None:
                 viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
 
         self.viscoelastic = viscoelastic_dict
 
         if flag_mat:  # wisdem includes vectors for the following material properties that are to be converted in order to comply with SONATA and VABS/anbax
-            if not kw.get('Xt') is None:
+            if kw.get('Xt') is not None:
                 self.Xt = float(kw.get('Xt')[0])  # retrieve axial tensile strength in [MPa] from provided 3D vector
-                
-            if not kw.get('Xc') is None:
+
+            if kw.get('Xc') is not None:
                 self.Xc = float(kw.get('Xc')[0])  # retrieve axial compression strength in [MPa] from provided 3D vector
-                
-            if not kw.get('Yt') is None:
+
+            if kw.get('Yt') is not None:
                 self.Yt = float(kw.get('Xt')[1])  # retrieve transverse tensile strength in [MPa] from provided 3D vector
 
-            if not kw.get('Yc') is None:
+            if kw.get('Yc') is not None:
                 self.Yc = float(kw.get('Xc')[1])  # retrieve transverse compression strength in [MPa] from provided 3D vector
 
-            if not kw.get('S') is None:
+            if kw.get('S') is not None:
                 self.S21 = float(kw.get('S')[0])  # retrieve in-/out of plane shear strength [MPa] in [MPa] from provided 3D vector
 
         else:
-            if not kw.get('Xt') is None:
+            if kw.get('Xt') is not None:
                 self.Xt = float(kw.get('Xt'))  # Axial Tensile Strength in [MPa]
 
-            if not kw.get('Xc') is None:
+            if kw.get('Xc') is not None:
                 self.Xc = float(kw.get('Xc'))  # Axial Compression Strength  [MPa]
 
-            if not kw.get('Yt') is None:
+            if kw.get('Yt') is not None:
                 self.Yt = float(kw.get('Yt'))  # Transverse Tensile strenght  [MPa]
 
-            if not kw.get('Yc') is None:
+            if kw.get('Yc') is not None:
                 self.Yc = float(kw.get('Yc'))  # Transverse  Compression strenght  [Mpa]
 
-            if not kw.get('S21') is None:
+            if kw.get('S21') is not None:
                 self.S21 = float(kw.get('S21'))  # in-/out of plane shear strength [MPa]
 
         # self.S23 = float(kw.get('S23'))
@@ -449,15 +454,15 @@ class OrthotropicMaterial(Material):
             Elasticity constitutive tensor for converting from strains
             to stresses. See Notes for details.
             This is calculated in the local material coordinates.
-        
+
         Notes
         -----
-        
+
         The returned tensor is size 6x6 and converts from strains in the form:
         [eps11, eps22, eps33, gamma23, gamma13, gamma12]
-        to stresses of 
+        to stresses of
         [sigma11, sigma22, sigma33, sigma23, sigma13, sigma12].
-        
+
         The shear strain components (gamma_ij) are the engineering shear strain
         that is twice the components of the elasticity tensor shear strains
         (e.g., gamma_ij = 2*eps_ij = eps_ij + eps_ji)
@@ -471,7 +476,7 @@ class OrthotropicMaterial(Material):
             https://windio.readthedocs.io/en/latest/source/materials.html
 
         """
- 
+
         # using tensor direction indices z=1, x=2, y=3
         # (anba uses this direction ordering to return stress/strain)
         # Implementation should match anbax_util.py > build_mat_library.
@@ -479,7 +484,7 @@ class OrthotropicMaterial(Material):
         # This means elastic modulus order should be:
         #   [Along Beam, Along Perimeter, Through Thickness]
         # Assuming no fiber orientation rotation angle.
-    
+
         e_xx = self.E[1]
         e_yy = self.E[2]
         e_zz = self.E[0]
@@ -518,11 +523,35 @@ class OrthotropicMaterial(Material):
         constitutive_tensor[3, 3] = g_yz
         constitutive_tensor[4, 4] = g_xz
         constitutive_tensor[5, 5] = g_xy
-        
+
         return constitutive_tensor
 
 
+#------------------------------------------------------------------------------------
+# Utility functions
+#------------------------------------------------------------------------------------
 def read_materials(yml):
+    """
+    Read material definitions from YAML data and create material objects.
+
+    Parameters
+    ----------
+    yml : list
+        List of dictionaries containing material definitions from YAML file.
+        Each dictionary should contain material properties and optionally an 'id' field.
+
+    Returns
+    -------
+    OrderedDict
+        Dictionary of material objects keyed by material ID, sorted by ID.
+        Contains IsotropicMaterial or OrthotropicMaterial instances based on 'orth' flag.
+
+    Notes
+    -----
+    If no 'id' is provided in the material definition, materials are automatically
+    assigned sequential IDs starting from 1. The flag_materials_vector_input is set
+    to True in this case to handle WISDEM-specific material definitions.
+    """
     materials = OrderedDict()
     for i, mat in enumerate(yml):
         if 'id' in mat:
@@ -530,22 +559,44 @@ def read_materials(yml):
             # If no ID is issued for materials, automatically define the following flag to allocate wisdem specfic material definitions
             flag_materials_vector_input = False
         else:
-            # print('STATUS: issue material IDs.')
             ID = i + 1
-            flag_materials_vector_input = True  # use this in case no mat ID was issues ToDo: better create a user defined flag
-
+            # use this in case no mat ID was issues
+            # TODO: better create a user defined flag
+            flag_materials_vector_input = True
 
         if mat.get('orth') == 0:
             materials[ID] = IsotropicMaterial(ID=ID, **mat)
         elif mat.get('orth') == 1:
             materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=flag_materials_vector_input, **mat)
+
     materials = OrderedDict(sorted(materials.items()))
     return materials
 
 
 def find_material(materials, attr, value):
+    """
+    Find a material object based on a given attribute and value.
+
+    Parameters
+    ----------
+    materials : OrderedDict
+        Dictionary of material objects keyed by material ID, sorted by ID.
+    attr : str
+        Attribute of the material object to search for.
+    value : str
+        Value of the attribute to search for.
+
+    Returns
+    -------
+    Material
+        Material object if found, otherwise None.
+    """
     return next((x for x in materials.values() if getattr(x, attr).lower() == value.lower()), None)
 
+
+#------------------------------------------------------------------------------------
+# Main function
+#------------------------------------------------------------------------------------
 if __name__ == '__main__':
     a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
     b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
