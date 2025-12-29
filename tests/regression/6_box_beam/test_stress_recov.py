@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 
 import pytest
 
+run_dir = os.path.dirname( os.path.realpath(__file__) )
+
 def run_stresses(job_str, loads_dict, flag_constant_loads):
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__name__) ) + os.sep
     job_name = 'Box_Beam'
-    filename_str = run_dir + job_str
+    filename_str = job_str
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
@@ -179,7 +180,6 @@ def run_stresses(job_str, loads_dict, flag_constant_loads):
 
 def test_force_dir1():
 
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
@@ -270,7 +270,6 @@ def test_force_dir1():
 
 def test_force_dir2():
 
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
@@ -378,7 +377,6 @@ def test_force_dir2():
 
 def test_force_dir3():
 
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
@@ -493,7 +491,6 @@ def test_force_dir3():
 
 
 def test_moment_dir1():
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, 'circle_beam.yaml')
     flag_constant_loads = False
 
@@ -590,7 +587,6 @@ def test_moment_dir1():
             "Should have 0 sigma23 for moment 1."
 
 def test_moment_dir2():
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
@@ -697,7 +693,7 @@ def test_moment_dir2():
             "Should have 0 sigma23 for moment 2."
 
 def test_moment_dir3():
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
+
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
@@ -803,7 +799,6 @@ def test_moment_dir3():
             "Should have 0 sigma23 for moment 3."
 
 def test_output_maps():
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
 
     loads_dict = {"Forces": [1.0e3, 0.5e3, 0.67e3],
@@ -811,7 +806,6 @@ def test_output_maps():
                   }
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__name__) ) + os.sep
     job_name = 'Box_Beam'
     filename_str = run_dir + job_str
 
@@ -949,7 +943,6 @@ def twist_stress_map_helper(flag_output_zero_twist):
     matplotlib.use('Agg')
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = 'rotated_beam.yaml'
     job_name = 'rot-beam'
     filename_str = run_dir + job_str
