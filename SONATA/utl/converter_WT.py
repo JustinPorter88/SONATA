@@ -140,17 +140,28 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
         anchor_start_handle = layer['start_nd_arc']['anchor']['handle']
         anchor_end_name = layer['end_nd_arc']['anchor']['name']
         anchor_end_handle = layer['end_nd_arc']['anchor']['handle']
-        for anchor in anchors:
-            if anchor_start_name == anchor['name']:
-                layer['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
-                layer['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
-                break
-        for anchor in anchors:
-            if anchor_end_name == anchor['name']:
-                layer['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
-                layer['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
-                break
-        
+        if 'web' not in layer.keys():
+            for anchor in anchors:
+                if anchor_start_name == anchor['name']:
+                    layer['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
+                    layer['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
+                    break
+            for anchor in anchors:
+                if anchor_end_name == anchor['name']:
+                    layer['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
+                    layer['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
+                    break
+        else:
+            web_name = layer['web']
+            for web in tmp0:
+                if web_name == web['name']:
+                    layer['start_nd_arc']['grid'] = web['start_nd_arc']['grid']
+                    layer['start_nd_arc']['values'] = web['start_nd_arc']['values']
+                    layer['end_nd_arc']['grid'] = web['end_nd_arc']['grid']
+                    layer['end_nd_arc']['values'] = web['end_nd_arc']['values']
+                    break
+
+
 
     # Set the web_exist flag. This checks whether at every station there is at least a non-zero thickness
     # layer defined in the web. If there isn't, webs are not built even if they are defined in terms of start and end positions

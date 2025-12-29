@@ -356,8 +356,8 @@ class Blade(Component):
         """
         ax2 = self._get_local_Ax2(x)
 
-        a = float(self.f_chord(x)) * float(self.f_pa(x))
-        b = float(self.f_chord(x)) * (1 - float(self.f_pa(x)))
+        a = float(self.f_soy(x))
+        b = float(self.f_chord(x)) - float(self.f_soy(x))
         beta = self.Ax2.Angle(self._get_local_Ax2(x))
         x0 = x - (np.sin(beta) * a * fs / self.f_blade_ref_axis.interpolate(1.0)[0][0, 0])
         x1 = x + (np.sin(beta) * b * fs / self.f_blade_ref_axis.interpolate(1.0)[0][0, 0])
@@ -378,7 +378,7 @@ class Blade(Component):
         for item in afs:
             xi = item[0]
             af = item[1]
-            (wire, te_pnt) = af.trsf_to_blfr(self.f_blade_ref_axis.interpolate(xi)[0][0], float(self.f_pa(xi)), float(self.f_chord(xi)), float(self.f_twist(xi)))
+            (wire, te_pnt) = af.trsf_to_blfr(self.f_blade_ref_axis.interpolate(xi)[0][0], float(self.f_soy(xi)), float(self.f_chord(xi)), float(self.f_twist(xi)))
             wireframe.append(wire)
             tes.append(te_pnt)
 

@@ -129,7 +129,7 @@ class Airfoil(object):
         self.wire = build_wire_from_BSplineLst(self.BSplineLst, twoD=False)
         return self.wire
 
-    def trsf_to_blfr(self, loc, pa_loc, chord, twist):
+    def trsf_to_blfr(self, loc, soy, chord, twist):
         """
         transforms the nondim. airfoil to the blade reference frame location
         and pitch-axis information, scales it with chord information and rotates
@@ -139,8 +139,8 @@ class Airfoil(object):
         ----------
         loc : array
             [x,y,z] position in blade reference coordinates
-        pa_loc : float
-            nondim. pitch axis location
+        soy : float
+            nondim. offset between leading edge and reference axis
         chord : float
             chordlength
         twist : float
@@ -151,7 +151,7 @@ class Airfoil(object):
         wire : TopoDS_Wire
 
         """
-        Trsf = trsf_af_to_blfr(loc, pa_loc, chord, twist)
+        Trsf = trsf_af_to_blfr(loc, soy, chord, twist)
         if self.wire is None or self.BSplineLst is None:
             self.gen_OCCtopo()
 
