@@ -451,10 +451,11 @@ class Blade(Component):
         self.f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
 
         #Read airfoil information
-        airfoils = yml.get('outer_shape').get('airfoils')
-        airfoil_position = []
-        for af in airfoils:
-            airfoil_position.append(af.get('spanwise_position'))
+        outer_shape_airfoils = yml.get('outer_shape').get('airfoils')
+        airfoil_position = ([], [])
+        for af in outer_shape_airfoils:
+            airfoil_position[0].append(af.get('spanwise_position'))
+            airfoil_position[1].append(af.get('name'))
 
         tmp = []
         for an in airfoil_position[1]:

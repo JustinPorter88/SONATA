@@ -94,8 +94,10 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     normalized arc length that is hard coded here.
     """
 
+    anchors = byml.get('structure').get('anchors')
+
     # Segments and webs
-    unordered_webs = byml.get('internal_structure').get('webs')
+    unordered_webs = byml.get('structure').get('webs')
     x = cs_pos # Non dimensional span position of the stations
 
     if unordered_webs is None:
@@ -106,7 +108,25 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
     # Webs need to be defined from LE to TE
     # Sorting webs to correct order
-    values_to_sort = [web['start_nd_arc']['values'][0] for web in unordered_webs]
+    values_to_sort = np.zeros(len(unordered_webs))
+    for i, web in enumerate(unordered_webs):
+        anchor_start_name = web['start_nd_arc']['anchor']['name']
+        anchor_start_handle = web['start_nd_arc']['anchor']['handle']
+        anchor_end_name = web['end_nd_arc']['anchor']['name']
+        anchor_end_handle = web['end_nd_arc']['anchor']['handle']
+
+        for anchor in anchors:
+            if anchor_start_name == anchor['name']:
+                web['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
+                web['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
+                break
+        for anchor in anchors:
+            if anchor_end_name == anchor['name']:
+                web['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
+                web['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
+                break
+
+        values_to_sort[i] = np.average(web['start_nd_arc']['values'])
     web_order = sorted(range(len(values_to_sort)), key=lambda i: values_to_sort[i], reverse=True)
     tmp0 = [unordered_webs[i] for i in web_order]
 
@@ -114,7 +134,23 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     id_webs = [dict() for n in range(len(x))]
 
     # Get sections information and init the CBM instances.
-    tmp1 = byml.get('internal_structure').get('layers')
+    tmp1 = byml.get('structure').get('layers')
+    for i, layer in enumerate(tmp1):
+        anchor_start_name = layer['start_nd_arc']['anchor']['name']
+        anchor_start_handle = layer['start_nd_arc']['anchor']['handle']
+        anchor_end_name = layer['end_nd_arc']['anchor']['name']
+        anchor_end_handle = layer['end_nd_arc']['anchor']['handle']
+        for anchor in anchors:
+            if anchor_start_name == anchor['name']:
+                layer['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
+                layer['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
+                break
+        for anchor in anchors:
+            if anchor_end_name == anchor['name']:
+                layer['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
+                layer['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
+                break
+        
 
     # Set the web_exist flag. This checks whether at every station there is at least a non-zero thickness
     # layer defined in the web. If there isn't, webs are not built even if they are defined in terms of start and end positions
@@ -192,9 +228,6 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                 set_interp_thick = PchipInterpolator(sec['thickness']['grid'], sec['thickness']['values'])
                 thick_i = float(set_interp_thick(x[i]))  # added float
 
-                default_start = False
-                default_end = False
-
                 if 'start_nd_arc' in sec.keys():
                     set_interp = PchipInterpolator(sec['start_nd_arc']['grid'], sec['start_nd_arc']['values'])
                     start_i     = float(set_interp(x[i]))
@@ -203,87 +236,11 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                         for kk in range(len(tmp2[i]['segments'][0]['layup'])):
                             if abs(start_i - tmp2[i]['segments'][0]['layup'][kk]['end']) < 1.e-5:
                                 start_i += 5.e-3
-                else:
-                    start_i = 0
-                    default_start = True
+
                 if 'end_nd_arc' in sec.keys():
                     set_interp = PchipInterpolator(sec['end_nd_arc']['grid'], sec['end_nd_arc']['values'])
                     end_i     = float(set_interp(x[i]))
-                else:
-                    end_i = 1
-                    default_end = True
 
-                ch = np.interp(x[i], blade.chord[:,0], blade.chord[:,1])
-
-                if 'width' in sec.keys():
-
-                    width_interp = PchipInterpolator(sec['width']['grid'],
-                                                 sec['width']['values'])
-
-                    width_nd = float(width_interp(x[i])) / total_arc / ch
-
-                    if default_start and not default_end:
-
-                        start_i = end_i - width_nd
-
-                        # Wrap value if less than 0.0
-                        start_i += (start_i < 0)
-
-                        default_start = False
-
-                    if default_end and not default_start:
-
-                        end_i = start_i + width_nd
-                        # Reduce the value if greater than 1.0
-                        end_i -= (end_i > 1.0)
-
-                        default_end = False
-
-
-                # If using default for the start and end, then the default
-                # value should be overwritten by the midpoint_nd_arc/width
-                # option set
-                if 'midpoint_nd_arc' in sec.keys() \
-                    and 'width' in sec.keys() \
-                    and default_start and default_end:
-
-                    width_interp = PchipInterpolator(sec['width']['grid'],
-                                                 sec['width']['values'])
-
-                    width_nd = float(width_interp(x[i])) / total_arc / ch
-
-                    if 'fixed' in sec['midpoint_nd_arc'].keys():
-
-                        if sec['midpoint_nd_arc']['fixed'].upper() == 'LE':
-
-                            # profile may have had order flipped after
-                            # previous id_le determination.
-                            id_le = np.argmin(profile[:,0])
-
-                            mid_nd = profile_curve[id_le]
-
-                        elif sec['midpoint_nd_arc']['fixed'].upper() == 'TE':
-
-                            mid_nd = 1.0
-
-                        else:
-                            print("WARNING : Unrecognized keyword for "
-                                  + "['midpoint_nd_arc']['fixed']!")
-                            mid_nd = np.nan
-
-                    else:
-                        mid_interp = PchipInterpolator(sec['midpoint_nd_arc']['grid'],
-                                                     sec['midpoint_nd_arc']['values'])
-
-                        mid_nd = float(mid_interp(x[i]))
-
-                    start_i = mid_nd - 0.5*width_nd
-                    # Wrap value if less than 0.0
-                    start_i += (start_i < 0)
-
-                    end_i = mid_nd + 0.5*width_nd
-                    # Reduce the value if greater than 1.0
-                    end_i -= (end_i > 1.0)
 
                 if thick_i > 1.e-6 and abs(start_i - end_i) > 1.e-3:
                     if 'web' not in sec.keys():
