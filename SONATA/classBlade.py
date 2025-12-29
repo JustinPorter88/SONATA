@@ -470,7 +470,7 @@ class Blade(Component):
                 cs_pos = np.linspace(0.0, 1.0, npts)
         else:
             if stations is None:
-                cs_pos = np.asarray([cs.get('position') for cs in yml.get('internal_structure').get('sections')])
+                cs_pos = np.asarray([cs.get('position') for cs in yml.get('structure').get('sections')])
             else:
                 cs_pos = stations
 
@@ -493,7 +493,7 @@ class Blade(Component):
             cbmconfigs = converter_WT(self, cs_pos, yml, self.materials, mesh_resolution = kwargs.get('flags').get('mesh_resolution'))
 
         else:
-            lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("internal_structure").get("sections")]
+            lst = [[cs.get("position"), CBMConfig(cs, self.materials)] for cs in yml.get("structure").get("sections")]
             cbmconfigs = np.asarray(lst)
 
 

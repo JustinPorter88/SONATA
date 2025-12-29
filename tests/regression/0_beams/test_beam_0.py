@@ -11,12 +11,11 @@ import pytest
 def test_6x6_beam0():
 
     # ===== Provide Path Directory & Yaml Filename ===== #
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-    job_str = '0_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.yaml'
-    # note: for better meshing convergence, units specified in yaml are in 'mm' instead of 'm'
+    run_dir = os.path.dirname( os.path.realpath(__file__) )
     job_name = 'box_beam_SmithChopra91'
-
-    filename_str = run_dir + job_str
+    job_str = '0_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.yaml'
+    filename_str = os.path.join(run_dir, '..', '..','..', 'examples','0_beams', job_str)
+    # note: for better meshing convergence, units specified in yaml are in 'mm' instead of 'm'
 
 
     # ===== Define flags ===== #

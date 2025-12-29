@@ -12,7 +12,7 @@ import pytest
 def run_stresses(job_str, loads_dict, flag_constant_loads):
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
+    run_dir = os.path.dirname( os.path.realpath(__name__) ) + os.sep
     job_name = 'Box_Beam'
     filename_str = run_dir + job_str
 
@@ -179,7 +179,8 @@ def run_stresses(job_str, loads_dict, flag_constant_loads):
 
 def test_force_dir1():
 
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
     recover_forces = np.array([[0.0, 1.0e3, 0.0, 0.0],
@@ -269,7 +270,8 @@ def test_force_dir1():
 
 def test_force_dir2():
 
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
     recover_forces = np.array([[0.0, 0.0, 1.0e3, 0.0],
@@ -376,7 +378,8 @@ def test_force_dir2():
 
 def test_force_dir3():
 
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
     recover_forces = np.array([[0.0, 0.0, 0.0, 1.0e3],
@@ -490,8 +493,8 @@ def test_force_dir3():
 
 
 def test_moment_dir1():
-
-    job_str = 'circle_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, 'circle_beam.yaml')
     flag_constant_loads = False
 
     recover_forces =  np.array([[0.0, 0.0, 0.0, 0.0],
@@ -587,8 +590,8 @@ def test_moment_dir1():
             "Should have 0 sigma23 for moment 1."
 
 def test_moment_dir2():
-
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
     recover_forces = np.array([[0.0, 0.0, 0.0, 0.0],
@@ -694,8 +697,8 @@ def test_moment_dir2():
             "Should have 0 sigma23 for moment 2."
 
 def test_moment_dir3():
-
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
     flag_constant_loads = False
 
     recover_forces = np.array([[0.0, 0.0, 0.0, 0.0],
@@ -800,15 +803,15 @@ def test_moment_dir3():
             "Should have 0 sigma23 for moment 3."
 
 def test_output_maps():
-
-    job_str = '6_box_beam.yaml'
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
 
     loads_dict = {"Forces": [1.0e3, 0.5e3, 0.67e3],
                   "Moments": [0.2e2, 0.7e2, 0.9e2]
                   }
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
+    run_dir = os.path.dirname( os.path.realpath(__name__) ) + os.sep
     job_name = 'Box_Beam'
     filename_str = run_dir + job_str
 
@@ -880,7 +883,7 @@ def test_output_maps():
 
     # Create stress and strain maps
 
-    output_folder = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+    output_folder = os.path.join(os.path.dirname( os.path.realpath(__name__) ),
                                  'stress-map')
 
     job.blade_exp_stress_strain_map(output_folder=output_folder)
@@ -946,9 +949,9 @@ def twist_stress_map_helper(flag_output_zero_twist):
     matplotlib.use('Agg')
 
     # Path to yaml file
-    run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
+    run_dir = os.path.dirname( os.path.realpath(__name__) )
     job_str = 'rotated_beam.yaml'
-    job_name = 'Box-Beam'
+    job_name = 'rot-beam'
     filename_str = run_dir + job_str
 
     # ===== Define flags ===== #
@@ -1062,18 +1065,18 @@ def test_stress_map_zero_twist():
     # Create all output map options
 
     # Baseline stress map case
-    output_baseline = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+    output_baseline = os.path.join(os.path.dirname( os.path.realpath(__name__) ),
                                  'stress-map')
     job_baseline.blade_exp_stress_strain_map(output_folder=output_baseline)
 
     # Stress map case using the flag on export only and not in job creation
-    output_flag = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+    output_flag = os.path.join(os.path.dirname( os.path.realpath(__name__) ),
                                  'stress-map-flag')
     job_baseline.blade_exp_stress_strain_map(output_folder=output_flag,
                                              flag_output_zero_twist=True)
 
     # Stress maps that are at zero twist because of evaluation of properties
-    output_0twist = os.path.join(os.path.dirname( os.path.realpath(__file__) ),
+    output_0twist = os.path.join(os.path.dirname( os.path.realpath(__name__) ),
                                  'stress-map-flag')
     job_0twist.blade_exp_stress_strain_map(output_folder=output_0twist)
 
