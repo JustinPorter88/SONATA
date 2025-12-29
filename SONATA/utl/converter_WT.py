@@ -47,8 +47,8 @@ def arc_length(x, y):
 
 def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     """
-    Converts the
-    @author: Pietro Bortolotti, Roland Feil
+    Converts the internal structure definition from the yaml file into CBMconfig instances
+    at the specified radial stations.
 
     Parameters
     ----------
@@ -95,8 +95,8 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     """
 
     # Segments and webs
-    unordered_webs        = byml.get('internal_structure_2d_fem').get('webs')
-    x           = cs_pos # Non dimensional span position of the stations
+    unordered_webs = byml.get('internal_structure').get('webs')
+    x = cs_pos # Non dimensional span position of the stations
 
     if unordered_webs is None:
         n_webs = 0
@@ -114,7 +114,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
     id_webs = [dict() for n in range(len(x))]
 
     # Get sections information and init the CBM instances.
-    tmp1 = byml.get('internal_structure_2d_fem').get('layers')
+    tmp1 = byml.get('internal_structure').get('layers')
 
     # Set the web_exist flag. This checks whether at every station there is at least a non-zero thickness
     # layer defined in the web. If there isn't, webs are not built even if they are defined in terms of start and end positions
@@ -556,25 +556,3 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
                     lst[i][1].segments[0]['Layup'][j][1] = 1
 
     return np.asarray(lst)
-
-
-
-
-#%% MAIN
-if __name__ == '__main__':
-    from SONATA.classAirfoil import Airfoil
-    from SONATA.classBlade import Blade
-    from SONATA.classMaterial import read_materials
-
-    with open('./jobs/PBortolotti/IEAonshoreWT.yaml', 'r') as myfile:
-        inputs  = myfile.read()
-    with open('jobs/PBortolotti/IEAontology_schema.yaml', 'r') as myfile:
-        schema  = myfile.read()
-    # validate(yaml.load(inputs), yaml.load(schema))
-    yml = yaml.load(inputs)
-
-    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-    materials = read_materials(yml.get('materials'))
-
-    job = Blade(name='IEAonshoreWT')
-    job.converter_WT(yml.get('components').get('blade'), airfoils, materials, wt_flag=True)
