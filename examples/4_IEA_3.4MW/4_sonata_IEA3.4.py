@@ -5,8 +5,8 @@ from SONATA.utl.beam_struct_eval import beam_struct_eval
 
 # Path to yaml file
 run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-job_str = 'IEA-3.4-130-RWT.yaml'
-job_name = 'IEA3.4'
+job_str = 'IEA-3p4-130-RWT.yaml'
+job_name = 'IEA3p4'
 filename_str = run_dir + job_str
 
 # ===== Define flags ===== #

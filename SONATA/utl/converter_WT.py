@@ -108,27 +108,30 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
     # Webs need to be defined from LE to TE
     # Sorting webs to correct order
-    values_to_sort = np.zeros(len(unordered_webs))
-    for i, web in enumerate(unordered_webs):
-        anchor_start_name = web['start_nd_arc']['anchor']['name']
-        anchor_start_handle = web['start_nd_arc']['anchor']['handle']
-        anchor_end_name = web['end_nd_arc']['anchor']['name']
-        anchor_end_handle = web['end_nd_arc']['anchor']['handle']
+    if n_webs>0:
+        values_to_sort = np.zeros(len(unordered_webs))
+        for i, web in enumerate(unordered_webs):
+            anchor_start_name = web['start_nd_arc']['anchor']['name']
+            anchor_start_handle = web['start_nd_arc']['anchor']['handle']
+            anchor_end_name = web['end_nd_arc']['anchor']['name']
+            anchor_end_handle = web['end_nd_arc']['anchor']['handle']
 
-        for anchor in anchors:
-            if anchor_start_name == anchor['name']:
-                web['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
-                web['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
-                break
-        for anchor in anchors:
-            if anchor_end_name == anchor['name']:
-                web['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
-                web['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
-                break
+            for anchor in anchors:
+                if anchor_start_name == anchor['name']:
+                    web['start_nd_arc']['grid'] = anchor[anchor_start_handle]['grid']
+                    web['start_nd_arc']['values'] = anchor[anchor_start_handle]['values']
+                    break
+            for anchor in anchors:
+                if anchor_end_name == anchor['name']:
+                    web['end_nd_arc']['grid'] = anchor[anchor_end_handle]['grid']
+                    web['end_nd_arc']['values'] = anchor[anchor_end_handle]['values']
+                    break
 
-        values_to_sort[i] = np.average(web['start_nd_arc']['values'])
-    web_order = sorted(range(len(values_to_sort)), key=lambda i: values_to_sort[i], reverse=True)
-    tmp0 = [unordered_webs[i] for i in web_order]
+            values_to_sort[i] = np.average(web['start_nd_arc']['values'])
+        web_order = sorted(range(len(values_to_sort)), key=lambda i: values_to_sort[i], reverse=True)
+        tmp0 = [unordered_webs[i] for i in web_order]
+    else:
+        tmp0 = []
 
     tmp2    = [dict([('position', x[n])]) for n in range(len(x))]
     id_webs = [dict() for n in range(len(x))]

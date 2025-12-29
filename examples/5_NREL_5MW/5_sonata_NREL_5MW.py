@@ -5,8 +5,8 @@ from SONATA.utl.beam_struct_eval import beam_struct_eval
 
 # Path to yaml file
 run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-job_str = 'IEA-5-RWT.yaml'
-job_name = 'IEA5'
+job_str = 'nrel5mw.yaml'
+job_name = 'NREL5MW'
 filename_str = run_dir + job_str
 
 # ===== Define flags ===== #
