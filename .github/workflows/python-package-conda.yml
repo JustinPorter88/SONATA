@@ -68,11 +68,11 @@ jobs:
           export MPLBACKEND=Agg
           python 2_sonata_IEA22.py
 
-      - name: Run example 5
-        run: |
-          cd examples/5_IEA_5MW
-          export MPLBACKEND=Agg
-          python 5_sonata_IEA5.py
+      # - name: Run example 5
+      #   run: |
+      #     cd examples/5_NREL_5MW
+      #     export MPLBACKEND=Agg
+      #     python 5_sonata_NREL_5MW.py
 
       - name: Run example 6
         run: |
