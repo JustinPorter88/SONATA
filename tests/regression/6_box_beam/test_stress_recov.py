@@ -799,7 +799,6 @@ def test_moment_dir3():
             "Should have 0 sigma23 for moment 3."
 
 def test_output_maps():
-    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
 
     loads_dict = {"Forces": [1.0e3, 0.5e3, 0.67e3],
                   "Moments": [0.2e2, 0.7e2, 0.9e2]
@@ -807,7 +806,8 @@ def test_output_maps():
 
     # Path to yaml file
     job_name = 'Box_Beam'
-    filename_str = run_dir + job_str
+    job_str = os.path.join(run_dir, '..', '..','..', 'examples', '6_beam_stress', '6_box_beam.yaml')
+    filename_str = os.path.join(run_dir, job_str)
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
@@ -945,7 +945,7 @@ def twist_stress_map_helper(flag_output_zero_twist):
     # Path to yaml file
     job_str = 'rotated_beam.yaml'
     job_name = 'rot-beam'
-    filename_str = run_dir + job_str
+    filename_str = os.path.join(run_dir, job_str)
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
