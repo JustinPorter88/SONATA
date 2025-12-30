@@ -140,7 +140,7 @@ class Airfoil(object):
         loc : array
             [x,y,z] position in blade reference coordinates
         soy : float
-            nondim. offset between leading edge and reference axis
+            dim. pitch axis location
         chord : float
             chordlength
         twist : float

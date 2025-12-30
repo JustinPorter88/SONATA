@@ -753,7 +753,7 @@ class Blade(Component):
         ax[1][1].set_ylabel("twist [rad]")
 
         ax[2][1].plot(self.soy[:, 0], self.soy[:, 1], "k.-")
-        ax[2][1].set_ylabel("pitch axis location [1/chord]")
+        ax[2][1].set_ylabel("Leading edge location [m]")
 
         #        ax3d = fig.add_subplot(326, projection='3d')
         #        for bm, af in zip(self.blade_matrix, self.airfoil):

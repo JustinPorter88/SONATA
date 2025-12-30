@@ -92,7 +92,7 @@ def trsf_af_to_blfr(loc, soy, chord, twist, deformation=None):
     loc : array
         [x,y,z] position in blade reference coordinates
     soy : float
-        nondim. offset between leading edge and reference axis
+        dim. pitch axis location
     chord : float
         chordlength
     twist : float
@@ -117,8 +117,10 @@ def trsf_af_to_blfr(loc, soy, chord, twist, deformation=None):
     trsf_trans2 = gp_Trsf()
     trsf_scale = gp_Trsf()
 
-    trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(soy, 0, 0), gp_Dir(0, 0, 1)), -twist)
-    trsf_trans1.SetTranslation(gp_Pnt(soy, 0, 0), gp_Pnt(0, 0, 0))
+    pa_loc = soy / chord
+
+    trsf_rot1.SetRotation(gp_Ax1(gp_Pnt(pa_loc, 0, 0), gp_Dir(0, 0, 1)), -twist)
+    trsf_trans1.SetTranslation(gp_Pnt(pa_loc, 0, 0), gp_Pnt(0, 0, 0))
     trsf_scale.SetScale(gp_Pnt(0, 0, 0), chord)
     trsf_rot2.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)), -np.pi / 2)
     trsf_rot3.SetRotation(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0)), -np.pi / 2)
