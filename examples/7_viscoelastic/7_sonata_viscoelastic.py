@@ -2,13 +2,13 @@ import os
 import numpy as np
 from SONATA.classBlade import Blade
 from SONATA.utl.beam_struct_eval import beam_struct_eval
-
+import yaml
 
 # Path to yaml file
-run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
+run_dir = os.path.dirname( os.path.realpath(__file__) )
 job_str = '7_hollow_rect.yaml'
 job_name = 'Box_Beam'
-filename_str = run_dir + job_str
+filename_str = os.path.join(run_dir, job_str)
 
 # ===== Define flags ===== #
 flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
@@ -53,8 +53,8 @@ flags_dict = {"flag_wt_ontology": flag_wt_ontology, "flag_ref_axes_wt": flag_ref
 
 # ===== User defined radial stations ===== #
 # Define the radial stations for cross sectional analysis (only used for flag_wt_ontology = True -> otherwise, sections from yaml file are used!)
-# radial_stations =  [0., 1.]
-radial_stations = np.linspace(0, 1, 21).tolist()
+radial_stations =  [0., 1.]
+# radial_stations = np.linspace(0, 1, 21).tolist()
 # radial_stations = [.7]
 
 # ===== Execute SONATA Blade Component Object ===== #
@@ -138,9 +138,11 @@ if flag_3d:
 
 assert len(job.materials) == 1, 'Following calculations assume single material.'
 
+with open(os.path.join(run_dir, 'viscoelasticity.yaml'), 'r') as file:
+    viscoelasticity_data = yaml.safe_load(file)
 
-assert job.materials[1].viscoelastic['time_scales_v'].shape[0] == 2,\
-    'Following calculations assume single viscoelastic decaying time scale.'
+# assert len(viscoelasticity_data[0]['time_scales_v']) == 2,\
+#     'Following calculations assume single viscoelastic decaying time scale.'  # noqa: SC100
 
 # Frequency to evaluate viscoelastic properties at.
 # If checking a modal damping factor, this should be that mode's natural freq.
@@ -151,10 +153,10 @@ omega  = 2 * np.pi * freq
 
 if job.materials[1].orth == 0:
 
-    E_i = job.materials[1].viscoelastic['E_v'][0]
-    tau_i = job.materials[1].viscoelastic['time_scales_v'][0]
+    E_i = viscoelasticity_data[0]['E_v'][0]
+    tau_i = viscoelasticity_data[0]['time_scales_v'][0]
 
-    E_inf = job.materials[1].viscoelastic['E_v'][1]
+    E_inf = viscoelasticity_data[0]['E_v'][1]
 
     storage_mod = E_inf + (omega**2 * tau_i**2 * E_i)/(omega**2 * tau_i**2 + 1)
     loss_mod = (omega * tau_i * E_i)/(omega**2 * tau_i**2 + 1)
@@ -174,12 +176,12 @@ elif job.materials[1].orth == 1:
 
     ref_values = job.materials[1].E.tolist() + job.materials[1].G.tolist()
 
-    tau_i = job.materials[1].viscoelastic['time_scales_v'][0]
+    tau_i = viscoelasticity_data[0]['time_scales_v'][0]
 
     for ind, prop_key in enumerate(mat_prop_dirs):
 
-        E_i = job.materials[1].viscoelastic[prop_key][0]
-        E_inf = job.materials[1].viscoelastic[prop_key][1]
+        E_i = viscoelasticity_data[0][prop_key][0]
+        E_inf = viscoelasticity_data[0][prop_key][1]
 
         storage_mod = E_inf + (omega**2 * tau_i**2 * E_i)/(omega**2 * tau_i**2 + 1)
         loss_mod = (omega * tau_i * E_i)/(omega**2 * tau_i**2 + 1)

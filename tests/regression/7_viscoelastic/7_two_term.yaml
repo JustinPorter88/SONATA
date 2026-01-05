@@ -199,38 +199,6 @@ airfoils:
                       grid: [-3.141592653589793, 3.141592653589793]
                       values: [0.5, 0.5]
 materials:
-   # -  name: steel # Orthotropic definition (remains isotropic for repeated parameters)
-   #    # Should give 1% critical damping for the first mode.
-   #    orth: 1 # modeling orthotropic only for viscoelastic modeling initially.
-   #    rho: 7850
-   #    # Baseline elastic parameters calculate warping field, but do not directly
-   #    # produce 6x6 matrices for in simulation.
-   #    E: [210000000000, 210000000000, 210000000000]
-   #    nu: [0.3, 0.3, 0.3]
-   #    G: [80769230769.2, 80769230769.2, 80769230769.2]
-   #    # Viscoelastic inputs (not defined in WindIO).
-   #    time_scales_v : [0.05, inf] # inf will be used to mark the non-decaying parameter values.
-   #    # Values correspond to `time_scales_v`. Values should add approximately to E,G.
-   #    E_1_v : [14081228364.4, 208610071445.5]
-   #    E_2_v : [14081228364.4, 208610071445.5]
-   #    E_3_v : [14081228364.4, 208610071445.5]
-   #    G_12_v : [5415857063.2, 80234642863.6]
-   #    G_13_v : [5415857063.2, 80234642863.6]
-   #    G_23_v : [5415857063.2, 80234642863.6]
-   #    # End viscoelastic inputs
-   # -  name: steel # Isotropic definition
-   #    # Should give 1% critical damping for the first mode.
-   #    orth: 0
-   #    rho: 7850
-   #    # Baseline elastic parameters calculate warping field, but do not directly
-   #    # produce 6x6 matrices for in simulation.
-   #    E: 210000000000
-   #    nu: 0.3
-   #    # Viscoelastic inputs (not defined in WindIO).
-   #    time_scales_v : [0.05, inf] # inf will be used to mark the non-decaying parameter values.
-   #    # Values correspond to `time_scales_v`. Values should add approximately to E,G.
-   #    E_v : [14081228364.4, 208610071445.5]
-   #    # End viscoelastic inputs
    -  name: steel # Isotropic definition
       # Should give 1% critical damping for the first mode and 1.5% for the second mode
       orth: 0
@@ -239,8 +207,3 @@ materials:
       # produce 6x6 matrices for in simulation.
       E: 210000000000
       nu: 0.3
-      # Viscoelastic inputs (not defined in WindIO).
-      time_scales_v : [0.02299974, 0.14994091, inf] # inf will be used to mark the non-decaying parameter values.
-      # Values correspond to `time_scales_v`. Values should add approximately to E,G.
-      E_v : [2.09916999e+10, 2.12183453e+09, 207667615908.0]
-      # End viscoelastic inputs

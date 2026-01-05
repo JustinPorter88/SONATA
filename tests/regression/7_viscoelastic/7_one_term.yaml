@@ -207,26 +207,3 @@ materials:
       E: [210000000000, 210000000000, 210000000000]
       nu: [0.3, 0.3, 0.3]
       G: [80769230769.2, 80769230769.2, 80769230769.2]
-      # Viscoelastic inputs (not defined in WindIO).
-      time_scales_v : [0.05, inf] # inf will be used to mark the non-decaying parameter values.
-      # Values correspond to `time_scales_v`. Values should add approximately to E,G.
-      E_1_v : [10000000000, 200000000000]
-      E_2_v : [10000000000, 200000000000]
-      E_3_v : [10000000000, 200000000000]
-      G_12_v : [3846153846.15238, 76923076923.04761]
-      G_13_v : [3846153846.15238, 76923076923.04761]
-      G_23_v : [3846153846.15238, 76923076923.04761]
-      # End viscoelastic inputs
-   # -  name: steel # Isotropic definition
-   #    # Should give 1% critical damping for the first mode.
-   #    orth: 0
-   #    rho: 7850
-   #    # Baseline elastic parameters calculate warping field, but do not directly
-   #    # produce 6x6 matrices for in simulation.
-   #    E: 210000000000
-   #    nu: 0.3
-   #    # Viscoelastic inputs (not defined in WindIO).
-   #    time_scales_v : [0.05, inf] # inf will be used to mark the non-decaying parameter values.
-   #    # Values correspond to `time_scales_v`. Values should add approximately to E,G.
-   #    E_v : [14081228364.4, 208610071445.5]
-   #    # End viscoelastic inputs
