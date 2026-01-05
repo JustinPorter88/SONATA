@@ -26,6 +26,9 @@ components:
             section_offset_y:
                 grid: [0.0, 1.0]
                 values: [0., 0.]
+            rthick:
+                grid: [0.0, 1.0]
+                values: [1.0, 1.0]
             airfoils:
                -  name: circular
                   spanwise_position: 0.0
