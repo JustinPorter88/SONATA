@@ -280,7 +280,8 @@ class Blade(Component):
             f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
             soy = f_soy(x_blra)
             f_tw = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-            twist_rad = f_tw(x_blra)
+            twist_deg = f_tw(x_blra)
+            twist_rad = np.deg2rad(twist_deg)
             # Get the absolute offset between mid chord and pitch axis (rotation center)
             ch_offset = chord * 0.5 - soy
             # Rotate it by the twist
@@ -432,7 +433,8 @@ class Blade(Component):
         c2_axis = kwargs.get('flags',{}).get('c2_axis')
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape').get('chord').get('grid'),yml.get('outer_shape').get('chord').get('values'))).T
-        tmp_tw = np.asarray((yml.get('outer_shape').get('twist').get('grid'),yml.get('outer_shape').get('twist').get('values'))).T
+        tmp_tw_deg = np.asarray((yml.get('outer_shape').get('twist').get('grid'),yml.get('outer_shape').get('twist').get('values'))).T
+        tmp_tw = np.deg2rad(tmp_tw_deg)
         tmp_soy = np.asarray((yml.get('outer_shape').get('section_offset_y').get('grid'),yml.get('outer_shape').get('section_offset_y').get('values'))).T
 
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
