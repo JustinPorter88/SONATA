@@ -34,7 +34,7 @@ def test_6x6_rotated():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
     job_str = 'rotated_beam.yaml'
-    job_name = 'Box-Beam'
+    job_name = 'Rotated_Beam'
     filename_str = run_dir + job_str
 
     # ===== Define flags ===== #
