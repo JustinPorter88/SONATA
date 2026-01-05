@@ -118,7 +118,7 @@ mu = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
 # job.blade_run_viscoelastic()
 
-beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir,
+beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job, run_dir,
                  job_str, mu)
 
 # ===== PLOTS ===== #

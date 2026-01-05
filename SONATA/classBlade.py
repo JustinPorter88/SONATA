@@ -7,7 +7,7 @@
 # Third party modules
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
+import windIO
 from scipy.interpolate import interp1d, PchipInterpolator
 
 # OpenCASCADE imports
@@ -213,11 +213,8 @@ class Blade(Component):
 
         if 'filename' in kwargs:
             filename = kwargs.get('filename')
-            with open(filename, 'r') as myfile:
-                inputs  = myfile.read()
-                yml = yaml.load(inputs, Loader = yaml.FullLoader)
-                self.yml = yml
-
+            yml = windIO.validate(filename, schema_type="turbine/turbine_schema")
+            self.name = yml.get('name')
 
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
             self.materials = read_materials(yml.get('materials'))
@@ -428,7 +425,6 @@ class Blade(Component):
             Is the database of airfoils
 
         """
-        self.name = self.yml.get('name')
         print('STATUS:\t Reading YAML Dictionary for Beam/Blade: %s' % (self.name))
         c2_axis = kwargs.get('flags',{}).get('c2_axis')
         #Read chord, twist and nondim. pitch axis location and create interpolation
@@ -980,24 +976,3 @@ class Blade(Component):
         arr = np.asarray(lst)
 
         return arr
-
-
-#------------------------------------------------------------------------------------
-# Main function
-#------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    plt.close("all")
-
-    #% ====== WindTurbine ==============
-    with open("../jobs/PBortolotti/IEAonshoreWT.yaml", "r") as myfile:
-        inputs = myfile.read()
-    with open("../jobs/PBortolotti/IEAontology_schema.yaml", "r") as myfile:
-        schema = myfile.read()
-    # validate(yaml.load(inputs), yaml.load(schema))
-    yml = yaml.load(inputs)
-
-    airfoils = [Airfoil(af) for af in yml.get("airfoils")]
-    materials = read_materials(yml.get("materials"))
-
-    job = Blade(name="IEAonshoreWT")
-    job.read_yaml(yml.get("components").get("blade"), airfoils, materials, wt_flag=True)

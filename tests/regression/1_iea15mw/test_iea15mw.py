@@ -208,7 +208,7 @@ def test_6x6_iea15mw():
     mu2 = 2*zeta[1]/omega[1]
     mu3 = 2*zeta[2]/omega[2]
     mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-    beam_struct_eval(flags_dict, Loads_dict, radial_stations, job,
+    beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job,
                      run_dir, job_str, mu)
 
 

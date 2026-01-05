@@ -102,7 +102,7 @@ def run_stresses(job_str, loads_dict, flag_constant_loads):
     mu2 = 2*zeta[1]/omega[1]
     mu3 = 2*zeta[2]/omega[2]
     mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-    beam_struct_eval(flags_dict, loads_dict, radial_stations, job, run_dir, job_str, mu)
+    beam_struct_eval(job_name, flags_dict, loads_dict, radial_stations, job, run_dir, job_str, mu)
 
 
     # Verfify stresses integrate to applied loads
@@ -873,7 +873,7 @@ def test_output_maps():
     # Just used for example script, not passed to SONATA
 
     mu = np.zeros(6)
-    beam_struct_eval(flags_dict, loads_dict, radial_stations, job, run_dir, job_str, mu)
+    beam_struct_eval(job_name, flags_dict, loads_dict, radial_stations, job, run_dir, job_str, mu)
 
     # Create stress and strain maps
 
@@ -1030,7 +1030,7 @@ def twist_stress_map_helper(flag_output_zero_twist):
     mu2 = 2*zeta[1]/omega[1]
     mu3 = 2*zeta[2]/omega[2]
     mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-    beam_struct_eval(flags_dict, Loads_dict, radial_stations, job,
+    beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job,
                      run_dir, job_str, mu)
 
 

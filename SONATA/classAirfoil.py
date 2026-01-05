@@ -7,7 +7,6 @@ import numbers
 import os
 
 # Third party modules
-import matplotlib.pyplot as plt
 import numpy as np
 # PythonOCC Libraries
 from OCC.Core.gp import gp_Pnt
@@ -237,28 +236,3 @@ class Airfoil(object):
         trf_af.coordinates = self.interpolate_shapes(self.coordinates, airfoil2.coordinates, k)
 
         return trf_af
-
-
-
-if __name__ == "__main__":
-    plt.close("all")
-    import yaml
-
-    with open("jobs/VariSpeed/UH-60A_adv.yml", "r") as f:
-        data = yaml.load(f.read())
-
-    airfoils = [Airfoil(af) for af in data["airfoils"]]
-
-    for af in airfoils:
-        af.gen_OCCtopo()
-
-    af1 = airfoils[0]
-    af2 = airfoils[1]
-    res = af1.transformed(af2, 1.0)
-    res.gen_OCCtopo()
-
-    with open("data1.yml", "w") as outfile:
-        yaml.dump(af1.write_yaml_airfoil(), outfile)
-
-    with open("data2.yml", "w") as outfile:
-        yaml.dump(af2.write_yaml_airfoil(), outfile)

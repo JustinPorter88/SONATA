@@ -7,7 +7,6 @@ from collections import OrderedDict
 
 # Third party modules
 import numpy as np
-import yaml
 
 
 #------------------------------------------------------------------------------------
@@ -592,16 +591,3 @@ def find_material(materials, attr, value):
         Material object if found, otherwise None.
     """
     return next((x for x in materials.values() if getattr(x, attr).lower() == value.lower()), None)
-
-
-#------------------------------------------------------------------------------------
-# Main function
-#------------------------------------------------------------------------------------
-if __name__ == '__main__':
-    a = IsotropicMaterial(ID=1, name='iso_mat', rho=0.4, )
-    b = OrthotropicMaterial(ID=2, name='orth_mat', rho=0.5)
-
-    with open('jobs/MonteCarlo/UH-60A_adv.yml', 'r') as myfile:
-        inputs = myfile.read()
-    data = yaml.load(inputs)['materials']
-    materials3 = read_materials(data)
