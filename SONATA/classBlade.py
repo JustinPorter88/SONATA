@@ -213,7 +213,10 @@ class Blade(Component):
 
         if 'filename' in kwargs:
             filename = kwargs.get('filename')
-            yml = windIO.validate(filename, schema_type="turbine/turbine_schema")
+            if kwargs['flags']['flag_wt_ontology']:
+                yml = windIO.validate(filename, schema_type="turbine/turbine_schema")
+            else:
+                yml = windIO.load_yaml(filename)
             self.name = yml.get('name')
 
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
