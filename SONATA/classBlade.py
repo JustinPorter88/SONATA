@@ -113,7 +113,7 @@ class Blade(Component):
         nparray([[grid, twist]])
 
     soy : ndarray
-        Describes the offset between leading edge and reference axis. 
+        Describes the offset between leading edge and reference axis.
         Usually positive.
         nparray([[grid, soy]])
 
@@ -437,11 +437,11 @@ class Blade(Component):
         tmp_soy = np.asarray((yml.get('outer_shape').get('section_offset_y').get('grid'),yml.get('outer_shape').get('section_offset_y').get('values'))).T
 
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
-        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('reference_axis'), 
-                                                                                                flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), 
+        (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('reference_axis'),
+                                                                                                flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'),
                                                                                                 c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw=tmp_tw)
-        (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('reference_axis'), 
-                                                                                              flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'), 
+        (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('reference_axis'),
+                                                                                              flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'),
                                                                                               c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw=tmp_tw)
 
         if c2_axis:

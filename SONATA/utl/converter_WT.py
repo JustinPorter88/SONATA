@@ -9,7 +9,6 @@ import os
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from collections import OrderedDict
-import yaml
 
 
 if __name__ == '__main__':
