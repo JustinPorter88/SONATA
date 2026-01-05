@@ -22,7 +22,7 @@ def test_6x6_iea22mw():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) )
     job_str = 'IEA-22-280-RWT.yaml'
-    job_name = 'IEA22'
+    job_name = 'IEA-22-280-RWT'
     filename_str = os.path.join(run_dir, '..', '..','..', 'examples','2_IEA22MW', job_str)
 
 

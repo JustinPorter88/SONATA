@@ -22,7 +22,7 @@ def test_6x6_iea15mw():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) )
     job_str = 'IEA-15-240-RWT.yaml'
-    job_name = 'IEA15'
+    job_name = 'IEA-15-240-RWT'
     filename_str = os.path.join(run_dir, '..', '..','..', 'examples','1_IEA15MW', job_str)
 
     # ===== Define flags ===== #
