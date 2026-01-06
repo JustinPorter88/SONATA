@@ -578,7 +578,7 @@ def read_materials(yml, viscoelastic_yaml=None):
                 ve_mat_name = ve_mat.get('name', '').lower()
                 if ve_mat_name == materials[ID].name.lower():
                     # assign viscoelastic properties to the material
-                    viscoelastic_mat_keys = ['time_scales_v', 'E_1_v', 'E_2_v', 'E_3_v',
+                    viscoelastic_mat_keys = ['time_scales_v', 'E_v', 'E_1_v', 'E_2_v', 'E_3_v',
                             'G_12_v', 'G_13_v', 'G_23_v']
                     for k in viscoelastic_mat_keys:
                         if ve_mat.get(k) is not None:
