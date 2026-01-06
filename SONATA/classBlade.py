@@ -220,7 +220,7 @@ class Blade(Component):
             self.name = yml.get('name')
 
             airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-            self.materials = read_materials(yml.get('materials'))
+            self.materials = read_materials(yml.get('materials'), viscoelastic_yaml=kwargs.get('viscoelastic_yaml', None))
 
             self.read_yaml(yml.get('components').get('blade'), airfoils, **kwargs)
 

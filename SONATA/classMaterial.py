@@ -529,7 +529,7 @@ class OrthotropicMaterial(Material):
 #------------------------------------------------------------------------------------
 # Utility functions
 #------------------------------------------------------------------------------------
-def read_materials(yml):
+def read_materials(yml, viscoelastic_yaml=None):
     """
     Read material definitions from YAML data and create material objects.
 
@@ -568,6 +568,21 @@ def read_materials(yml):
         elif mat.get('orth') == 1:
             materials[ID] = OrthotropicMaterial(ID=ID, flag_mat=flag_materials_vector_input, **mat)
 
+        if viscoelastic_yaml is not None:
+            # read viscoelastic properties from separate yaml file and assign to material
+            import yaml
+            with open(viscoelastic_yaml, 'r') as f:
+                viscoelastic_data = yaml.safe_load(f)
+
+            for ve_mat in viscoelastic_data.get('materials', []):
+                ve_mat_name = ve_mat.get('name', '').lower()
+                if ve_mat_name == materials[ID].name.lower():
+                    # assign viscoelastic properties to the material
+                    viscoelastic_mat_keys = ['time_scales_v', 'E_1_v', 'E_2_v', 'E_3_v',
+                            'G_12_v', 'G_13_v', 'G_23_v']
+                    for k in viscoelastic_mat_keys:
+                        if ve_mat.get(k) is not None:
+                            materials[ID].viscoelastic[k] = ve_mat.get(k)
     materials = OrderedDict(sorted(materials.items()))
     return materials
 

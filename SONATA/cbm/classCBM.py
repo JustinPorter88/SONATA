@@ -728,7 +728,7 @@ class CBM(object):
 
             if not (self.materials[MatID].viscoelastic == {}):
                 time_scale_list += self.materials[MatID]\
-                                    .viscoelastic['time_scales_v'].tolist()
+                                    .viscoelastic['time_scales_v']
 
         time_scale_list = np.sort(np.unique(time_scale_list)).tolist()
 
@@ -743,7 +743,7 @@ class CBM(object):
                 mat = self.materials[MatID]
 
                 if hasattr(mat, 'viscoelastic') and not (mat.viscoelastic=={}):
-                    found_time_scale = tau in mat.viscoelastic['time_scales_v'].tolist()
+                    found_time_scale = tau in mat.viscoelastic['time_scales_v']
                 else:
                     found_time_scale = False
 

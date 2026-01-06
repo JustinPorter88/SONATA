@@ -32,14 +32,15 @@ def test_one_viscoelastic():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
     job_str = '7_one_term.yaml'
-    job_name = 'Box_Beam'
-    filename_str = run_dir + job_str
+    job_name = 'Box_Beam1'
+    filename_str = os.path.join(run_dir, job_str)
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
     flag_ref_axes_wt        = True # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
 
     flag_viscoelastic = True # flag to run viscoelastic 6x6 matrices calculation.
+    viscoelastic_yaml = os.path.join(run_dir, "viscoelasticity_one_term.yaml")
 
     # --- plotting flags ---
     # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
@@ -88,7 +89,7 @@ def test_one_viscoelastic():
     # flags         - communicates flag dictionary (defined above)
     # stations      - input of radial stations for cross sectional analysis
     # stations_sine - input of radial stations for refinement (only and automatically applied when lofing flag flag_lft = True)
-    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations)  # initialize job with respective yaml input file
+    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, viscoelastic_yaml=viscoelastic_yaml)  # initialize job with respective yaml input file
 
     # ===== Build & mesh segments ===== #
     job.blade_gen_section(topo_flag=True, mesh_flag = True)
@@ -170,14 +171,15 @@ def test_two_viscoelastic():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
     job_str = '7_two_term.yaml'
-    job_name = 'Box_Beam'
-    filename_str = run_dir + job_str
+    job_name = 'Box_Beam2'
+    filename_str = os.path.join(run_dir, job_str)
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
     flag_ref_axes_wt        = True # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
 
     flag_viscoelastic = True # flag to run viscoelastic 6x6 matrices calculation.
+    viscoelastic_yaml = os.path.join(run_dir, "viscoelasticity_two_term.yaml")
 
     # --- plotting flags ---
     # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
@@ -226,7 +228,7 @@ def test_two_viscoelastic():
     # flags         - communicates flag dictionary (defined above)
     # stations      - input of radial stations for cross sectional analysis
     # stations_sine - input of radial stations for refinement (only and automatically applied when lofing flag flag_lft = True)
-    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations)  # initialize job with respective yaml input file
+    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, viscoelastic_yaml=viscoelastic_yaml)  # initialize job with respective yaml input file
 
     # ===== Build & mesh segments ===== #
     job.blade_gen_section(topo_flag=True, mesh_flag = True)
@@ -298,13 +300,14 @@ def test_ortho_viscoelastic():
     run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
     job_str = '7_full_ortho.yaml'
     job_name = 'Box_Beam_Ortho'
-    filename_str = run_dir + job_str
+    filename_str = os.path.join(run_dir, job_str)
 
     # ===== Define flags ===== #
     flag_wt_ontology        = True # if true, use ontology definition of wind turbines for yaml files
     flag_ref_axes_wt        = True # if true, rotate reference axes from wind definition to comply with SONATA (rotorcraft # definition)
 
     flag_viscoelastic = True # flag to run viscoelastic 6x6 matrices calculation.
+    viscoelastic_yaml = os.path.join(run_dir, "viscoelasticity_full_ortho.yaml")
 
     # --- plotting flags ---
     # Define mesh resolution, i.e. the number of points along the profile that is used for out-to-inboard meshing of a 2D blade cross section
@@ -353,7 +356,7 @@ def test_ortho_viscoelastic():
     # flags         - communicates flag dictionary (defined above)
     # stations      - input of radial stations for cross sectional analysis
     # stations_sine - input of radial stations for refinement (only and automatically applied when lofing flag flag_lft = True)
-    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations)  # initialize job with respective yaml input file
+    job = Blade(name=job_name, filename=filename_str, flags=flags_dict, stations=radial_stations, viscoelastic_yaml=viscoelastic_yaml)  # initialize job with respective yaml input file
 
     # ===== Build & mesh segments ===== #
     job.blade_gen_section(topo_flag=True, mesh_flag = True)
