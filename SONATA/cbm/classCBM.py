@@ -758,7 +758,7 @@ class CBM(object):
                 else:
                     # find index of time scale
                     time_scale_ind = np.argmax(tau
-                                          == mat.viscoelastic['time_scales_v'])
+                                          == np.array(mat.viscoelastic['time_scales_v']))
 
                 if found_time_scale and mat.orth == 0:
 

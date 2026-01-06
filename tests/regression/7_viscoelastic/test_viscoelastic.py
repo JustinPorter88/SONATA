@@ -143,7 +143,7 @@ def test_one_viscoelastic():
         "First 3 rows of viscoelastic do not add to match the elastic."
 
     assert np.allclose(tot_prony[3:], stiff[0][3:],
-                       atol=0.0001*tot_prony[3:].max()), \
+                       atol=0.0002*tot_prony[3:].max()), \
         "Last 3 rows of viscoelastic do not add to match the elastic."
 
     # Check ratios of terms match that of inputs

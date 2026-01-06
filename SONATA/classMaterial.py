@@ -582,8 +582,11 @@ def read_materials(yml, viscoelastic_yaml=None):
                             'G_12_v', 'G_13_v', 'G_23_v']
                     for k in viscoelastic_mat_keys:
                         if ve_mat.get(k) is not None:
-                            materials[ID].viscoelastic[k] = ve_mat.get(k)
+                            materials[ID].viscoelastic[k] = [float(tmp)
+                                                     for tmp in ve_mat.get(k)]
+
     materials = OrderedDict(sorted(materials.items()))
+
     return materials
 
 
