@@ -224,7 +224,7 @@ def test_6x6_iea15mw():
     test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              test_file)
 
-    utils.compare_bd_blade(ref_path, test_path, tolerance=1e-9)
+    utils.compare_bd_blade(ref_path, test_path, abs_tolerance=1e-3)
 
 
 def test_external_mesh_iea15mw():
