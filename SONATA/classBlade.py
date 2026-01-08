@@ -248,7 +248,7 @@ class Blade(Component):
 #        string reputation of an object, """
 #        return 'Blade: '+ str(self.name)
 
-    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False, c2_axis=False, tmp_chord = [], tmp_soy = [], tmp_tw=[]):
+    def _read_ref_axes(self, yml_ra, flag_ref_axes_wt=False, c2_axis=False, tmp_chord = [], tmp_soy = [], tmp_tw_rad=[]):
         """
         reads and determines interpolates function for the reference axis of
         the blade
@@ -284,21 +284,20 @@ class Blade(Component):
             tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
             tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
 
-        f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
-        f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
-        f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1])
+        f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1])
+        f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1])
 
         x_blra = np.unique(np.sort(np.hstack((tmp_ra['x'][:,0], tmp_ra['y'][:,0], tmp_ra['z'][:,0]))))
         tmp_ra = np.vstack((x_blra, f_ref_axis_x(x_blra), f_ref_axis_y(x_blra), f_ref_axis_z(x_blra))).T
 
         if c2_axis:
-            f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
+            f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1])
             chord = f_chord(x_blra)
-            f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
+            f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1])
             soy = f_soy(x_blra)
-            f_tw = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-            twist_deg = f_tw(x_blra)
-            twist_rad = np.deg2rad(twist_deg)
+            f_tw = interp1d(tmp_tw_rad[:,0], tmp_tw_rad[:,1])
+            twist_rad = f_tw(x_blra)
             # Get the absolute offset between mid chord and pitch axis (rotation center)
             ch_offset = chord * 0.5 - soy
             # Rotate it by the twist
@@ -450,23 +449,23 @@ class Blade(Component):
         c2_axis = kwargs.get('flags',{}).get('c2_axis')
         #Read chord, twist and nondim. pitch axis location and create interpolation
         tmp_chord = np.asarray((yml.get('outer_shape').get('chord').get('grid'),yml.get('outer_shape').get('chord').get('values'))).T
-        tmp_tw_deg = np.asarray((yml.get('outer_shape').get('twist').get('grid'),yml.get('outer_shape').get('twist').get('values'))).T
-        tmp_tw = np.deg2rad(tmp_tw_deg)
+        tmp_tw_rad = np.asarray((yml.get('outer_shape').get('twist').get('grid'),yml.get('outer_shape').get('twist').get('values'))).T
+        tmp_tw_rad[:,1] = np.deg2rad(tmp_tw_rad[:,1])
         tmp_soy = np.asarray((yml.get('outer_shape').get('section_offset_y').get('grid'),yml.get('outer_shape').get('section_offset_y').get('values'))).T
 
         #Read blade & beam reference axis and create BSplineLst & interpolation instance
         (self.blade_ref_axis_BSplineLst, self.f_blade_ref_axis, tmp_blra) = self._read_ref_axes(yml.get('reference_axis'),
                                                                                                 flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'),
-                                                                                                c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw=tmp_tw)
+                                                                                                c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw_rad=tmp_tw_rad)
         (self.beam_ref_axis_BSplineLst, self.f_beam_ref_axis, tmp_bera) = self._read_ref_axes(yml.get('reference_axis'),
                                                                                               flag_ref_axes_wt=kwargs.get('flags', {}).get('flag_ref_axes_wt'),
-                                                                                              c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw=tmp_tw)
+                                                                                              c2_axis=c2_axis, tmp_chord = tmp_chord, tmp_soy = tmp_soy, tmp_tw_rad=tmp_tw_rad)
 
         if c2_axis:
             tmp_soy[:,1]=tmp_chord[:,1]* 0.5
-        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
+        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1])
+        self.f_twist = interp1d(tmp_tw_rad[:,0], tmp_tw_rad[:,1])
+        self.f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1])
 
         #Read airfoil information
         outer_shape_airfoils = yml.get('outer_shape').get('airfoils')
@@ -492,7 +491,7 @@ class Blade(Component):
             else:
                 cs_pos = stations
 
-        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw[:,0],
+        x = np.unique(np.sort(np.hstack((tmp_chord[:,0], tmp_tw_rad[:,0],
                                          tmp_blra[:,0], tmp_bera[:,0],
                                          tmp_soy[:,0], arr[:,0], cs_pos))))
 
