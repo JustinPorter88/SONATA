@@ -270,7 +270,7 @@ def converter_WT(blade, cs_pos, byml, materials, mesh_resolution):
 
                         if 'fiber_orientation' in sec.keys():
                             set_interp = PchipInterpolator(sec['fiber_orientation']['grid'], sec['fiber_orientation']['values'])
-                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]) * 180 / np.pi)  # added float
+                            tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = float(set_interp(x[i]))  # added float
                         else:
                             tmp2[i]['segments'][0]['layup'][id_layer]['orientation'] = 0.
 
