@@ -87,7 +87,7 @@ cd ../examples/1_IEA15MW
 python 1_sonata_IEA15.py
 ```
 
-Note that two examples use two different structures of the input files. Example 0 uses the original yaml structure from TUM, whereas the second file uses the wind turbine ontology coded in [windIO](https://github.com/IEAWindSystems/windIO). windIO is developed within IEA Wind Task 55 REFWIND and its documentation lives [here](https://ieawindsystems.github.io/windIO/main/index.html). 
+Note that two examples use two different structures of the input files. Example 0 uses the original yaml structure from TUM, whereas the second file uses the wind turbine ontology coded in [windIO](https://github.com/IEAWindSystems/windIO). windIO is developed within IEA Wind Task 55 REFWIND and its documentation lives [here](https://ieawindsystems.github.io/windIO/main/index.html).
 
 
 ### Structural Damping Example
