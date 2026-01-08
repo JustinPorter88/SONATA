@@ -267,21 +267,20 @@ class Blade(Component):
             tmp_ra['y'] = np.asarray((yml_ra.get('y').get('grid'),yml_ra.get('y').get('values'))).T
             tmp_ra['z'] = np.asarray((yml_ra.get('z').get('grid'),yml_ra.get('z').get('values'))).T
 
-        f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1], bounds_error=False, fill_value='extrapolate')
-        f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1], bounds_error=False, fill_value='extrapolate')
-        f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1], bounds_error=False, fill_value='extrapolate')
+        f_ref_axis_x = interp1d(tmp_ra['x'][:,0], tmp_ra['x'][:,1])
+        f_ref_axis_y = interp1d(tmp_ra['y'][:,0], tmp_ra['y'][:,1])
+        f_ref_axis_z = interp1d(tmp_ra['z'][:,0], tmp_ra['z'][:,1])
 
         x_blra = np.unique(np.sort(np.hstack((tmp_ra['x'][:,0], tmp_ra['y'][:,0], tmp_ra['z'][:,0]))))
         tmp_ra = np.vstack((x_blra, f_ref_axis_x(x_blra), f_ref_axis_y(x_blra), f_ref_axis_z(x_blra))).T
 
         if c2_axis:
-            f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
+            f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1])
             chord = f_chord(x_blra)
-            f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
+            f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1])
             soy = f_soy(x_blra)
-            f_tw = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-            twist_deg = f_tw(x_blra)
-            twist_rad = np.deg2rad(twist_deg)
+            f_tw = interp1d(tmp_tw[:,0], tmp_tw[:,1])
+            twist_rad = f_tw(x_blra)
             # Get the absolute offset between mid chord and pitch axis (rotation center)
             ch_offset = chord * 0.5 - soy
             # Rotate it by the twist
@@ -447,9 +446,9 @@ class Blade(Component):
 
         if c2_axis:
             tmp_soy[:,1]=tmp_chord[:,1]* 0.5
-        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1], bounds_error=False, fill_value='extrapolate')
-        self.f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1], bounds_error=False, fill_value='extrapolate')
+        self.f_chord = interp1d(tmp_chord[:,0], tmp_chord[:,1])
+        self.f_twist = interp1d(tmp_tw[:,0], tmp_tw[:,1])
+        self.f_soy = interp1d(tmp_soy[:,0], tmp_soy[:,1])
 
         #Read airfoil information
         outer_shape_airfoils = yml.get('outer_shape').get('airfoils')
