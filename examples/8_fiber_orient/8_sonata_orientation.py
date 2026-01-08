@@ -84,7 +84,7 @@ if custom_mesh:
     cells = np.array([[1, 2, 3, 0]])
 
     # check job.materials
-    MatID = 2*np.ones(1)
+    MatID = np.ones(1)
 
     job.blade_custom_mesh(nodes, cells, MatID, theta_3=15)
 
