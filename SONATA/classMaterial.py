@@ -236,17 +236,6 @@ class IsotropicMaterial(Material):
         if kw.get("nu") is not None:
             self.nu = float(kw.get("nu"))
 
-
-        viscoelastic_mat_keys = ['time_scales_v', 'E_v']
-
-        viscoelastic_dict = {}
-
-        for k in viscoelastic_mat_keys:
-            if kw.get(k) is not None:
-                viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
-
-        self.viscoelastic = viscoelastic_dict
-
         if kw.get("alpha") is not None:
             self.alpha = float(kw.get("alpha"))
 
@@ -255,6 +244,8 @@ class IsotropicMaterial(Material):
 
         if kw.get("UTS") is not None:
             self.UTS = float(kw.get("UTS"))
+
+        self.viscoelastic = {}
 
     def constitutive_tensor(self):
         """
@@ -398,17 +389,6 @@ class OrthotropicMaterial(Material):
         if all(k in kw for k in ('alpha_11', 'alpha_22', 'alpha_33')):
             self.alpha = np.array([kw.get('alpha_11'), kw.get('alpha_22'), kw.get('alpha_33')]).astype(float)
 
-        viscoelastic_mat_keys = ['time_scales_v', 'E_1_v', 'E_2_v', 'E_3_v',
-                            'G_12_v', 'G_13_v', 'G_23_v']
-
-        viscoelastic_dict = {}
-
-        for k in viscoelastic_mat_keys:
-            if kw.get(k) is not None:
-                viscoelastic_dict[k] = np.asarray(kw.get(k)).astype(float)
-
-        self.viscoelastic = viscoelastic_dict
-
         if flag_mat:  # wisdem includes vectors for the following material properties that are to be converted in order to comply with SONATA and VABS/anbax
             if kw.get('Xt') is not None:
                 self.Xt = float(kw.get('Xt')[0])  # retrieve axial tensile strength in [MPa] from provided 3D vector
@@ -442,6 +422,8 @@ class OrthotropicMaterial(Material):
                 self.S21 = float(kw.get('S21'))  # in-/out of plane shear strength [MPa]
 
         # self.S23 = float(kw.get('S23'))
+
+        self.viscoelastic = {}
 
     def constitutive_tensor(self):
         """
@@ -578,8 +560,10 @@ def read_materials(yml, viscoelastic_yaml=None):
                 ve_mat_name = ve_mat.get('name', '').lower()
                 if ve_mat_name == materials[ID].name.lower():
                     # assign viscoelastic properties to the material
-                    viscoelastic_mat_keys = ['time_scales_v', 'E_v', 'E_1_v', 'E_2_v', 'E_3_v',
-                            'G_12_v', 'G_13_v', 'G_23_v']
+                    viscoelastic_mat_keys = ['time_scales_v', 'E_v',
+                                             'E_1_v', 'E_2_v', 'E_3_v',
+                                             'G_12_v', 'G_13_v', 'G_23_v']
+
                     for k in viscoelastic_mat_keys:
                         if ve_mat.get(k) is not None:
                             materials[ID].viscoelastic[k] = [float(tmp)
