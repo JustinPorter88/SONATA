@@ -82,7 +82,7 @@ def load_bd_visco(fname):
 
     return stiff
 
-def compare_bd_blade(ref_path, test_path, tolerance=1e-9):
+def compare_bd_blade(ref_path, test_path, abs_tolerance=1e-9):
     """
 
 
@@ -111,14 +111,14 @@ def compare_bd_blade(ref_path, test_path, tolerance=1e-9):
             np.abs(stiff_ref[i]-stiff_test[i]).max() / stiff_ref[i].max()))
 
         assert np.allclose(stiff_ref[i], stiff_test[i],
-                           atol=tolerance*stiff_ref[i].max()), \
+                           atol=abs_tolerance*stiff_ref[i].max()), \
             "Stiffness matrix does not match at station index {:}.".format(i)
 
         print("Mass error: {:}".format(
             np.abs(mass_ref[i]-mass_test[i]).max() / mass_ref[i].max()))
 
         assert np.allclose(mass_ref[i], mass_test[i],
-                           atol=tolerance*mass_ref[i].max()), \
+                           atol=abs_tolerance*mass_ref[i].max()), \
             "Mass matrix does not match at station index {:}.".format(i)
 
     return
