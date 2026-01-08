@@ -79,13 +79,13 @@ jobs:
           cd examples/6_beam_stress
           export MPLBACKEND=Agg
           python 6_sonata_beam_stress.py
-      
+
       - name: Run example 7
         run: |
           cd examples/7_viscoelastic
           export MPLBACKEND=Agg
           python 7_sonata_viscoelastic.py
-      
+
       - name: Run example 8
         run: |
           cd examples/8_fiber_orient
