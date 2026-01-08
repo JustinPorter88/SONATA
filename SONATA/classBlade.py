@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import windIO
 from scipy.interpolate import interp1d, PchipInterpolator
+import importlib.metadata
 
 # OpenCASCADE imports
 from OCC.Core.gp import (
@@ -215,6 +216,22 @@ class Blade(Component):
             filename = kwargs.get('filename')
             if kwargs['flags']['flag_wt_ontology']:
                 yml = windIO.validate(filename, schema_type="turbine/turbine_schema")
+
+                # Validate compatible windIO version
+                windIO_vers = importlib.metadata.version("windIO")
+                windIO_tuple = tuple(map(int, windIO_vers.split('.')))
+
+                input_vers_tuple = tuple(map(int, yml['windIO_version'].split('.')))
+
+                assert windIO_tuple[0] == 2, \
+                    'SONATA currently only supports windIO version 2.X. ' \
+                    + ' A different version appears to be installed'
+
+
+                assert input_vers_tuple[0] == 2, \
+                    'SONATA currently only supports windIO version 2.X.' \
+                        + ' Input specifies a different version.'
+
             else:
                 yml = windIO.load_yaml(filename)
             self.name = yml.get('name')
