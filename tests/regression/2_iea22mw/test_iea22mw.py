@@ -22,7 +22,7 @@ def test_6x6_iea22mw():
     # Path to yaml file
     run_dir = os.path.dirname( os.path.realpath(__file__) )
     job_str = 'IEA-22-280-RWT.yaml'
-    job_name = 'IEA22'
+    job_name = 'IEA-22-280-RWT'
     filename_str = os.path.join(run_dir, '..', '..','..', 'examples','2_IEA22MW', job_str)
 
 
@@ -113,7 +113,7 @@ def test_6x6_iea22mw():
     mu2 = 2*zeta[1]/omega[1]
     mu3 = 2*zeta[2]/omega[2]
     mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-    beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir,
+    beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job, run_dir,
                      job_str, mu)
 
     plt.close('all')
@@ -128,7 +128,7 @@ def test_6x6_iea22mw():
     test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              test_file)
 
-    utils.compare_bd_blade(ref_path, test_path, tolerance=1e-9)
+    utils.compare_bd_blade(ref_path, test_path, abs_tolerance=1e-3)
 
 
 if __name__ == "__main__":

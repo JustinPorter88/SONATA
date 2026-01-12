@@ -311,35 +311,3 @@ def convert_inertia_matrix(beam_inertia, flags_dict):
                     beam_inertia[:, j, k] = beam_inertia[:, j, k] * 1e-6  # kg mm2 -> kg m2
 
     return beam_inertia
-
-# ==============
-# Main
-# ==============
-
-if __name__ == '__main__':
-    import yaml
-    from SONATA.classAirfoil import Airfoil
-    #from SONATA.classBlade import Blade
-
-    from SONATA.classMaterial import read_materials
-
-    # provide primary path; used for providing yaml input file as well as output directory
-    folder = '/Users/rfeil/work/6_SONATA/SONATA/jobs/RFeil/'
-    filename = (folder + 'IEAonshoreWT_BAR_005a.yaml')
-    with open(filename, 'r') as myfile:
-        inputs = myfile.read()
-        yml = yaml.load(inputs, Loader=yaml.FullLoader)
-
-    airfoils = [Airfoil(af) for af in yml.get('airfoils')]
-    materials = read_materials(yml.get('materials'))
-    # Blade.read_IEA37(yml.get('components').get('blade'), airfoils, **kwargs)
-    wt_name = yml.get('name')
-
-    # radial_stations = [0.0, 0.5, 1.0] # must include 0 and 1!
-    radial_stations = np.linspace(0.0, 1.0, 11)
-
-    beam_stiff = np.zeros([len('radial_stations'), 6, 6])
-    beam_inertia = np.zeros([len('radial_stations'), 6, 6])
-
-    write_beamdyn_axis(folder, wt_name, yml.get('components').get('blade'))
-    write_beamdyn_prop(folder, wt_name, radial_stations, beam_stiff, beam_inertia)

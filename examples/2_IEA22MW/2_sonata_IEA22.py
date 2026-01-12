@@ -94,7 +94,7 @@ if not flag_estimate_structural_damping:
 else:
     mu = np.zeros(6)
 
-beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir,
+beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job, run_dir,
                  job_str, mu)
 
 if flag_estimate_structural_damping:

@@ -5,8 +5,8 @@ from SONATA.utl.beam_struct_eval import beam_struct_eval
 
 # Path to yaml file
 run_dir = os.path.dirname( os.path.realpath(__file__) ) + os.sep
-job_str = 'IEA-3.4-130-RWT.yaml'
-job_name = 'IEA3.4'
+job_str = 'IEA-3p4-130-RWT.yaml'
+job_name = 'IEA3p4'
 filename_str = run_dir + job_str
 
 # ===== Define flags ===== #
@@ -86,7 +86,7 @@ mu1 = 2*zeta[0]/omega[0]
 mu2 = 2*zeta[1]/omega[1]
 mu3 = 2*zeta[2]/omega[2]
 mu = np.array([mu1, mu2, mu3, mu2, mu1, mu3])
-beam_struct_eval(flags_dict, Loads_dict, radial_stations, job, run_dir, job_str, mu)
+beam_struct_eval(job_name, flags_dict, Loads_dict, radial_stations, job, run_dir, job_str, mu)
 
 # ===== PLOTS ===== #
 # job.blade_plot_attributes()

@@ -5,11 +5,9 @@
 ## Background
 SONATA is a toolbox for Multidiciplinary Rotor Blade Design Environment for Structural Optimization and Aeroelastic Analysis. SONATA has originally been developed at the Helicopter Technology Institute of the Technical University of Munich (TUM), Germany. The original repository is available at https://gitlab.lrz.de/HTMWTUM/SONATA. The original work was supported by the German Federal Ministry for Economic Affairs and Energy through the German Aviation Research Program LuFo V-2 and the Austrian Research Promotion Agency through the Austrian Research Program TAKE OFF in the project VARI-SPEED.
 
-SONATA has been adapted to wind energy applications thanks to work performed at the National Renewable Energy Laboratory ([NREL](https://www.nrel.gov)) in Colorado, USA
- and funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program.
-NREL has since been renamed National Laboratory of the Rockies (NLR).
-This repository is managed by Pietro Bortolotti, researcher in the systems engineering group at NLR.
+SONATA has been adapted to wind energy applications thanks to work performed at the National Renewable Energy Laboratory ([NREL](https://www.nrel.gov)), recently renamed National Laboratory of the Rockies (NLR), located in Golden, Colorado, USA. Work at NREL/NLR is funded by the US Department of Energy, Wind Energy Technology Office under the Big Adaptive Rotor program, and the STability and Aeroelastic Behavior of Large wind turbinEs (STABLE) project.
 
+This repository is managed by Pietro Bortolotti and Justin Porter, researchers in the wind energy systems group at NLR.
 
 
 ## Part of the WETO Stack
@@ -22,9 +20,7 @@ SONATA is primarily developed with the support of the U.S. Department of Energy 
 
 
 ## Installation
-SONATA can be run on mac and linux machines. No Windows installation is supported at the moment. We make use of Anaconda, which is a commonly used package manager for python. Download and install the latest anaconda version [here](https://docs.anaconda.com/anaconda/install/)
-
-At NREL (and possibly at other institutes), first disconnect from vpn client during installation in order to avoid remote server error when trying to retrieve URLs for installation.
+SONATA can be run on mac and linux machines. No Windows installation is supported at the moment. We make use of Anaconda, which is a commonly used package manager for Python. Download and install the latest anaconda version [here](https://docs.anaconda.com/anaconda/install/)
 
 First setup an anaconda environment, here named sonata-env, activate it, and add the pythonocc library (v7.4.1).
 You should do this in the folder that you want to clone SONATA to.
@@ -49,7 +45,7 @@ conda activate sonata-env
 cd ..
 ```
 
-Next, download the solvers VABS (commercial, use wine to run it on mac/linux systems) or in the same conda environment compile ANBA4 (open-source)
+Next, in the same conda environment compile ANBA4 (open-source)
 
 ```
 git clone git@github.com:ANBA4/anba4.git # (or git clone https://github.com/ANBA4/anba4.git)
@@ -85,17 +81,24 @@ cd examples/0_beams
 python 0_SONATA_init_box_beam_HT_antisym_layup_15_6_SI_SmithChopra91.py
 ```
 
-Next try running the section at 30% along the blade span of the [IEA15MW refence wind turbine](https://github.com/IEAWindTask37/IEA-15-240-RWT)
+Next try modeling the blade of the [IEA-15MW reference wind turbine](https://github.com/IEAWindSystems/IEA-15-240-RWT).
 ```
 cd ../examples/1_IEA15MW
 python 1_sonata_IEA15.py
 ```
+
+Note that two examples use two different structures of the input files. Example 0 uses the original yaml structure from TUM, whereas the second file uses the wind turbine ontology coded in [windIO](https://github.com/IEAWindSystems/windIO). windIO is developed within IEA Wind Task 55 REFWIND and its documentation lives [here](https://ieawindsystems.github.io/windIO/main/index.html).
+
 
 ### Structural Damping Example
 
 The IEA 22MW example includes instructions on how to estimate structural damping via the modal strain energy approach.
 Detailed instructions can be found [here](examples/2_IEA22MW/README.md). Further details are provided in publications including Porter et al. (2025).
 
+### Notes
+
+1. You must define a TE anchor for SONATA. SONATA does not autodefine the TE anchor as implied by WindIO.
+2. Layer definition in SONATA only supports `start_nd_arc` and `end_nd_arc`. Other tools can generate these quantities from the WindIO definition.
 
 
 ## Publications:
