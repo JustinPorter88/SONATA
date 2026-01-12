@@ -95,6 +95,10 @@ Note that two examples use two different structures of the input files. Example 
 The IEA 22MW example includes instructions on how to estimate structural damping via the modal strain energy approach.
 Detailed instructions can be found [here](examples/2_IEA22MW/README.md). Further details are provided in publications including Porter et al. (2025).
 
+### Notes
+
+1. You must define a TE anchor for SONATA. SONATA does not autodefine the TE anchor as implied by WindIO.
+2. Layer definition in SONATA only supports `start_nd_arc` and `end_nd_arc`. Other tools can generate these quantities from the WindIO definition.
 
 
 ## Publications:
