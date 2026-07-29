@@ -93,7 +93,7 @@ def plot_mesh(nodes, elements, theta_11, data, data_name, materials,
         polygon = Polygon(array, closed=True, edgecolor="k")
         patches.append(polygon)
 
-    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.2)
+    p = PatchCollection(patches, alpha=alpha, cmap=cmap, edgecolors = 'k', linewidths=0.02)
     p.set_array(data)
     p.set_clim(vmin, vmax)
     _ = ax.add_collection(p)

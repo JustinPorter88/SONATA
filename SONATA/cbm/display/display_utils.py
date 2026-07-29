@@ -54,7 +54,7 @@ def display_config(DeviationAngle=1e-5, DeviationCoefficient=1e-5, bg_c=((20, 6,
     display.Context.SetDeviationAngle(DeviationAngle)  # 0.001 default. Be careful to scale it to the problem.
     display.Context.SetDeviationCoefficient(DeviationCoefficient)  # 0.001 default. Be careful to scale it to the problem.
     display.set_bg_gradient_color([bg_c[0][0], bg_c[0][1], bg_c[0][2]], [bg_c[1][0], bg_c[1][1], bg_c[1][2]])
-    show_coordinate_system(display, cs_size)
+    # show_coordinate_system(display, cs_size)
 
     add_menu("File")
     add_function_to_menu("File", close)

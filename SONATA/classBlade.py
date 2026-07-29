@@ -32,7 +32,6 @@ from SONATA.cbm.classCBMConfig import CBMConfig
 
 # SONATA cbm display utilities
 from SONATA.cbm.display.display_utils import (
-    display_Ax2,
     display_cbm_SegmentLst,
     display_config
 )
@@ -826,6 +825,9 @@ class Blade(Component):
 
         self.display.View.SetBackgroundColor(Quantity_Color(1.0, 1.0, 1.0,
                                                             Quantity_TOC_RGB))
+
+        # self.display.View.TriedronOff()
+
         self.display.View.Update()
 
 
@@ -863,7 +865,7 @@ class Blade(Component):
         if flag_topo:
             for (x, cs) in self.sections:
                 # display sections
-                display_Ax2(self.display, cs.Ax2, length=0.2)
+                # display_Ax2(self.display, cs.Ax2, length=0.2)
                 display_cbm_SegmentLst(self.display, cs.SegmentLst,
                                        self.Ax2, cs.Ax2,
                                        rotate_colors=rotate_colors)
@@ -913,7 +915,12 @@ class Blade(Component):
         if output_name is not None:
             # To get higher resolution, but a breakpoint here and manually
             # resize the window before saving.
+
             self.display.View.Dump(output_name + '.png')
+            # breakpoint()
+            pass
+
+
 
         self.start_display()
 
